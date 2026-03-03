@@ -1,60 +1,88 @@
 
 
-## Plan: Seed Rich Meeting Transcripts + Fix Transcript Page
+# Plan: Create Nonprofit Control Tower Roadmap Document
 
-### Problem
+## Objective
+Create a comprehensive `docs/nonprofit-control-tower-roadmap.md` file that serves as the execution guide for transforming the SJ Control Tower into the Nonprofit Control Tower. No code changes -- document only.
 
-Two issues to address:
+## What the Document Will Cover
 
-1. **Broken Transcript Page**: `MeetingTranscriptsPage` queries columns that don't exist in `meeting_transcripts` (`summary`, `speakers`, `source`, `processing_status`). The actual schema is `id, meeting_id, speaker, content, created_at`. The page shows "No Transcripts" even though 25 transcript turns exist across 10 meetings.
+The roadmap MD will be structured as sequential, testable steps so that Claude Code (or you) can execute them one at a time:
 
-2. **Insufficient Seed Data**: The existing 10 meetings have only 2-3 speaker turns each (very short). User wants at least 10 meetings with long, realistic agency-client transcripts.
+### Document Structure
 
-### Current State
+**Section 1 -- Project Overview**
+- Product name, tagline, selling point (agentic layer on top of existing CRM)
+- Tech stack (unchanged: React 18 + TypeScript + Vite + Supabase + shadcn/ui)
 
-- `meeting_transcripts` schema: `id, meeting_id, speaker, content, created_at` (speaker-turn model, one row per turn)
-- `meeting_action_items` schema: `id, meeting_id, text, assignee_id, assignee_email, due_date, priority, task_id, status, extracted_from_transcript, extraction_confidence, created_at, updated_at` — currently empty
-- 10 meetings already have transcripts (2-3 turns each, very brief)
-- 22 clients exist (law firms, CPA firms, tech companies)
+**Section 2 -- Module Decisions (Final)**
 
-### Implementation
+| Module | Action | Notes |
+|--------|--------|-------|
+| EOS | DELETE entirely | Remove `src/modules/eos/` (17 pages, components, hooks, types), all EOS nav groups, admin EOS section, routes from `App.tsx`, registry entry |
+| Productivity | DELETE entirely | Remove `src/modules/productivity/` (4 pages, hooks, types), nav items, admin "Productivity Import", registry entry |
+| Client Portal | DELETE | Remove `src/pages/client/` (2 files), routes from `App.tsx` |
+| Meetings | KEEP, hidden by default | Set `defaultEnabled: false` in `MODULE_REGISTRY`; no other changes |
+| Projects | KEEP, toggleable | Keep as-is, admin can enable/disable |
+| Business Dev | KEEP, toggleable | Keep as-is, admin can enable/disable |
+| Lead Follow-Up | KEEP, enabled | Stays active, users will use it |
+| Actions/Tasks | KEEP, toggleable | Already gated by feature flag |
+| Knowledge | KEEP | No changes |
+| Admin | KEEP | Simplify nav (remove EOS/Productivity sections) |
+| Platform | KEEP | Core, always enabled |
 
-#### 1. Fix MeetingTranscriptsPage to match actual schema
+**Section 3 -- Step-by-Step Execution Plan**
 
-Rewrite the query and `TranscriptRow` interface to aggregate `meeting_transcripts` by `meeting_id`:
-- Group turns by `meeting_id`, collect unique speakers, concatenate content
-- Remove references to non-existent columns (`summary`, `source`, `processing_status`)
-- Derive speaker list from `DISTINCT speaker` per meeting
-- Show turn count instead of processing status
-- Keep search, preview dialog, and navigation working
+Each step is a single, testable unit:
 
-#### 2. Seed 10 new meetings with long transcripts (via edge function)
+- **Step 1**: Remove EOS module
+  - Files to delete: `src/modules/eos/` (entire directory)
+  - Files to edit: `App.tsx` (remove `eosRoutes` import and usage), `modules.ts` (remove `eos` from `ModuleId` union and `MODULE_REGISTRY`), `navigationStructure.ts` (remove "Strategy (EOS)" group, remove admin "EOS" group, remove `eosOnly` properties), `AppSidebar.tsx` (remove `isEosUser` logic), `env.ts` (remove `eos` from env map)
+  - Test: Build succeeds, app loads, no EOS nav items visible
 
-Create a temporary `seed-meeting-transcripts` edge function that inserts:
+- **Step 2**: Remove Productivity module
+  - Files to delete: `src/modules/productivity/` (entire directory)
+  - Files to edit: `App.tsx` (remove `productivityRoutes`), `modules.ts` (remove from type and registry), `navigationStructure.ts` (remove Productivity/Processes from "Operations" group, remove "Productivity Import" from admin nav), `env.ts`
+  - Test: Build succeeds, no productivity nav items
 
-- **10 new completed meetings** tied to existing clients, covering realistic agency scenarios:
-  1. Acme Corp — Q1 Strategy Review (8+ turns)
-  2. NovaTech Solutions — Product Roadmap Sync (8+ turns)
-  3. Kevin Patel — Contract Automation Workshop (8+ turns)
-  4. Sarah Chen — Document Management Discovery (8+ turns)
-  5. James Thompson — Litigation Dashboard Review (8+ turns)
-  6. Jennifer Adams — Tax Season Readiness (8+ turns)
-  7. Michael Richardson — Year-End Compliance Review (8+ turns)
-  8. Robert Martinez — Family Law Portal Demo (8+ turns)
-  9. Thomas Anderson — CFO Advisory Dashboard (8+ turns)
-  10. Patricia Williams — IP Portfolio Tracking (8+ turns)
+- **Step 3**: Remove Client Portal
+  - Files to delete: `src/pages/client/ClientPortalDashboard.tsx`, `src/pages/client/ProjectDashboard.tsx`
+  - Files to edit: `App.tsx` (remove both client portal routes and imports)
+  - Test: Build succeeds, `/client/*` routes gone
 
-- Each meeting gets **8-12 speaker turns** with realistic dialogue between agency presenter (Shahed) and client stakeholders
-- Each meeting gets **2-4 action items** in `meeting_action_items` with priorities, due dates, and confidence scores
+- **Step 4**: Set Meetings to hidden by default
+  - File to edit: `modules.ts` -- change meetings `defaultEnabled` from `true` to `false`
+  - Test: Meetings nav hidden unless admin enables it
 
-#### 3. Cleanup
+- **Step 5**: Rebrand to Nonprofit Control Tower
+  - Update sidebar branding, landing page title/tagline
+  - Update `BrandingContext` defaults if hardcoded
 
-Delete the temporary edge function after execution.
+- **Step 6**: Clean up admin navigation
+  - Remove EOS admin group, productivity import, any orphaned references
+  - Keep: Users & Access, Knowledge & AI, System, AI & Automation, Content & Feedback
 
-### Files Changed
+- **Step 7+**: New nonprofit modules (future phases)
+  - Data Health, Reconciliation, Events, Grants, Board Reports
+  - AI Agent Center (5 nonprofit operational agents)
+  - Integration Center (CRM/Finance/Payment/Email tiles)
+  - New user roles (Executive Director, Development Director, Finance Manager, Operations Manager)
 
-| File | Change |
-|------|--------|
-| `src/modules/meetings/pages/MeetingTranscriptsPage.tsx` | Rewrite query to aggregate speaker turns per meeting; fix TranscriptRow interface |
-| `supabase/functions/seed-meeting-transcripts/index.ts` | Temporary edge function to insert 10 meetings + ~100 transcript turns + ~30 action items |
+**Section 4 -- New Nonprofit Modules Spec** (brief descriptions for future build)
+
+**Section 5 -- Design Guidelines**
+- Calm, trust-oriented color palette
+- "Operations Intelligence" language
+- Never show CRM-like record tables
+- Always reinforce "Connected to [CRM]" messaging
+
+**Section 6 -- Demo Data Requirements**
+
+## File to Create
+- `docs/nonprofit-control-tower-roadmap.md` -- single comprehensive file
+
+## What Will NOT Change
+- Zero code files modified or deleted
+- No module removals yet
+- No navigation changes yet
 
