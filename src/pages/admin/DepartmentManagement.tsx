@@ -6,7 +6,31 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Building2, Loader2 } from "lucide-react";
-import { useDepartments } from "@/modules/productivity/hooks/useProductivity";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Department {
+  id: string;
+  name: string;
+  description: string | null;
+  is_active: boolean;
+  manager?: { full_name: string } | null;
+}
+
+function useDepartments() {
+  return useQuery({
+    queryKey: ["departments"],
+    queryFn: async (): Promise<Department[]> => {
+      const { data, error } = await supabase
+        .from("departments")
+        .select("*")
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return (data || []) as unknown as Department[];
+    },
+  });
+}
 
 export default function DepartmentManagement() {
   const { data: departments = [], isLoading } = useDepartments();

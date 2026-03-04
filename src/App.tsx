@@ -18,15 +18,8 @@ import { meetingsRoutes } from "@/modules/meetings";
 import { actionsRoutes } from "@/modules/actions";
 import { knowledgeRoutes } from "@/modules/knowledge";
 import { businessDevRoutes } from "@/modules/business-dev";
-import { eosRoutes } from "@/modules/eos";
 import { projectsRoutes } from "@/modules/projects";
-import { productivityRoutes } from "@/modules/productivity";
 import { adminRoutes } from "@/modules/admin";
-
-// Client portal (public, no layout)
-import ClientPortalDashboard from "@/pages/client/ClientPortalDashboard";
-import ProjectDashboard from "@/pages/client/ProjectDashboard";
-
 
 const queryClient = new QueryClient();
 
@@ -43,19 +36,6 @@ const App = () => (
             <Routes>
               {/* Public routes (login, signup, auth callbacks) */}
               {publicRoutes}
-              
-
-              {/* Client portal: token + password, no layout */}
-              <Route
-                path="/projects/:slug/client-portal/:token"
-                element={<ClientPortalDashboard />}
-              />
-
-              {/* Legacy-style client project dashboard (optional) */}
-              <Route
-                path="/client/project/:token"
-                element={<ProjectDashboard />}
-              />
 
               {/* Protected routes with dashboard layout */}
               <Route element={<ProtectedRoute />}>
@@ -68,9 +48,7 @@ const App = () => (
                   {meetingsRoutes}
                   {actionsRoutes}
                   {knowledgeRoutes}
-                  {eosRoutes}
                   {projectsRoutes}
-                  {productivityRoutes}
                 </Route>
               </Route>
 

@@ -114,7 +114,7 @@ export function AppSidebar({ open = true, onToggleSidebar }: AppSidebarProps) {
   const { companyName } = useBranding();
   const { isFeatureEnabled } = useFeatureFlags();
   const { hasModule } = useModuleAccess();
-  const { agencyRole, isEosUser, isAdmin } = useAgencyRole();
+  const { agencyRole, isAdmin } = useAgencyRole();
   const { data: dealStats } = useDealPipelineStats();
   const dealStageCounts = dealStats?.by_stage ?? {};
 
@@ -170,8 +170,6 @@ export function AppSidebar({ open = true, onToggleSidebar }: AppSidebarProps) {
     if (item.adminOnly && !isAdmin) return false;
     if (item.featureFlag && !isFeatureEnabled(item.featureFlag as any)) return false;
     if (item.module && !hasModule(item.module)) return false;
-    // EOS-gated items only show when user has EOS enabled (admins bypass)
-    if (item.eosOnly && !isEosUser && !isAdmin) return false;
     // Agency role filter: admins bypass, users without a role see all items
     if (item.agencyRoles && !isAdmin && currentAgencyRole) {
       if (!item.agencyRoles.includes(currentAgencyRole)) return false;
@@ -181,8 +179,6 @@ export function AppSidebar({ open = true, onToggleSidebar }: AppSidebarProps) {
 
   // Filter groups - show if at least one item is visible
   const isGroupVisible = (group: NavGroup): boolean => {
-    // EOS-gated groups only show when user has EOS enabled (admins bypass)
-    if (group.eosOnly && !isEosUser && !isAdmin) return false;
     // Agency role filter for groups: admins bypass
     if (group.agencyRoles && !isAdmin && currentAgencyRole) {
       if (!group.agencyRoles.includes(currentAgencyRole)) return false;

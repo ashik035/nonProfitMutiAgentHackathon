@@ -31,8 +31,6 @@ export interface NavItem {
   headerOnly?: boolean;
   /** When set, only these agency roles see the item. Admins always see everything. */
   agencyRoles?: AgencyRole[];
-  /** When true, only visible if user.isEosUser === true */
-  eosOnly?: boolean;
 }
 
 export interface NavGroup {
@@ -45,8 +43,6 @@ export interface NavGroup {
   items: NavItem[];
   /** When set, only these agency roles see the group. Admins always see everything. */
   agencyRoles?: AgencyRole[];
-  /** When true, only visible if user.isEosUser === true */
-  eosOnly?: boolean;
 }
 
 /**
@@ -199,69 +195,11 @@ export const navigationGroups: NavGroup[] = [
     ],
   },
   {
-    id: "strategy",
-    title: "Strategy (EOS)",
-    icon: "Target",
-    module: "eos",
-    eosOnly: true, // Only shown to EOS-enabled users
-    agencyRoles: ["owner"],
-    items: [
-      {
-        title: "EOS Hub",
-        href: "/eos",
-        icon: "Target",
-        module: "eos",
-      },
-      {
-        title: "V/TO",
-        href: "/eos/vto",
-        icon: "Eye",
-        module: "eos",
-      },
-      {
-        title: "OKRs",
-        href: "/okrs",
-        icon: "Crosshair",
-        module: "eos",
-      },
-      {
-        title: "Issues",
-        href: "/eos/issues",
-        icon: "AlertCircle",
-        module: "eos",
-      },
-      {
-        title: "Scorecard",
-        href: "/eos/scorecard",
-        icon: "BarChart3",
-        module: "eos",
-      },
-      {
-        title: "Accountability",
-        href: "/eos/accountability",
-        icon: "Network",
-        module: "eos",
-      },
-    ],
-  },
-  {
     id: "operations",
     title: "Operations",
     icon: "Settings2",
     agencyRoles: ["owner", "pm"], // ICs don't need operations
     items: [
-      {
-        title: "Productivity",
-        href: "/productivity",
-        icon: "BarChart3",
-        module: "productivity",
-      },
-      {
-        title: "Processes",
-        href: "/process",
-        icon: "FileText",
-        module: "productivity",
-      },
       {
         title: "Feedback",
         href: "/feedback",
@@ -335,37 +273,6 @@ export const adminNavigation: NavGroup[] = [
             title: "Task Streams",
             href: "/admin/tasks/streams",
             icon: "GitBranch",
-          },
-        ],
-      },
-      {
-        title: "OKR & Scorecards",
-        href: "/admin/eos/scorecards",
-        icon: "Target",
-        headerOnly: true,
-        children: [
-          {
-            title: "Scorecard Settings",
-            href: "/admin/eos/scorecards",
-            icon: "BarChart3",
-          },
-        ],
-      },
-      {
-        title: "Accountability",
-        href: "/admin/eos/accountability",
-        icon: "Shield",
-        headerOnly: true,
-        children: [
-          {
-            title: "Chart Management",
-            href: "/admin/eos/accountability",
-            icon: "Network",
-          },
-          {
-            title: "V/TO Settings",
-            href: "/admin/eos/vto",
-            icon: "FileText",
           },
         ],
       },
@@ -487,46 +394,9 @@ export const adminNavigation: NavGroup[] = [
         icon: "Building2",
       },
       {
-        title: "Productivity Import",
-        href: "/admin/productivity-import",
-        icon: "Upload",
-      },
-      {
         title: "Meeting Analytics",
         href: "/admin/meeting-analytics",
         icon: "Calendar",
-      },
-    ],
-  },
-  {
-    id: "admin-eos",
-    title: "EOS",
-    icon: "Target",
-    items: [
-      {
-        title: "EOS Admin",
-        href: "/admin/eos",
-        icon: "Target",
-      },
-      {
-        title: "VTO Config",
-        href: "/admin/eos/vto",
-        icon: "FileText",
-      },
-      {
-        title: "Scorecards",
-        href: "/admin/eos/scorecards",
-        icon: "BarChart3",
-      },
-      {
-        title: "OKRs Workspace",
-        href: "/admin/eos/okrs",
-        icon: "Crosshair",
-      },
-      {
-        title: "Accountability",
-        href: "/admin/eos/accountability",
-        icon: "Network",
       },
     ],
   },

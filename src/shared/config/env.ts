@@ -27,13 +27,11 @@ export const env = {
 
   // Module toggles (build-time defaults, overridden by app_modules at runtime)
   modules: {
-    eos: envBool("VITE_MODULE_EOS", true),
     meetings: envBool("VITE_MODULE_MEETINGS", true),
     projects: envBool("VITE_MODULE_PROJECTS", true),
     actions: envBool("VITE_MODULE_ACTIONS", true),
     businessDev: envBool("VITE_MODULE_BUSINESS_DEV", true),
     knowledge: envBool("VITE_MODULE_KNOWLEDGE", true),
-    productivity: envBool("VITE_MODULE_PRODUCTIVITY", true),
     admin: envBool("VITE_MODULE_ADMIN", true),
   },
 

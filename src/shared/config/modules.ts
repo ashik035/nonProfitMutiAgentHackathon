@@ -12,22 +12,20 @@
  * the useModuleAccess() hook.
  *
  * Feature-flag policy: Some modules (meetings, knowledge, actions, business-dev)
- * also use requiresFeatureFlag for runtime toggling via app_config. Projects and
- * productivity are module-only (no feature flag); enable/disable via module registry.
+ * also use requiresFeatureFlag for runtime toggling via app_config. Projects
+ * are module-only (no feature flag); enable/disable via module registry.
  */
 
 import { env } from "./env";
 
 export type ModuleId =
   | "platform"
-  | "eos"
   | "meetings"
   | "projects"
   | "actions"
   | "business-dev"
   | "lead-followup"
   | "knowledge"
-  | "productivity"
   | "admin";
 
 export interface ModuleDefinition {
@@ -69,17 +67,6 @@ export const MODULE_REGISTRY: Record<ModuleId, ModuleDefinition> = {
     defaultEnabled: true,
     featureFlags: ["enableTasks"],
   },
-  eos: {
-    id: "eos",
-    name: "EOS",
-    description: "Entrepreneurial Operating System - V/TO, OKRs, issues, scorecards, accountability",
-    icon: "Target",
-    category: "business",
-    isCore: false,
-    dependencies: ["platform"],
-    defaultEnabled: true,
-    featureFlags: [],
-  },
   meetings: {
     id: "meetings",
     name: "Meetings",
@@ -88,7 +75,7 @@ export const MODULE_REGISTRY: Record<ModuleId, ModuleDefinition> = {
     category: "operations",
     isCore: false,
     dependencies: ["platform"],
-    defaultEnabled: true,
+    defaultEnabled: false,
     featureFlags: ["enableMeetings"],
   },
   knowledge: {
@@ -135,17 +122,6 @@ export const MODULE_REGISTRY: Record<ModuleId, ModuleDefinition> = {
     defaultEnabled: true,
     featureFlags: [],
   },
-  productivity: {
-    id: "productivity",
-    name: "Productivity",
-    description: "Team and individual productivity metrics, department analysis, AI insights",
-    icon: "BarChart3",
-    category: "operations",
-    isCore: false,
-    dependencies: ["platform"],
-    defaultEnabled: true,
-    featureFlags: [],
-  },
   admin: {
     id: "admin",
     name: "Admin",
@@ -169,13 +145,11 @@ export function isModuleBundled(moduleId: ModuleId): boolean {
   if (mod.isCore) return true;
 
   const envMap: Record<string, boolean> = {
-    eos: env.modules.eos,
     meetings: env.modules.meetings,
     projects: env.modules.projects,
     actions: env.modules.actions,
     "business-dev": env.modules.businessDev,
     knowledge: env.modules.knowledge,
-    productivity: env.modules.productivity,
   };
 
   return envMap[moduleId] ?? mod.defaultEnabled;

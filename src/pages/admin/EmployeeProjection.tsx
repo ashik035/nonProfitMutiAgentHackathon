@@ -15,7 +15,30 @@ import { Progress } from "@/components/ui/progress";
 import { Loader2, Users, Building2, Briefcase, Search, UserCheck } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { EmployeeProfile, Department, Pod } from "@/modules/productivity/types";
+interface EmployeeProfile {
+  id: string;
+  email: string;
+  full_name: string;
+  department_id: string | null;
+  title: string | null;
+  employment_type: "full-time" | "part-time" | "contractor" | "intern";
+  is_active: boolean;
+  hire_date: string | null;
+  location: string | null;
+}
+
+interface Department {
+  id: string;
+  name: string;
+  is_active: boolean;
+}
+
+interface Pod {
+  id: string;
+  name: string;
+  department_id: string | null;
+  is_active: boolean;
+}
 
 function useEmployeeProjectionData() {
   return useQuery({
