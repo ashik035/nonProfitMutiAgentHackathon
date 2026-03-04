@@ -29,7 +29,6 @@ import GoogleMeetMeetings from "@/pages/admin/integrations/GoogleMeetMeetings";
 import GoogleDriveIntegration from "@/pages/admin/integrations/GoogleDriveIntegration";
 import IntegrationAnalytics from "@/pages/admin/IntegrationAnalytics";
 import ProjectReports from "@/pages/admin/ProjectReports";
-import ResourceUtilizationReports from "@/pages/admin/ResourceUtilizationReports";
 import AIModelManagement from "@/pages/admin/AIModelManagement";
 import AIUsageAnalytics from "@/pages/admin/AIUsageAnalytics";
 import EnvironmentValidator from "@/pages/admin/EnvironmentValidator";
@@ -60,12 +59,6 @@ import SeedRunner from "@/pages/admin/SeedRunner";
 import GeminiRAGConfig from "@/pages/admin/GeminiRAGConfig";
 import MemoryAnalytics from "@/pages/admin/MemoryAnalytics";
 import EmbeddingsExplorer from "@/pages/admin/EmbeddingsExplorer";
-import AdminEOS from "@/pages/admin/eos/AdminEOS";
-import VTOAdmin from "@/pages/admin/eos/VTOAdmin";
-import ScorecardWorkspace from "@/pages/admin/eos/ScorecardWorkspace";
-import AdminEOSAccountability from "@/pages/admin/eos/AdminEOSAccountability";
-import OKRsWorkspace from "@/pages/admin/eos/OKRsWorkspace";
-import ProductivityImport from "@/pages/admin/ProductivityImport";
 import OAuthClients from "@/pages/admin/OAuthClients";
 import ApiKeys from "@/pages/admin/ApiKeys";
 import StreamsPage from "@/modules/actions/pages/StreamsPage";
@@ -120,7 +113,7 @@ export const adminRoutes = (
     <Route path="/admin/settings/project-modules" element={<ProjectModules />} />
     <Route path="/admin/settings/dashboard-widgets" element={<DashboardWidgets />} />
     <Route path="/admin/settings/agency-roles" element={<AgencyRoles />} />
-    
+
     <Route path="/admin/integrations" element={<Integrations />} />
     <Route path="/admin/integrations/oauth/callback" element={<OAuthCallback />} />
     <Route path="/admin/integrations/analytics" element={<IntegrationAnalytics />} />
@@ -146,7 +139,6 @@ export const adminRoutes = (
 
     {/* Team & Resources */}
     <Route path="/admin/team/employees" element={<EmployeeManagement />} />
-    <Route path="/admin/productivity-import" element={<ProductivityImport />} />
     <Route path="/admin/team/pods" element={<PODManagement />} />
     <Route path="/admin/team/employee_projection" element={<RPTeamSettings />} />
     <Route path="/admin/team/departments" element={<DepartmentManagement />} />
@@ -163,22 +155,11 @@ export const adminRoutes = (
     <Route path="/admin/knowledge/gemini" element={<GeminiRAGConfig />} />
     <Route path="/admin/knowledge/memory-analytics" element={<MemoryAnalytics />} />
 
-    {/* EOS Admin */}
-    <Route path="/admin/eos" element={<AdminEOS />} />
-    <Route path="/admin/eos/vto" element={<VTOAdmin />} />
-    <Route path="/admin/eos/scorecards" element={<ScorecardWorkspace />} />
-    <Route path="/admin/eos/accountability" element={<AdminEOSAccountability />} />
-    <Route path="/admin/eos/okrs" element={<OKRsWorkspace />} />
-
     {/* Content & Feedback */}
     <Route path="/admin/feedback" element={<FeedbackManagement />} />
 
     {/* Reports */}
     <Route path="/admin/reports/projects" element={<ProjectReports />} />
-    <Route
-      path="/admin/reports/resource-utilization"
-      element={<ResourceUtilizationReports />}
-    />
 
     {/* Deployment & Config */}
     <Route path="/admin/deployment" element={<DeploymentStatus />} />

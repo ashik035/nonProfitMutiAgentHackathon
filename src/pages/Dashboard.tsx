@@ -7,7 +7,6 @@ import { useDashboardStats, useRecentActivity, getTimeAgo, useAITeamSummary } fr
 
 // Lazy-load role dashboards so they don't inflate the main bundle
 const OwnerDashboard = lazy(() => import("@/pages/dashboards/OwnerDashboard"));
-const OwnerDashboardWithEOS = lazy(() => import("@/pages/dashboards/OwnerDashboardWithEOS"));
 const PMDashboard = lazy(() => import("@/pages/dashboards/PMDashboard"));
 const ICDashboard = lazy(() => import("@/pages/dashboards/ICDashboard"));
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -71,7 +70,7 @@ function DashboardFallback() {
 
 export default function Dashboard() {
   const { profile, loading } = useAuth();
-  const { agencyRole, isEosUser, isAdmin } = useAgencyRole();
+  const { agencyRole, isAdmin } = useAgencyRole();
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
   const { data: recentActivity, isLoading: activityLoading } = useRecentActivity();
   const { data: aiTeam, isLoading: aiTeamLoading } = useAITeamSummary();
@@ -85,7 +84,7 @@ export default function Dashboard() {
     if (agencyRole === "owner") {
       return (
         <Suspense fallback={<DashboardFallback />}>
-          {isEosUser ? <OwnerDashboardWithEOS /> : <OwnerDashboard />}
+          <OwnerDashboard />
         </Suspense>
       );
     }

@@ -9,7 +9,37 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search, Users, Loader2, Building2, MapPin, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useEmployeeProfiles } from "@/modules/productivity/hooks/useEmployees";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+
+interface EmployeeProfile {
+  id: string;
+  email: string;
+  full_name: string;
+  department_id: string | null;
+  title: string | null;
+  employment_type: string;
+  is_active: boolean;
+  location: string | null;
+  department?: { name: string } | null;
+}
+
+function useEmployeeProfiles(search?: string) {
+  return useQuery({
+    queryKey: ["employees", search],
+    queryFn: async (): Promise<EmployeeProfile[]> => {
+      let query = supabase
+        .from("employee_profiles")
+        .select("*, department:department_id(name)")
+        .eq("is_active", true)
+        .order("full_name");
+      if (search) query = query.or(`full_name.ilike.%${search}%,email.ilike.%${search}%`);
+      const { data, error } = await query;
+      if (error) throw error;
+      return (data || []) as EmployeeProfile[];
+    },
+  });
+}
 import { generateEmployeesCSV } from "@/lib/csv";
 import { toast } from "sonner";
 
