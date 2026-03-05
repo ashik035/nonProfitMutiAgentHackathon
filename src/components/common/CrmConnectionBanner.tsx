@@ -11,7 +11,20 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 
-const CRM_SLUGS = ["hubspot", "salesforce", "zoho", "pipedrive"] as const;
+const CRM_SLUGS = [
+  "hubspot",
+  "salesforce",
+  "zoho-crm",
+  "pipedrive",
+  "salesforce-npsp",
+  "blackbaud-raiser-edge",
+  "bloomerang",
+  "neon-crm",
+  "virtuous",
+  "donorperfect",
+  "hubspot-nonprofit",
+  "kindful",
+] as const;
 type CrmSlug = (typeof CRM_SLUGS)[number];
 
 const DISMISS_KEY = "hide-crm-banner";

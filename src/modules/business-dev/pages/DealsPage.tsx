@@ -18,10 +18,11 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, LayoutDashboard, BarChart3, Download, RefreshCw, Grid, Users, Search, FileText, Calculator, CheckCircle, Trophy, ThumbsUp, XCircle } from "lucide-react";
+import { Plus, LayoutDashboard, BarChart3, Download, RefreshCw, Grid, Users, Search, FileText, Calculator, CheckCircle, Trophy, ThumbsUp, XCircle, Loader2 } from "lucide-react";
 import { CrmConnectionBanner } from "@/components/common/CrmConnectionBanner";
 import { supabase } from "@/integrations/supabase/client";
 import { useClients } from "@/hooks/useClients";
+import { useCrmSync } from "@/hooks/useCrmSync";
 import { useDeals, useDealPipelineStats } from "../hooks/useDeals";
 import { generateDealsCSV } from "@/lib/csv";
 import { toast } from "sonner";
@@ -77,6 +78,7 @@ function formatShortCurrency(val: number) {
 export default function DealsPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const crmSync = useCrmSync();
 
   const mainTab = (searchParams.get("tab") as MainTab) || "all";
   const stageParam = searchParams.get("stage") || "all";
@@ -303,11 +305,21 @@ export default function DealsPage() {
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
-          <Button variant="outline" size="sm" asChild>
-            <a href="/admin/integrations">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => crmSync.mutate()}
+            disabled={crmSync.isPending}
+          >
+            {crmSync.isPending ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
               <RefreshCw className="h-4 w-4 mr-2" />
-              Sync Latest Deals
-            </a>
+            )}
+            Sync from CRM
+          </Button>
+          <Button variant="outline" size="sm" asChild>
+            <a href="/admin/integrations">Configure integrations</a>
           </Button>
           <Button onClick={() => navigate("/deals/new")}>
             <Plus className="h-4 w-4 mr-2" />

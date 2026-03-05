@@ -118,6 +118,9 @@ verify_jwt = false
 [functions.user-oauth-refresh]
 verify_jwt = false
 
+[functions.crm-sync]
+verify_jwt = false
+
 [functions.user-oauth-disconnect]
 verify_jwt = false
 
