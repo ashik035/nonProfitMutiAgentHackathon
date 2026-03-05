@@ -54,6 +54,9 @@ import {
   Monitor,
   HelpCircle,
   PanelLeftClose,
+  ShieldCheck,
+  ArrowLeftRight,
+  CalendarDays,
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -93,6 +96,9 @@ const iconMap: Record<string, LucideIcon> = {
   Wrench,
   Monitor,
   HelpCircle,
+  ShieldCheck,
+  ArrowLeftRight,
+  CalendarDays,
 };
 
 function resolveIcon(iconName: string): LucideIcon {

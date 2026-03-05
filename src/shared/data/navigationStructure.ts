@@ -59,6 +59,18 @@ export const dashboardItem: NavItem = {
  */
 export const navigationGroups: NavGroup[] = [
   {
+    id: "nonprofit-ops",
+    title: "Nonprofit Operations",
+    icon: "ShieldCheck",
+    items: [
+      { title: "Data Health", href: "/data-health", icon: "ShieldCheck" },
+      { title: "Reconciliation", href: "/reconciliation", icon: "ArrowLeftRight" },
+      { title: "Events", href: "/events", icon: "CalendarDays" },
+      { title: "Grants", href: "/grants", icon: "BookOpen" },
+      { title: "Board Reports", href: "/board-reports", icon: "FileText" },
+    ],
+  },
+  {
     id: "business-dev",
     title: "Sales Hub",
     icon: "Briefcase",
