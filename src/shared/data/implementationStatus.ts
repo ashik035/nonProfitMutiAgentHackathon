@@ -451,7 +451,7 @@ export const implementationStatus: ModuleStatus[] = [
     docs: [
       { title: "Business Dev Blueprint", path: "docs/02-modules/06-business-development.md", description: "42 pages, 134 components, 68 hooks, 15 tables, 75+ edge functions" },
     ],
-    database: { tables: 7, status: "done", notes: "deals, deal_activities, deal_comments, contacts, lead_followup_contacts, contact_communications, scheduled_emails" },
+    database: { tables: 6, status: "done", notes: "deals, deal_activities, contacts, lead_followup_contacts, contact_communications, scheduled_emails" },
     types: { status: "done" },
     routes: { status: "done" },
     navigation: { status: "done" },

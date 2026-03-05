@@ -7,11 +7,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { queryKeys, invalidateKeys } from "@/lib/cache";
-import type { Deal, DealFormData, DealFilters, DealActivity, DealComment, DealPipelineStats, DealStage, DealActivityType } from "../types";
+import type { Deal, DealFormData, DealFilters, DealActivity, DealPipelineStats, DealStage, DealActivityType } from "../types";
 
 const DEAL_SELECT = "*, owner:profiles!deals_owner_id_profiles_fkey(full_name, email), client:clients(name), contact:contacts(first_name, last_name, email)";
 const ACTIVITY_SELECT = "*, user:profiles!deal_activities_user_id_profiles_fkey(full_name)";
-const COMMENT_SELECT = "*, user:profiles!deal_comments_user_id_profiles_fkey(full_name, email)";
 
 /** Metadata keys stored on deals.metadata (including URLs & Links and Advanced) */
 const DEAL_METADATA_KEYS = [
@@ -476,59 +475,6 @@ export function useDealActivities(dealId: string) {
       return (data || []) as unknown as DealActivity[];
     },
     enabled: !!dealId,
-  });
-}
-
-export function useDealComments(dealId: string) {
-  return useQuery({
-    queryKey: queryKeys.deals.comments(dealId),
-    queryFn: async (): Promise<DealComment[]> => {
-      const { data, error } = await supabase
-        .from("deal_comments")
-        .select(COMMENT_SELECT)
-        .eq("deal_id", dealId)
-        .order("created_at");
-      if (error) throw error;
-      return (data || []) as unknown as DealComment[];
-    },
-    enabled: !!dealId,
-  });
-}
-
-export function useAddDealComment() {
-  const queryClient = useQueryClient();
-  const { user } = useAuth();
-  return useMutation({
-    mutationFn: async ({ dealId, content }: { dealId: string; content: string }) => {
-      const { error } = await supabase.from("deal_comments").insert({ deal_id: dealId, user_id: user?.id!, content });
-      if (error) throw error;
-    },
-    onSuccess: (_, vars) => { queryClient.invalidateQueries({ queryKey: queryKeys.deals.comments(vars.dealId) }); },
-    onError: (error: Error) => toast.error("Failed to add comment", { description: error.message }),
-  });
-}
-
-export function useUpdateDealComment() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ id, dealId, content }: { id: string; dealId: string; content: string }) => {
-      const { error } = await supabase.from("deal_comments").update({ content, updated_at: new Date().toISOString() }).eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: (_, vars) => { queryClient.invalidateQueries({ queryKey: queryKeys.deals.comments(vars.dealId) }); toast.success("Comment updated"); },
-    onError: (error: Error) => toast.error("Failed to update comment", { description: error.message }),
-  });
-}
-
-export function useDeleteDealComment() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ id }: { id: string; dealId: string }) => {
-      const { error } = await supabase.from("deal_comments").delete().eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: (_, vars) => { queryClient.invalidateQueries({ queryKey: queryKeys.deals.comments(vars.dealId) }); toast.success("Comment deleted"); },
-    onError: (error: Error) => toast.error("Failed to delete comment", { description: error.message }),
   });
 }
 

@@ -91,7 +91,6 @@ export const queryKeys = {
     revenueProjection: (year?: number) => ["deals", "revenue-projection", year ?? new Date().getFullYear()] as const,
     overviewExtra: ["deals", "overview-extra"] as const,
     activities: (dealId: string) => ["deals", "activities", dealId] as const,
-    comments: (dealId: string) => ["deals", "comments", dealId] as const,
   },
 
   // Tasks

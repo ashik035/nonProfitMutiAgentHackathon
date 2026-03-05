@@ -1,5 +1,5 @@
 /**
- * Deal Detail Page - Tabbed view with activities, comments, meetings, and AI coach
+ * Deal Detail Page - Tabbed view with activities, meetings, and AI coach
  */
 
 import { useState } from "react";
@@ -15,11 +15,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { ArrowLeft, DollarSign, Calendar, User, Building2, MessageSquare, Activity, Loader2, ChevronRight, Pencil, Trash2, Video, Plus, Bot, Tag, Send, MoreHorizontal } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { ArrowLeft, DollarSign, Calendar, User, Building2, Activity, Loader2, ChevronRight, Pencil, Trash2, Video, Plus, Bot, Tag, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
-import { useDeal, useDealActivities, useDealComments, useAddDealComment, useUpdateDealComment, useDeleteDealComment, useAddDealActivity, useUpdateDealStage, useUpdateDeal, useDeleteDeal } from "../hooks/useDeals";
+import { useDeal, useDealActivities, useAddDealActivity, useUpdateDealStage, useUpdateDeal, useDeleteDeal } from "../hooks/useDeals";
 import { DataSourceBadge } from "@/components/common/DataSourceBadge";
 import { useDealMeetings } from "@/modules/meetings/hooks/useCrossModuleMeetings";
 import { useAssignMeeting } from "@/modules/meetings/hooks/useMeetingAssignment";
@@ -48,11 +46,7 @@ const ACTIVITY_TYPES: { value: DealActivityType; label: string }[] = [
 export default function DealDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [tab, setTab] = useState("overview");
-  const [newComment, setNewComment] = useState("");
-  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
-  const [editingCommentContent, setEditingCommentContent] = useState("");
 
   // Lost reason dialog state
   const [lostDialogOpen, setLostDialogOpen] = useState(false);
@@ -75,10 +69,6 @@ export default function DealDetailPage() {
 
   const { data: deal, isLoading } = useDeal(slug!);
   const { data: activities = [] } = useDealActivities(deal?.id || "");
-  const { data: comments = [] } = useDealComments(deal?.id || "");
-  const addComment = useAddDealComment();
-  const updateComment = useUpdateDealComment();
-  const deleteComment = useDeleteDealComment();
   const addActivity = useAddDealActivity();
   const updateStage = useUpdateDealStage();
   const updateDeal = useUpdateDeal();
@@ -130,19 +120,6 @@ export default function DealDetailPage() {
     }
     setLostDialogOpen(false);
     setPendingLostDealId(null);
-  };
-
-  const handleSubmitComment = () => {
-    if (!newComment.trim()) return;
-    addComment.mutate({ dealId: deal.id, content: newComment.trim() });
-    setNewComment("");
-  };
-
-  const handleSaveEditComment = () => {
-    if (!editingCommentId || !editingCommentContent.trim()) return;
-    updateComment.mutate({ id: editingCommentId, dealId: deal.id, content: editingCommentContent.trim() });
-    setEditingCommentId(null);
-    setEditingCommentContent("");
   };
 
   const handleSubmitActivity = () => {
@@ -209,7 +186,7 @@ export default function DealDetailPage() {
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete deal?</AlertDialogTitle>
-                <AlertDialogDescription>This will permanently delete "{deal.title}" and all associated activities and comments.</AlertDialogDescription>
+                <AlertDialogDescription>This will permanently delete "{deal.title}" and all associated activities.</AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -255,7 +232,6 @@ export default function DealDetailPage() {
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="activities">Activities ({activities.length})</TabsTrigger>
-          <TabsTrigger value="comments">Comments ({comments.length})</TabsTrigger>
           <TabsTrigger value="meetings">Meetings ({linkedMeetings.length})</TabsTrigger>
           <TabsTrigger value="ai-coach"><Bot className="h-3.5 w-3.5 mr-1" />AI Coach</TabsTrigger>
         </TabsList>
@@ -382,73 +358,6 @@ export default function DealDetailPage() {
                       <p className="text-sm mt-1">{a.content}</p>
                     </div>
                     <span className="text-xs text-muted-foreground whitespace-nowrap">{new Date(a.created_at).toLocaleDateString()}</span>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-
-        {/* === COMMENTS TAB === */}
-        <TabsContent value="comments" className="mt-4 space-y-4">
-          <div className="flex items-center gap-2">
-            <Input
-              placeholder="Add a comment..."
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") handleSubmitComment(); }}
-            />
-            <Button size="sm" disabled={!newComment.trim()} onClick={handleSubmitComment}>
-              <MessageSquare className="h-4 w-4 mr-1" />Post
-            </Button>
-          </div>
-          {comments.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">No comments yet.</p>
-          ) : (
-            <div className="space-y-2">
-              {comments.map((c) => (
-                <Card key={c.id}>
-                  <CardContent className="py-3 px-4">
-                    {editingCommentId === c.id ? (
-                      <div className="space-y-2">
-                        <Textarea
-                          value={editingCommentContent}
-                          onChange={(e) => setEditingCommentContent(e.target.value)}
-                          rows={2}
-                        />
-                        <div className="flex gap-2 justify-end">
-                          <Button size="sm" variant="outline" onClick={() => setEditingCommentId(null)}>Cancel</Button>
-                          <Button size="sm" disabled={!editingCommentContent.trim()} onClick={handleSaveEditComment}>Save</Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-medium text-sm">{c.user?.full_name || "Unknown"}</span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleDateString()}</span>
-                            {c.user_id === user?.id && (
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-6 w-6">
-                                    <MoreHorizontal className="h-3.5 w-3.5" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem onClick={() => { setEditingCommentId(c.id); setEditingCommentContent(c.content); }}>
-                                    <Pencil className="h-3.5 w-3.5 mr-2" />Edit
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-destructive" onClick={() => deleteComment.mutate({ id: c.id, dealId: deal.id })}>
-                                    <Trash2 className="h-3.5 w-3.5 mr-2" />Delete
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            )}
-                          </div>
-                        </div>
-                        <p className="text-sm text-muted-foreground">{c.content}</p>
-                      </>
-                    )}
                   </CardContent>
                 </Card>
               ))}

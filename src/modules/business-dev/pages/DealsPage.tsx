@@ -202,11 +202,6 @@ export default function DealsPage() {
     toast.success("Deals exported successfully");
   };
 
-  const handleSyncLatest = () => {
-    // Placeholder - wire to hubspot-sync-deals if available
-    // toast.info("Sync not configured");
-  };
-
   const handleViewDetails = (slug: string) => {
     navigate(`/deals/${slug}`);
   };

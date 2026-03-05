@@ -45,16 +45,6 @@ export interface DealActivity {
   user?: { full_name: string } | null;
 }
 
-export interface DealComment {
-  id: string;
-  deal_id: string;
-  user_id: string;
-  content: string;
-  created_at: string;
-  updated_at: string;
-  user?: { full_name: string; email: string } | null;
-}
-
 export interface Contact {
   id: string;
   first_name: string;

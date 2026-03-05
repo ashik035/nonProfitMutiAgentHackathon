@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/command";
 import { Check, X, Loader2, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useEmployees } from "@/hooks/useEmployees";
+import { useEmployeeDirectory } from "@/hooks/useEmployeeDirectory";
 
 interface TeamMemberSelectorProps {
   selectedIds: string[];
@@ -38,7 +38,7 @@ export function TeamMemberSelector({
 }: TeamMemberSelectorProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const { data: employees = [], isLoading } = useEmployees();
+  const { data: employees = [], isLoading } = useEmployeeDirectory();
 
   // Filter employees: exclude already selected (in add mode) and excluded IDs
   const availableEmployees = employees.filter(
@@ -46,7 +46,7 @@ export function TeamMemberSelector({
       !excludeIds.includes(emp.id) &&
       (mode === "add" ? !selectedIds.includes(emp.id) : true) &&
       (search.trim() === "" ||
-        emp.name.toLowerCase().includes(search.toLowerCase()) ||
+        emp.full_name.toLowerCase().includes(search.toLowerCase()) ||
         emp.email.toLowerCase().includes(search.toLowerCase()) ||
         (emp.department || "").toLowerCase().includes(search.toLowerCase()))
   ).slice(0, 50); // Max 50 results
@@ -120,7 +120,7 @@ export function TeamMemberSelector({
                           {isSelected && <Check className="h-3 w-3" />}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{emp.name}</p>
+                          <p className="font-medium truncate">{emp.full_name}</p>
                           <p className="text-xs text-muted-foreground truncate">{emp.email}</p>
                           {(emp.department || emp.title) && (
                             <p className="text-xs text-muted-foreground">
@@ -147,7 +147,7 @@ export function TeamMemberSelector({
               variant="secondary"
               className="flex items-center gap-1 pr-1"
             >
-              <span className="truncate max-w-[150px]">{emp.name}</span>
+              <span className="truncate max-w-[150px]">{emp.full_name}</span>
               <button
                 type="button"
                 onClick={() => handleToggle(emp.id)}
@@ -163,4 +163,3 @@ export function TeamMemberSelector({
     </div>
   );
 }
-
