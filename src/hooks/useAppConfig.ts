@@ -162,9 +162,9 @@ export function useResetAppConfig() {
     mutationFn: async () => {
       const defaultConfig: AppConfig = {
         branding: {
-          companyName: "CollabAi",
-          tagline: "AI-Powered Collaboration Platform",
-          supportEmail: "support@collabai.software",
+          companyName: "Nonprofit Control Tower",
+          tagline: "Operational Intelligence Layer for Modern Nonprofits",
+          supportEmail: "support@nonprofitai.software",
         },
         features: {
           enableAIChat: true,
