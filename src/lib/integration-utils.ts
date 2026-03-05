@@ -91,6 +91,7 @@ export interface OrganizationIntegration {
   user_id: string;
   provider_id: string;
   enabled: boolean | null;
+  is_primary: boolean | null;
   config: Record<string, any> | null;
   connection_status: string | null;
   connection_message: string | null;
@@ -99,6 +100,27 @@ export interface OrganizationIntegration {
   oauth_tokens: Record<string, any> | null;
   created_at: string;
   updated_at: string;
+}
+
+export const CRM_PROVIDER_SLUGS = [
+  'hubspot',
+  'salesforce',
+  'zoho-crm',
+  'pipedrive',
+  'salesforce-npsp',
+  'blackbaud-raiser-edge',
+  'bloomerang',
+  'neon-crm',
+  'virtuous',
+  'donorperfect',
+  'hubspot-nonprofit',
+  'kindful',
+] as const;
+
+export type CrmProviderSlug = (typeof CRM_PROVIDER_SLUGS)[number];
+
+export function isCrmProvider(slug: string): boolean {
+  return (CRM_PROVIDER_SLUGS as readonly string[]).includes(slug);
 }
 
 export interface IntegrationService {

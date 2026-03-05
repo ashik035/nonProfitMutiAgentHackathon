@@ -76,7 +76,7 @@ serve(async (req) => {
     const ids = providerIds.map((p: { id: string }) => p.id);
     const { data: integrations, error: listError } = await supabase
       .from("organization_integrations")
-      .select("id, provider_id, config, oauth_tokens, connection_status, last_sync_at")
+      .select("id, provider_id, config, oauth_tokens, connection_status, last_sync_at, enabled, is_primary")
       .eq("connection_status", "connected")
       .in("provider_id", ids);
 
@@ -90,14 +90,22 @@ serve(async (req) => {
 
     const slugById = Object.fromEntries(providerIds.map((p: { id: string; slug: string }) => [p.id, p.slug]));
 
-    const rows = (integrations ?? []) as Array<{
+    type IntRow = {
       id: string;
       provider_id: string;
       config: Record<string, unknown>;
       oauth_tokens: Record<string, unknown> | null;
       connection_status: string;
       last_sync_at: string | null;
-    }>;
+      enabled: boolean | null;
+      is_primary: boolean | null;
+    };
+    let rows = ((integrations ?? []) as IntRow[])
+      .filter((r) => r.enabled !== false);
+    const withPrimary = rows.filter((r) => r.is_primary === true);
+    if (withPrimary.length > 0) {
+      rows = withPrimary;
+    }
 
     const results: { integration_id: string; slug: string; inbound: number; outbound: number; errors: string[] }[] = [];
 

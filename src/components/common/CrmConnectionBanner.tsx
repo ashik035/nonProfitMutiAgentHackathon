@@ -50,17 +50,18 @@ async function fetchCrmConnection(): Promise<CrmIntegrationRow | null> {
   const { data, error } = await supabase
     .from("organization_integrations")
     .select(
-      `id, connection_status, last_sync_at,
+      `id, connection_status, last_sync_at, is_primary,
        integration_providers!inner(slug, name, logo_url)`
     )
     .eq("user_id", user.id)
     .in("integration_providers.slug", CRM_SLUGS as unknown as string[])
     .eq("connection_status", "connected")
+    .order("is_primary", { ascending: false, nullsFirst: false })
     .limit(1)
     .maybeSingle();
 
   if (error) throw error;
-  return data as CrmIntegrationRow | null;
+  return data as unknown as CrmIntegrationRow | null;
 }
 
 export function CrmConnectionBanner() {

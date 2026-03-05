@@ -192,11 +192,14 @@ serve(async (req) => {
 
     // Record the failure on the meeting row
     if (meetingId) {
-      await supabase
-        .from("meetings")
-        .update({ transcript_status: "failed", transcript_error: message })
-        .eq("id", meetingId)
-        .catch(() => {});
+      try {
+        await supabase
+          .from("meetings")
+          .update({ transcript_status: "failed", transcript_error: message })
+          .eq("id", meetingId);
+      } catch {
+        // Non-critical – meeting row update can fail if columns missing
+      }
     }
 
     return new Response(JSON.stringify({ error: message }), {

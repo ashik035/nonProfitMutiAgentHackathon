@@ -68,8 +68,33 @@ serve(async (req) => {
 
     let validationResult = { valid: false, message: '', details: {} }
 
+    const crmSlugToValidator: Record<string, string> = {
+      'salesforce-npsp': 'salesforce',
+      'hubspot-nonprofit': 'hubspot',
+    }
+    const effectiveService = crmSlugToValidator[service] ?? service
+
+    const crmSlugsNoValidator = [
+      'blackbaud-raiser-edge',
+      'bloomerang',
+      'neon-crm',
+      'virtuous',
+      'donorperfect',
+      'kindful',
+    ]
+    if (crmSlugsNoValidator.includes(service)) {
+      return new Response(
+        JSON.stringify({
+          valid: false,
+          message: 'Test connection is not available for this CRM provider yet.',
+          details: {},
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+      )
+    }
+
     // Validate based on service type
-    switch (service) {
+    switch (effectiveService) {
       case 'openai':
         validationResult = await validateOpenAI(apiKey)
         break

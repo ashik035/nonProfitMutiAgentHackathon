@@ -64,6 +64,8 @@ export {
   useUpdateIntegration,
   useTestConnection,
   useDisconnectIntegration,
+  useToggleIntegrationEnabled,
+  useSetPrimaryCrm,
   useIntegrationServices,
   useToggleService,
   useSetDefaultService,

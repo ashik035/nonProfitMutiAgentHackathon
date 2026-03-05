@@ -14,6 +14,8 @@ import {
   IntegrationUsageLog,
   sortCategoriesByOrder,
   sortProvidersByOrder,
+  CRM_PROVIDER_SLUGS,
+  isCrmProvider,
 } from '@/lib/integration-utils';
 
 // ============================================
@@ -209,16 +211,17 @@ export function useUpdateIntegration() {
 
       const { data, error } = await supabase
         .from('organization_integrations')
-        .upsert({
-          user_id: user.id,
-          provider_id: providerId,
-          config,
-          enabled,
-          connection_status: 'connected',
-          last_tested_at: new Date().toISOString(),
-        }, {
-          onConflict: 'user_id,provider_id',
-        })
+        .upsert(
+          {
+            user_id: user.id,
+            provider_id: providerId,
+            config,
+            enabled,
+            connection_status: 'connected',
+            last_tested_at: new Date().toISOString(),
+          } as Record<string, unknown>,
+          { onConflict: 'user_id,provider_id' }
+        )
         .select()
         .single();
 
@@ -283,6 +286,89 @@ export function useDisconnectIntegration() {
       queryClient.invalidateQueries({ queryKey: integrationKeys.orgIntegrations() });
       queryClient.invalidateQueries({
         queryKey: integrationKeys.orgIntegration(variables.providerId),
+      });
+    },
+  });
+}
+
+/**
+ * Toggle integration enabled (active/inactive) without changing config
+ */
+export function useToggleIntegrationEnabled() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      providerId,
+      enabled,
+    }: {
+      providerId: string;
+      enabled: boolean;
+    }): Promise<OrganizationIntegration> => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const { data, error } = await supabase
+        .from('organization_integrations')
+        .update({ enabled } as Record<string, unknown>)
+        .eq('user_id', user.id)
+        .eq('provider_id', providerId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as OrganizationIntegration;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: integrationKeys.orgIntegrations() });
+      queryClient.invalidateQueries({
+        queryKey: integrationKeys.orgIntegration(data.provider_id),
+      });
+    },
+  });
+}
+
+/**
+ * Set one CRM integration as primary; clears primary on other CRM integrations for this user
+ */
+export function useSetPrimaryCrm() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ providerId }: { providerId: string }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const { data: crmProviders } = await supabase
+        .from('integration_providers')
+        .select('id')
+        .in('slug', [...CRM_PROVIDER_SLUGS]);
+
+      const crmProviderIds = (crmProviders ?? []).map((p) => p.id);
+
+      if (crmProviderIds.length > 0) {
+        await supabase
+          .from('organization_integrations')
+          .update({ is_primary: false } as Record<string, unknown>)
+          .eq('user_id', user.id)
+          .in('provider_id', crmProviderIds);
+      }
+
+      const { data, error } = await supabase
+        .from('organization_integrations')
+        .update({ is_primary: true } as Record<string, unknown>)
+        .eq('user_id', user.id)
+        .eq('provider_id', providerId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as OrganizationIntegration;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: integrationKeys.orgIntegrations() });
+      queryClient.invalidateQueries({
+        queryKey: integrationKeys.orgIntegration(data.provider_id),
       });
     },
   });

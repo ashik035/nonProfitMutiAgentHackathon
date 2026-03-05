@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Save, AlertCircle, ArrowLeft, RefreshCw } from 'lucide-react';
+import { Loader2, Save, AlertCircle, ArrowLeft, RefreshCw, Star } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -21,6 +21,8 @@ import {
   useDisconnectIntegration,
   useToggleService,
   useSetDefaultService,
+  useToggleIntegrationEnabled,
+  useSetPrimaryCrm,
 } from '@/hooks/useIntegrations';
 import { useSyncProjects } from '@/hooks/useIntegrationSync';
 import { DynamicFormField } from '@/components/integrations/DynamicFormField';
@@ -33,6 +35,7 @@ import {
   storeOAuthState,
   buildOAuthAuthorizationUrl,
   getDefaultFieldsForProvider,
+  isCrmProvider,
 } from '@/lib/integration-utils';
 
 export default function ProviderDetail() {
@@ -88,6 +91,10 @@ export default function ProviderDetail() {
   const disconnectIntegration = useDisconnectIntegration();
   const toggleService = useToggleService();
   const setDefaultService = useSetDefaultService();
+  const toggleIntegrationEnabled = useToggleIntegrationEnabled();
+  const setPrimaryCrm = useSetPrimaryCrm();
+
+  const isCrm = slug ? isCrmProvider(slug) : false;
 
   // Form state
   const [formValues, setFormValues] = useState<Record<string, string>>({});
@@ -360,6 +367,74 @@ export default function ProviderDetail() {
                   disabled={disconnectIntegration.isPending}
                 >
                   Disconnect
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* CRM: active toggle and primary selection (when connected) */}
+      {isCrm && orgIntegration && orgIntegration.connection_status === 'connected' && (
+        <Card>
+          <CardHeader>
+            <CardTitle>CRM options</CardTitle>
+            <CardDescription>
+              Control whether this integration is active and set it as the primary CRM for syncing.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between rounded-lg border p-4">
+              <div>
+                <p className="font-medium">Active</p>
+                <p className="text-sm text-muted-foreground">
+                  When off, this CRM will not be used for sync or as primary.
+                </p>
+              </div>
+              <Button
+                variant={orgIntegration.enabled ? 'default' : 'outline'}
+                size="sm"
+                onClick={() =>
+                  toggleIntegrationEnabled.mutate({
+                    providerId: provider.id,
+                    enabled: !orgIntegration.enabled,
+                  })
+                }
+                disabled={toggleIntegrationEnabled.isPending}
+              >
+                {toggleIntegrationEnabled.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : orgIntegration.enabled ? (
+                  'On'
+                ) : (
+                  'Off'
+                )}
+              </Button>
+            </div>
+            <div className="flex items-center justify-between rounded-lg border p-4">
+              <div>
+                <p className="font-medium">Primary CRM</p>
+                <p className="text-sm text-muted-foreground">
+                  Only one CRM can be primary at a time. Sync and overview use the primary CRM.
+                </p>
+              </div>
+              {orgIntegration.is_primary ? (
+                <span className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-1 text-sm font-medium text-primary">
+                  <Star className="h-4 w-4" />
+                  Primary CRM
+                </span>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPrimaryCrm.mutate({ providerId: provider.id })}
+                  disabled={setPrimaryCrm.isPending}
+                >
+                  {setPrimaryCrm.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    'Set as primary'
+                  )}
                 </Button>
               )}
             </div>
