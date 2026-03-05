@@ -3,28 +3,28 @@ import { AIGradientText } from "@/components/ui/ai-indicator";
 
 const comparisons = [
   {
-    problem: "ChatGPT banned at your firm — confidentiality risk",
-    solution: "AI runs behind YOUR firewall",
+    problem: "Donor data scattered across spreadsheets and siloed databases",
+    solution: "Unified donor intelligence in one place",
   },
   {
-    problem: "Juggling Excel, Docs, Zoom notes, and emails",
-    solution: "One unified dashboard",
+    problem: "Juggling Excel, Google Docs, Zoom notes, and emails",
+    solution: "One unified dashboard for your organization",
   },
   {
-    problem: "$60/user/month with 150-seat minimums",
-    solution: "Flat annual pricing, no minimums",
+    problem: "Grant reporting done manually every quarter",
+    solution: "Automated grant tracking and reporting",
   },
   {
-    problem: "Generic AI that doesn't understand your industry",
-    solution: "Pre-built agents for law, accounting, healthcare, banking",
+    problem: "Generic AI that doesn't understand nonprofit operations",
+    solution: "Pre-built agents for fundraising, programs, and compliance",
   },
   {
-    problem: "No audit trail for compliance officers",
+    problem: "No audit trail for board or compliance oversight",
     solution: "Full logging and role-based access",
   },
   {
-    problem: "Meeting summaries lost in email threads",
-    solution: "Auto-transcribed, searchable, actionable",
+    problem: "Meeting action items lost in email threads",
+    solution: "Auto-transcribed, searchable, and actionable",
   },
 ];
 
@@ -43,7 +43,7 @@ export function ProblemSolution() {
             Replace the Chaos with <AIGradientText>One Command Center</AIGradientText>
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            See how Control Tower transforms the way professional services firms use AI
+            See how Nonprofit Control Tower transforms the way mission-driven organizations operate
           </p>
         </div>
 

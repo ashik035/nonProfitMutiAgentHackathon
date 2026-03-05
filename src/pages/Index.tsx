@@ -37,8 +37,7 @@ export default function Index() {
               </div>
             )}
             <div className="flex items-baseline gap-1.5">
-              <span className="text-xl font-bold text-foreground">{companyName}</span>
-              <span className="text-sm font-semibold text-primary">Control Tower</span>
+              <span className="text-xl font-bold text-foreground">Nonprofit Control Tower</span>
             </div>
           </Link>
 
@@ -54,7 +53,7 @@ export default function Index() {
               Pricing
             </Link>
             <a
-              href="https://collabai.software"
+              href="https://nonprofitai.software"
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
@@ -73,7 +72,7 @@ export default function Index() {
               className="btn-primary-bold rounded-full px-5 font-semibold text-white border-0 hidden sm:flex"
               asChild
             >
-              <a href="https://collabai.software/try-demo" target="_blank" rel="noopener noreferrer">
+              <a href="https://nonprofitai.software/try-demo" target="_blank" rel="noopener noreferrer">
                 <Sparkles className="mr-1.5 h-4 w-4" />
                 Get Started
               </a>
@@ -126,7 +125,7 @@ export default function Index() {
                 className="btn-primary-bold mt-2 rounded-full font-semibold text-white border-0"
                 asChild
               >
-                <a href="https://collabai.software/try-demo" target="_blank" rel="noopener noreferrer">
+                <a href="https://nonprofitai.software/try-demo" target="_blank" rel="noopener noreferrer">
                   <Sparkles className="mr-1.5 h-4 w-4" />
                   Get Started
                 </a>

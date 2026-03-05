@@ -19,29 +19,29 @@ export function HeroSection() {
           <div className="mb-8 flex items-center justify-center gap-4">
             <AIPoweredBadge size="lg" />
             <span className="text-sm font-medium text-muted-foreground">
-              Trusted by 500+ Financial & Legal Firms
+              Trusted by nonprofits across the country
             </span>
           </div>
 
           {/* Main Headline with AI Gradient */}
           <h1 className="text-balance text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl xl:text-8xl">
-            <span className="text-foreground">Your AI Agents.</span>
+            <span className="text-foreground">Nonprofit Control Tower</span>
             <br />
             <AIGradientText as="span" className="block mt-2">
-              One Control Center.
+              Operational Intelligence Layer.
             </AIGradientText>
           </h1>
 
           {/* Subheadline */}
           <p className="mx-auto mt-6 max-w-xl text-xl font-semibold text-foreground sm:text-2xl">
-            Private. Secure. Enterprise-Ready.
+            Built for Modern Nonprofits.
           </p>
 
           {/* Description */}
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-            Stop switching between ChatGPT, Excel, Slack, and scattered notes.
-            CollabAI brings intelligent AI agents directly into your workflow—
-            with your data staying <strong className="text-foreground">100% behind your firewall</strong>.
+            Stop juggling spreadsheets, donor databases, and siloed tools.
+            Nonprofit Control Tower brings intelligent AI agents directly into your organization's workflow—
+            with your mission-critical data staying <strong className="text-foreground">secure and private</strong>.
           </p>
 
           {/* CTAs with AI styling */}
@@ -51,7 +51,7 @@ export function HeroSection() {
               className="btn-primary-bold h-14 rounded-full px-10 text-base font-bold text-white border-0" 
               asChild
             >
-              <a href="https://collabai.software/try-demo" target="_blank" rel="noopener noreferrer">
+              <a href="https://nonprofitai.software/try-demo" target="_blank" rel="noopener noreferrer">
                 <Sparkles className="mr-2 h-5 w-5" />
                 Start Free Trial
                 <ArrowRight className="ml-2 h-4 w-4" />

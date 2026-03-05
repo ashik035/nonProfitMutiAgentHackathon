@@ -72,7 +72,7 @@ export function FeatureGrid() {
             Everything Flows Through <AIGradientText>Control Tower</AIGradientText>
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            A complete AI-powered platform designed for professional services firms
+            A complete AI-powered platform designed for mission-driven organizations
           </p>
         </div>
 

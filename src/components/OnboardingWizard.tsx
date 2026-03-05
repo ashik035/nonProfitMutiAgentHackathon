@@ -42,7 +42,7 @@ interface OnboardingData {
 const STEPS = [
   {
     id: 1,
-    title: "Welcome to CollabAi",
+    title: "Welcome to Nonprofit Control Tower",
     description: "Let's get you set up in just a few steps",
     icon: Sparkles,
   },
@@ -168,10 +168,10 @@ export default function OnboardingWizard({
               </div>
             </div>
             <div className="text-center space-y-3">
-              <h3 className="text-2xl font-bold">Welcome to CollabAi!</h3>
+              <h3 className="text-2xl font-bold">Welcome to Nonprofit Control Tower!</h3>
               <p className="text-muted-foreground max-w-md mx-auto">
                 We're excited to have you here. Let's take a moment to set up your
-                profile and get you started with AI-powered collaboration.
+                profile and get you started with AI-powered operations for your organization.
               </p>
             </div>
             <div className="space-y-3 pt-4">
@@ -279,7 +279,7 @@ export default function OnboardingWizard({
                 <Label htmlFor="goals">What are your goals? (Optional)</Label>
                 <Textarea
                   id="goals"
-                  placeholder="What do you want to achieve with CollabAi?"
+                  placeholder="What do you want to achieve with Nonprofit Control Tower?"
                   value={data.goals}
                   onChange={(e) => setData({ ...data, goals: e.target.value })}
                   rows={4}
@@ -301,7 +301,7 @@ export default function OnboardingWizard({
               <h3 className="text-2xl font-bold">You're all set!</h3>
               <p className="text-muted-foreground max-w-md mx-auto">
                 Your profile has been created. You can now start exploring all the
-                features CollabAi has to offer.
+                features Nonprofit Control Tower has to offer.
               </p>
             </div>
             <div className="bg-muted/50 rounded-lg p-4 space-y-2">

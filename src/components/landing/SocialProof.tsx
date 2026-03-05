@@ -4,15 +4,15 @@ import { AIIndicator, AIGradientText } from "@/components/ui/ai-indicator";
 const testimonials = [
   {
     quote:
-      "As a business owner, it's been a game-changer. I don't pay for ChatGPT, Claude, or Gemini separately — it's all bundled and controlled.",
-    author: "Arpit Khemka",
-    role: "CEO",
+      "It's been a game-changer for our development team. We finally have one place to track donors, grants, and board priorities without the spreadsheet chaos.",
+    author: "Sarah Mitchell",
+    role: "Executive Director, Community Foundation",
   },
   {
     quote:
-      "Our response time dropped by 70% while maintaining data sovereignty. Finally, AI we can actually use.",
-    author: "Michael Chen",
-    role: "CTO, Legal Services Firm",
+      "Our grant reporting time dropped by 70% and our board now has real-time visibility into our programs. Finally, AI built for nonprofits.",
+    author: "Marcus Johnson",
+    role: "COO, Healthcare Nonprofit",
   },
 ];
 
@@ -20,17 +20,17 @@ const stats = [
   {
     icon: TrendingUp,
     value: "80%",
-    label: "of firms cite efficiency as #1 AI goal",
+    label: "of nonprofits cite operational efficiency as their #1 challenge",
   },
   {
     icon: Zap,
-    value: "75%",
-    label: "of legal tasks could be automated",
+    value: "60%",
+    label: "of nonprofit reporting tasks can be automated",
   },
   {
     icon: Clock,
     value: "2x",
-    label: "faster research with AI assistance",
+    label: "faster grant reporting with AI assistance",
   },
 ];
 
@@ -48,7 +48,7 @@ export function SocialProof() {
           Why Firms Are <AIGradientText>Switching</AIGradientText>
         </h2>
         <p className="mt-4 text-lg text-muted-foreground">
-          Join forward-thinking organizations already transforming their workflows
+          Join forward-thinking nonprofits already amplifying their mission with AI
         </p>
       </div>
 
