@@ -46,9 +46,19 @@ serve(async (req) => {
     
     if (provider && credentials) {
       service = provider;
-      // Extract API key from credentials - common field names
-      apiKey = credentials.api_key || credentials.apiKey || credentials.access_token || 
-               credentials.secret_key || credentials.token || Object.values(credentials)[0];
+      if (provider === 'salesforce-npsp' || provider === 'salesforce') {
+        const inst = credentials.instance_url?.trim();
+        const token = credentials.access_token?.trim();
+        if (token) {
+          apiKey = inst ? `${inst}:${token}` : token;
+        } else {
+          apiKey = credentials.api_key || credentials.apiKey || credentials.access_token ||
+            credentials.secret_key || credentials.token || Object.values(credentials)[0] as string;
+        }
+      } else {
+        apiKey = credentials.api_key || credentials.apiKey || credentials.access_token ||
+          credentials.secret_key || credentials.token || Object.values(credentials)[0] as string;
+      }
     }
 
     // Health check / deployment test - no external calls (ping or empty body)

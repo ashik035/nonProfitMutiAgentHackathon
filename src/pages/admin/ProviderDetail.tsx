@@ -45,12 +45,15 @@ export default function ProviderDetail() {
   // Fetch provider data
   const { data: provider, isLoading, error } = useIntegrationProvider(slug || '');
   const { data: fieldsFromDb = [] } = useIntegrationFields(provider?.id || '');
-  const fields =
+  const rawFields =
     fieldsFromDb.length > 0 && provider
       ? fieldsFromDb
       : provider
         ? getDefaultFieldsForProvider(provider)
         : [];
+  const fields = [...rawFields].sort(
+    (a, b) => (a.display_order ?? 0) - (b.display_order ?? 0)
+  );
   const { data: orgIntegration } = useOrganizationIntegration(provider?.id || '');
   const { data: services = [] } = useIntegrationServices(provider?.id || '');
   const { data: usageStats, isLoading: statsLoading } = useProviderUsageStats(
@@ -101,12 +104,12 @@ export default function ProviderDetail() {
   const [hasChanges, setHasChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Initialize form values from org integration config
+  const fieldKeysSignature = fields.map((f) => f.field_key).sort().join(',');
+
   useEffect(() => {
     if (orgIntegration?.config) {
       setFormValues(orgIntegration.config as Record<string, string>);
-    } else if (fields && fields.length > 0) {
-      // Set default values
+    } else if (fields.length > 0) {
       const defaults: Record<string, string> = {};
       fields.forEach((field) => {
         if (field.default_value) {
@@ -115,7 +118,7 @@ export default function ProviderDetail() {
       });
       setFormValues(defaults);
     }
-  }, [orgIntegration, fields]);
+  }, [orgIntegration, fieldKeysSignature]);
 
   // Handle field change
   const handleFieldChange = (fieldKey: string, value: string) => {
@@ -329,7 +332,9 @@ export default function ProviderDetail() {
           <CardHeader>
             <CardTitle>Configuration</CardTitle>
             <CardDescription>
-              Enter your API credentials to connect {provider.name}
+              {isCrm
+                ? `Enter the required credentials for ${provider.name}. Credentials are stored securely. After saving, you can set this as primary and sync contacts from the Deals page.`
+                : `Enter your API credentials to connect ${provider.name}`}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
