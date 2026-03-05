@@ -558,6 +558,47 @@ export type Database = {
           },
         ]
       }
+      crm_sync_logs: {
+        Row: {
+          created_at: string
+          direction: string
+          entity_type: string
+          id: string
+          message: string | null
+          organization_integration_id: string
+          records_processed: number | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          direction: string
+          entity_type: string
+          id?: string
+          message?: string | null
+          organization_integration_id: string
+          records_processed?: number | null
+          status: string
+        }
+        Update: {
+          created_at?: string
+          direction?: string
+          entity_type?: string
+          id?: string
+          message?: string | null
+          organization_integration_id?: string
+          records_processed?: number | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_sync_logs_organization_integration_id_fkey"
+            columns: ["organization_integration_id"]
+            isOneToOne: false
+            referencedRelation: "organization_integrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deals: {
         Row: {
           client_id: string | null
@@ -882,6 +923,8 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          display_order: number | null
+          enabled: boolean | null
           id: string
           name: string
           slug: string
@@ -890,6 +933,8 @@ export type Database = {
         Insert: {
           created_at?: string
           description?: string | null
+          display_order?: number | null
+          enabled?: boolean | null
           id?: string
           name: string
           slug: string
@@ -898,6 +943,8 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string | null
+          display_order?: number | null
+          enabled?: boolean | null
           id?: string
           name?: string
           slug?: string
@@ -913,10 +960,14 @@ export type Database = {
           created_at: string
           description: string | null
           display_order: number | null
+          docs_url: string | null
           id: string
           is_active: boolean | null
+          is_available: boolean | null
+          is_coming_soon: boolean | null
           logo_url: string | null
           name: string
+          oauth_config: Json | null
           slug: string
           updated_at: string
         }
@@ -927,10 +978,14 @@ export type Database = {
           created_at?: string
           description?: string | null
           display_order?: number | null
+          docs_url?: string | null
           id?: string
           is_active?: boolean | null
+          is_available?: boolean | null
+          is_coming_soon?: boolean | null
           logo_url?: string | null
           name: string
+          oauth_config?: Json | null
           slug: string
           updated_at?: string
         }
@@ -941,10 +996,14 @@ export type Database = {
           created_at?: string
           description?: string | null
           display_order?: number | null
+          docs_url?: string | null
           id?: string
           is_active?: boolean | null
+          is_available?: boolean | null
+          is_coming_soon?: boolean | null
           logo_url?: string | null
           name?: string
+          oauth_config?: Json | null
           slug?: string
           updated_at?: string
         }
@@ -3238,6 +3297,18 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      data_source_type:
+        | "manual"
+        | "hubspot"
+        | "salesforce"
+        | "zoho"
+        | "pipedrive"
+        | "blackbaud"
+        | "bloomerang"
+        | "neon"
+        | "virtuous"
+        | "donorperfect"
+        | "kindful"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3366,6 +3437,19 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      data_source_type: [
+        "manual",
+        "hubspot",
+        "salesforce",
+        "zoho",
+        "pipedrive",
+        "blackbaud",
+        "bloomerang",
+        "neon",
+        "virtuous",
+        "donorperfect",
+        "kindful",
+      ],
     },
   },
 } as const
