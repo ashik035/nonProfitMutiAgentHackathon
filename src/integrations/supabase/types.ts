@@ -925,32 +925,97 @@ export type Database = {
           description: string | null
           display_order: number | null
           enabled: boolean | null
+          icon: string | null
           id: string
           name: string
           slug: string
           sort_order: number | null
+          updated_at: string | null
         }
         Insert: {
           created_at?: string
           description?: string | null
           display_order?: number | null
           enabled?: boolean | null
+          icon?: string | null
           id?: string
           name: string
           slug: string
           sort_order?: number | null
+          updated_at?: string | null
         }
         Update: {
           created_at?: string
           description?: string | null
           display_order?: number | null
           enabled?: boolean | null
+          icon?: string | null
           id?: string
           name?: string
           slug?: string
           sort_order?: number | null
+          updated_at?: string | null
         }
         Relationships: []
+      }
+      integration_fields: {
+        Row: {
+          created_at: string
+          default_value: string | null
+          display_order: number | null
+          field_key: string
+          field_type: string
+          help_text: string | null
+          id: string
+          is_required: boolean | null
+          is_sensitive: boolean | null
+          label: string
+          placeholder: string | null
+          provider_id: string
+          select_options: Json | null
+          validation_regex: string | null
+        }
+        Insert: {
+          created_at?: string
+          default_value?: string | null
+          display_order?: number | null
+          field_key: string
+          field_type: string
+          help_text?: string | null
+          id?: string
+          is_required?: boolean | null
+          is_sensitive?: boolean | null
+          label: string
+          placeholder?: string | null
+          provider_id: string
+          select_options?: Json | null
+          validation_regex?: string | null
+        }
+        Update: {
+          created_at?: string
+          default_value?: string | null
+          display_order?: number | null
+          field_key?: string
+          field_type?: string
+          help_text?: string | null
+          id?: string
+          is_required?: boolean | null
+          is_sensitive?: boolean | null
+          label?: string
+          placeholder?: string | null
+          provider_id?: string
+          select_options?: Json | null
+          validation_regex?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_fields_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "integration_providers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       integration_providers: {
         Row: {
@@ -964,6 +1029,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           is_available: boolean | null
+          is_beta: boolean | null
           is_coming_soon: boolean | null
           logo_url: string | null
           name: string
@@ -982,6 +1048,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_available?: boolean | null
+          is_beta?: boolean | null
           is_coming_soon?: boolean | null
           logo_url?: string | null
           name: string
@@ -1000,6 +1067,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_available?: boolean | null
+          is_beta?: boolean | null
           is_coming_soon?: boolean | null
           logo_url?: string | null
           name?: string
@@ -1013,6 +1081,125 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "integration_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_services: {
+        Row: {
+          cost_model: Json | null
+          created_at: string
+          description: string | null
+          display_order: number | null
+          enabled: boolean | null
+          features: Json | null
+          has_cost: boolean | null
+          id: string
+          is_default: boolean | null
+          name: string
+          provider_id: string
+          requires_config: boolean | null
+          service_key: string
+          updated_at: string
+        }
+        Insert: {
+          cost_model?: Json | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          enabled?: boolean | null
+          features?: Json | null
+          has_cost?: boolean | null
+          id?: string
+          is_default?: boolean | null
+          name: string
+          provider_id: string
+          requires_config?: boolean | null
+          service_key: string
+          updated_at?: string
+        }
+        Update: {
+          cost_model?: Json | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          enabled?: boolean | null
+          features?: Json | null
+          has_cost?: boolean | null
+          id?: string
+          is_default?: boolean | null
+          name?: string
+          provider_id?: string
+          requires_config?: boolean | null
+          service_key?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_services_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "integration_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_usage_logs: {
+        Row: {
+          action: string
+          created_at: string
+          error_message: string | null
+          estimated_cost: number | null
+          id: string
+          organization_id: string | null
+          provider_id: string | null
+          request_metadata: Json | null
+          response_metadata: Json | null
+          service_id: string | null
+          status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          error_message?: string | null
+          estimated_cost?: number | null
+          id?: string
+          organization_id?: string | null
+          provider_id?: string | null
+          request_metadata?: Json | null
+          response_metadata?: Json | null
+          service_id?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          error_message?: string | null
+          estimated_cost?: number | null
+          id?: string
+          organization_id?: string | null
+          provider_id?: string | null
+          request_metadata?: Json | null
+          response_metadata?: Json | null
+          service_id?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_usage_logs_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "integration_providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "integration_usage_logs_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "integration_services"
             referencedColumns: ["id"]
           },
         ]
@@ -1752,6 +1939,8 @@ export type Database = {
           status: string | null
           tags: string[] | null
           title: string
+          transcript_error: string | null
+          transcript_status: string | null
           updated_at: string
           zoom_id: string | null
           zoom_join_url: string | null
@@ -1787,6 +1976,8 @@ export type Database = {
           status?: string | null
           tags?: string[] | null
           title: string
+          transcript_error?: string | null
+          transcript_status?: string | null
           updated_at?: string
           zoom_id?: string | null
           zoom_join_url?: string | null
@@ -1822,6 +2013,8 @@ export type Database = {
           status?: string | null
           tags?: string[] | null
           title?: string
+          transcript_error?: string | null
+          transcript_status?: string | null
           updated_at?: string
           zoom_id?: string | null
           zoom_join_url?: string | null
@@ -1895,33 +2088,48 @@ export type Database = {
       organization_integrations: {
         Row: {
           config: Json | null
+          connection_message: string | null
           connection_status: string | null
           created_at: string
           credentials: Json | null
+          enabled: boolean | null
           id: string
+          is_primary: boolean | null
           last_sync_at: string | null
+          last_tested_at: string | null
+          oauth_tokens: Json | null
           provider_id: string
           updated_at: string
           user_id: string
         }
         Insert: {
           config?: Json | null
+          connection_message?: string | null
           connection_status?: string | null
           created_at?: string
           credentials?: Json | null
+          enabled?: boolean | null
           id?: string
+          is_primary?: boolean | null
           last_sync_at?: string | null
+          last_tested_at?: string | null
+          oauth_tokens?: Json | null
           provider_id: string
           updated_at?: string
           user_id: string
         }
         Update: {
           config?: Json | null
+          connection_message?: string | null
           connection_status?: string | null
           created_at?: string
           credentials?: Json | null
+          enabled?: boolean | null
           id?: string
+          is_primary?: boolean | null
           last_sync_at?: string | null
+          last_tested_at?: string | null
+          oauth_tokens?: Json | null
           provider_id?: string
           updated_at?: string
           user_id?: string
