@@ -420,11 +420,145 @@ export function areRequiredFieldsFilled(
     .every((field) => config[field.field_key]);
 }
 
+function makeField(
+  providerId: string,
+  key: string,
+  label: string,
+  type: 'text' | 'password' | 'url' | 'email',
+  opts: { required?: boolean; sensitive?: boolean; placeholder?: string; help_text?: string; display_order?: number } = {}
+): IntegrationField {
+  const { required = true, sensitive = true, placeholder = null, help_text = null, display_order = 0 } = opts;
+  return {
+    id: `default-${providerId}-${key}`,
+    provider_id: providerId,
+    field_key: key,
+    label,
+    field_type: type,
+    placeholder,
+    default_value: null,
+    is_required: required,
+    is_sensitive: sensitive,
+    help_text,
+    validation_regex: null,
+    select_options: null,
+    display_order,
+    created_at: new Date().toISOString(),
+  };
+}
+
+/**
+ * CRM-specific credential fields per provider (from each provider’s official connection method).
+ * Used when integration_fields table has no rows so the Configuration form shows the right inputs.
+ */
+export function getCrmCredentialFields(providerSlug: string, providerId: string): IntegrationField[] {
+  const base = (key: string, label: string, type: 'text' | 'password' | 'url' = 'text', opts = {}) =>
+    makeField(providerId, key, label, type, opts);
+
+  switch (providerSlug) {
+    case 'salesforce-npsp':
+    case 'salesforce':
+      return [
+        base('instance_url', 'Instance URL', 'url', {
+          required: false,
+          sensitive: false,
+          placeholder: 'https://yourorg.my.salesforce.com',
+          help_text: 'Optional. Defaults to https://login.salesforce.com if blank.',
+          display_order: 0,
+        }),
+        base('access_token', 'Access Token', 'password', { display_order: 1 }),
+      ];
+
+    case 'hubspot':
+    case 'hubspot-nonprofit':
+      return [
+        base('api_key', 'Private App Access Token or API Key', 'password', {
+          help_text: 'From HubSpot: Settings → Integrations → Private Apps, or legacy API key.',
+          display_order: 0,
+        }),
+      ];
+
+    case 'blackbaud-raiser-edge':
+      return [
+        base('client_id', 'Client ID', 'text', { sensitive: false, display_order: 0 }),
+        base('client_secret', 'Client Secret', 'password', { display_order: 1 }),
+        base('subscription_key', 'Subscription Key', 'password', {
+          help_text: 'From Blackbaud Developer Portal → your application.',
+          display_order: 2,
+        }),
+      ];
+
+    case 'bloomerang':
+      return [
+        base('api_key', 'API Key', 'password', {
+          help_text: 'From Bloomerang: User menu → Edit My User → API keys.',
+          display_order: 0,
+        }),
+      ];
+
+    case 'neon-crm':
+      return [
+        base('org_id', 'Organization ID', 'text', {
+          sensitive: false,
+          placeholder: 'From Settings → Organization Profile',
+          help_text: 'Neon CRM Settings → Organization Profile → Account Information.',
+          display_order: 0,
+        }),
+        base('api_key', 'API Key', 'password', {
+          help_text: 'Settings → User Management → enable API Access for a user, then copy the key.',
+          display_order: 1,
+        }),
+      ];
+
+    case 'virtuous':
+      return [
+        base('api_key', 'API Key', 'password', {
+          help_text: 'From Virtuous Connect dashboard at connect.virtuoussoftware.com.',
+          display_order: 0,
+        }),
+      ];
+
+    case 'donorperfect':
+      return [
+        base('api_key', 'API Key', 'password', {
+          help_text: 'From DonorPerfect support or your account credentials.',
+          display_order: 0,
+        }),
+        base('app_name', 'Application Name', 'text', {
+          required: false,
+          sensitive: false,
+          placeholder: 'Max 20 characters',
+          display_order: 1,
+        }),
+        base('instance_url', 'Instance URL', 'url', {
+          required: false,
+          sensitive: false,
+          display_order: 2,
+        }),
+      ];
+
+    case 'kindful':
+      return [
+        base('client_id', 'Client ID', 'text', { sensitive: false, display_order: 0 }),
+        base('client_secret', 'Client Secret', 'password', { display_order: 1 }),
+      ];
+
+    case 'zoho-crm':
+    case 'pipedrive':
+    default:
+      return [];
+  }
+}
+
 /**
  * Default credential fields when integration_fields table has no rows for this provider.
- * Ensures Configuration form and Connect/Configure always show on provider detail.
+ * For CRM providers, uses getCrmCredentialFields so each CRM gets the correct connection fields.
  */
 export function getDefaultFieldsForProvider(provider: IntegrationProvider): IntegrationField[] {
+  if (isCrmProvider(provider.slug)) {
+    const crmFields = getCrmCredentialFields(provider.slug, provider.id);
+    if (crmFields.length > 0) return crmFields;
+  }
+
   const base = {
     provider_id: provider.id,
     placeholder: null,
