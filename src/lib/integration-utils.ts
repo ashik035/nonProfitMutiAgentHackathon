@@ -398,31 +398,89 @@ export function areRequiredFieldsFilled(
     .every((field) => config[field.field_key]);
 }
 
+/**
+ * Default credential fields when integration_fields table has no rows for this provider.
+ * Ensures Configuration form and Connect/Configure always show on provider detail.
+ */
+export function getDefaultFieldsForProvider(provider: IntegrationProvider): IntegrationField[] {
+  const base = {
+    provider_id: provider.id,
+    placeholder: null,
+    default_value: null,
+    help_text: null,
+    validation_regex: null,
+    select_options: null,
+    display_order: 0,
+    created_at: new Date().toISOString(),
+  };
+  if (provider.auth_type === 'oauth2') {
+    return [
+      {
+        ...base,
+        id: `default-${provider.id}-client_id`,
+        field_key: 'client_id',
+        label: 'Client ID',
+        field_type: 'text',
+        is_required: true,
+        is_sensitive: false,
+      },
+      {
+        ...base,
+        id: `default-${provider.id}-client_secret`,
+        field_key: 'client_secret',
+        label: 'Client Secret',
+        field_type: 'password',
+        is_required: true,
+        is_sensitive: true,
+      },
+    ];
+  }
+  if (provider.auth_type === 'api_key') {
+    return [
+      {
+        ...base,
+        id: `default-${provider.id}-api_key`,
+        field_key: 'api_key',
+        label: 'API Key',
+        field_type: 'password',
+        is_required: true,
+        is_sensitive: true,
+      },
+    ];
+  }
+  return [];
+}
+
 // ============================================
 // CONFIG HELPERS
 // ============================================
 
 /**
- * Build OAuth authorization URL
+ * Build OAuth authorization URL. client_id can come from configOverrides when not stored on provider.
  */
 export function buildOAuthAuthorizationUrl(
   provider: IntegrationProvider,
   state: string,
-  redirectUri: string
+  redirectUri: string,
+  configOverrides?: { client_id?: string }
 ): string {
   if (!provider.oauth_config) {
     throw new Error('Provider does not have OAuth configuration');
   }
 
+  const oauth = provider.oauth_config as { client_id?: string; authorize_url?: string; response_type?: string; scopes?: string[] };
+  const clientId = configOverrides?.client_id ?? oauth.client_id ?? '';
+  const scopes = Array.isArray(oauth.scopes) ? oauth.scopes.join(' ') : '';
+
   const params = new URLSearchParams({
-    client_id: provider.oauth_config.client_id || '',
+    client_id: clientId,
     redirect_uri: redirectUri,
-    response_type: provider.oauth_config.response_type || 'code',
+    response_type: oauth.response_type || 'code',
     state,
-    scope: provider.oauth_config.scopes.join(' '),
+    scope: scopes,
   });
 
-  return `${provider.oauth_config.authorize_url}?${params.toString()}`;
+  return `${oauth.authorize_url}?${params.toString()}`;
 }
 
 /**

@@ -493,8 +493,21 @@ interface GroupedProviders {
   };
 }
 
+const UNCATEGORIZED_CATEGORY: IntegrationCategory = {
+  id: 'uncategorized',
+  name: 'CRM & Integrations',
+  slug: 'crm-systems',
+  description: 'CRM and third-party integrations',
+  icon: 'Users',
+  display_order: 999,
+  enabled: true,
+  created_at: '',
+  updated_at: '',
+};
+
 /**
- * Get all providers grouped by category with connection status
+ * Get all providers grouped by category with connection status.
+ * Providers with null category_id are shown under "CRM & Integrations".
  */
 export function useProvidersGroupedByCategory() {
   const categoriesQuery = useIntegrationCategories();
@@ -505,11 +518,10 @@ export function useProvidersGroupedByCategory() {
     categoriesQuery.isLoading || providersQuery.isLoading || orgIntegrationsQuery.isLoading;
   const error = categoriesQuery.error || providersQuery.error || orgIntegrationsQuery.error;
 
-  const grouped: GroupedProviders[] | undefined = categoriesQuery.data?.map((category) => {
+  const baseGrouped: GroupedProviders[] | undefined = categoriesQuery.data?.map((category) => {
     const categoryProviders =
       providersQuery.data?.filter((p) => p.category_id === category.id) || [];
 
-    // Attach org integration to each provider
     const providersWithIntegration = categoryProviders.map((provider) => ({
       ...provider,
       orgIntegration: orgIntegrationsQuery.data?.find((i) => i.provider_id === provider.id),
@@ -528,6 +540,35 @@ export function useProvidersGroupedByCategory() {
       },
     };
   });
+
+  const uncategorizedProviders =
+    providersQuery.data?.filter((p) => p.category_id == null) || [];
+  const uncategorizedWithIntegration = uncategorizedProviders.map((provider) => ({
+    ...provider,
+    orgIntegration: orgIntegrationsQuery.data?.find((i) => i.provider_id === provider.id),
+  }));
+  const uncategorizedConnected = uncategorizedWithIntegration.filter(
+    (p) => p.orgIntegration?.connection_status === 'connected'
+  ).length;
+
+  const uncategorizedGroup: GroupedProviders | null =
+    uncategorizedWithIntegration.length > 0
+      ? {
+          category: UNCATEGORIZED_CATEGORY,
+          providers: uncategorizedWithIntegration,
+          stats: {
+            totalProviders: uncategorizedWithIntegration.length,
+            connectedProviders: uncategorizedConnected,
+          },
+        }
+      : null;
+
+  const grouped: GroupedProviders[] | undefined =
+    baseGrouped && uncategorizedGroup
+      ? [...baseGrouped, uncategorizedGroup]
+      : uncategorizedGroup
+        ? [uncategorizedGroup]
+        : baseGrouped;
 
   return {
     grouped,

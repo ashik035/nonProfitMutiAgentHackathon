@@ -32,6 +32,7 @@ import {
   generateOAuthState,
   storeOAuthState,
   buildOAuthAuthorizationUrl,
+  getDefaultFieldsForProvider,
 } from '@/lib/integration-utils';
 
 export default function ProviderDetail() {
@@ -40,7 +41,13 @@ export default function ProviderDetail() {
 
   // Fetch provider data
   const { data: provider, isLoading, error } = useIntegrationProvider(slug || '');
-  const { data: fields = [] } = useIntegrationFields(provider?.id || '');
+  const { data: fieldsFromDb = [] } = useIntegrationFields(provider?.id || '');
+  const fields =
+    fieldsFromDb.length > 0 && provider
+      ? fieldsFromDb
+      : provider
+        ? getDefaultFieldsForProvider(provider)
+        : [];
   const { data: orgIntegration } = useOrganizationIntegration(provider?.id || '');
   const { data: services = [] } = useIntegrationServices(provider?.id || '');
   const { data: usageStats, isLoading: statsLoading } = useProviderUsageStats(
@@ -168,19 +175,19 @@ export default function ProviderDetail() {
       toast.error('This provider does not have OAuth configuration set up.');
       return;
     }
+    const clientId = formValues.client_id?.trim();
+    if (!clientId) {
+      toast.error('Please enter Client ID and save, then try Connect again.');
+      return;
+    }
 
     try {
-      // 1. Generate and store state for CSRF protection
       const state = generateOAuthState();
       storeOAuthState(state, provider.id);
-
-      // 2. Build redirect URI
       const redirectUri = `${window.location.origin}/admin/integrations/oauth/callback`;
-
-      // 3. Build authorization URL
-      const authUrl = buildOAuthAuthorizationUrl(provider, state, redirectUri);
-
-      // 4. Redirect to provider authorization page
+      const authUrl = buildOAuthAuthorizationUrl(provider, state, redirectUri, {
+        client_id: clientId,
+      });
       window.location.href = authUrl;
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to initiate OAuth flow');
@@ -310,7 +317,7 @@ export default function ProviderDetail() {
       </Card>
 
       {/* Configuration Form */}
-      {fields.length > 0 && (
+      {fields.length > 0 && provider && (
         <Card>
           <CardHeader>
             <CardTitle>Configuration</CardTitle>
@@ -360,13 +367,13 @@ export default function ProviderDetail() {
         </Card>
       )}
 
-      {/* OAuth Connect for OAuth providers */}
-      {provider.auth_type === 'oauth' && !orgIntegration && (
+      {/* OAuth Connect for OAuth2 providers */}
+      {provider.auth_type === 'oauth2' && provider.oauth_config && !orgIntegration?.connection_status?.includes('connected') && (
         <Card>
           <CardHeader>
             <CardTitle>Connect with OAuth</CardTitle>
             <CardDescription>
-              Connect your {provider.name} account using OAuth
+              Save your Client ID and Client Secret above, then click below to connect your {provider.name} account.
             </CardDescription>
           </CardHeader>
           <CardContent>
