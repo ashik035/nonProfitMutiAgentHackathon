@@ -662,6 +662,7 @@ export type Database = {
       ai_providers: {
         Row: {
           api_base_url: string | null
+          api_key_secret_name: string | null
           created_at: string
           id: string
           is_active: boolean | null
@@ -670,6 +671,7 @@ export type Database = {
         }
         Insert: {
           api_base_url?: string | null
+          api_key_secret_name?: string | null
           created_at?: string
           id?: string
           is_active?: boolean | null
@@ -678,6 +680,7 @@ export type Database = {
         }
         Update: {
           api_base_url?: string | null
+          api_key_secret_name?: string | null
           created_at?: string
           id?: string
           is_active?: boolean | null
@@ -685,6 +688,50 @@ export type Database = {
           slug?: string | null
         }
         Relationships: []
+      }
+      ai_usage_logs: {
+        Row: {
+          created_at: string
+          embedding_tokens: number | null
+          estimated_cost: number | null
+          function_name: string
+          id: string
+          input_tokens: number | null
+          model_id: string | null
+          output_tokens: number | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          embedding_tokens?: number | null
+          estimated_cost?: number | null
+          function_name: string
+          id?: string
+          input_tokens?: number | null
+          model_id?: string | null
+          output_tokens?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          embedding_tokens?: number | null
+          estimated_cost?: number | null
+          function_name?: string
+          id?: string
+          input_tokens?: number | null
+          model_id?: string | null
+          output_tokens?: number | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_usage_logs_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "ai_models"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       app_config: {
         Row: {

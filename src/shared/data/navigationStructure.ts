@@ -26,6 +26,7 @@ export interface NavItem {
   featureFlag?: string; // Legacy feature flag check
   adminOnly?: boolean;
   badge?: string;
+  isAI?: boolean; // Shows AI indicator animation
   children?: NavItem[]; // Nested sub-items (e.g., Streams under Tasks)
   /** When true, parent is rendered as a section header only (collapsible), not a link; children are the links */
   headerOnly?: boolean;
