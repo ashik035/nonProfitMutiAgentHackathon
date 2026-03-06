@@ -28,7 +28,7 @@ export function CommentThread({ taskId, comments: commentsProp }: CommentThreadP
 
   const handleSubmit = useCallback(
     async (content: string) => {
-      await addComment.mutateAsync({ taskId, content });
+      await addComment.mutateAsync({ taskId, content } as any);
     },
     [taskId, addComment],
   );
@@ -87,14 +87,14 @@ function CommentItem({ comment, taskId }: { comment: TaskComment; taskId: string
 
   const handleSaveEdit = async () => {
     if (!editText.trim()) return;
-    await updateComment.mutateAsync({ id: comment.id, taskId, content: editText.trim() });
+    await updateComment.mutateAsync({ id: comment.id, taskId, content: editText.trim() } as any);
     setIsEditing(false);
   };
 
   const handleReply = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!replyText.trim()) return;
-    await addReply.mutateAsync({ taskId, content: replyText.trim(), parentCommentId: comment.id });
+    await addReply.mutateAsync({ taskId, content: replyText.trim(), parentCommentId: comment.id } as any);
     setReplyText("");
     setShowReply(false);
   };

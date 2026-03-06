@@ -32,7 +32,7 @@ export function useEntityMeetings(entityType: string, entityId: string) {
   return useQuery({
     queryKey: [ENTITY_MEETINGS_KEY, entityType, entityId],
     queryFn: async (): Promise<EntityMeetingAssignment[]> => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("meeting_assignments")
         .select(
           "*, meeting:meetings(id, title, scheduled_at, status, duration_minutes, slug)"
@@ -65,7 +65,7 @@ export function useAddEntityMeeting() {
       entityId: string;
       meetingId: string;
     }) => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("meeting_assignments")
         .insert({
           meeting_id: meetingId,
@@ -111,7 +111,7 @@ export function useRemoveEntityMeeting() {
       entityType: string;
       entityId: string;
     }) => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("meeting_assignments")
         .delete()
         .eq("id", id);

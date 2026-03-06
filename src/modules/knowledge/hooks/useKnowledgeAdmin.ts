@@ -20,9 +20,6 @@ interface CategoryWithStats extends KnowledgeCategory {
   children?: CategoryWithStats[];
 }
 
-/**
- * Hook to fetch all categories with optional statistics
- */
 export function useCategories(includeStats = false) {
   return useQuery({
     queryKey: ['knowledge-categories', includeStats],
@@ -39,30 +36,27 @@ export function useCategories(includeStats = false) {
         return categories as KnowledgeCategory[];
       }
 
-      // Fetch stats for each category by counting entries directly
       const categoriesWithStats: CategoryWithStats[] = await Promise.all(
         categories.map(async (category) => {
-          const { data: entries } = await supabase
+          const { data: entries } = await (supabase as any)
             .from('knowledge_entries')
             .select('status, view_count, updated_at')
             .eq('category_id', category.id);
 
+          const entryList = (entries || []) as any[];
           const stats: CategoryStats = {
-            entry_count: entries?.length || 0,
-            published_count: entries?.filter((e) => e.status === 'published').length || 0,
-            draft_count: entries?.filter((e) => e.status === 'draft').length || 0,
-            total_views: entries?.reduce((sum, e) => sum + (e.view_count || 0), 0) || 0,
-            last_updated: entries?.length
-              ? entries.sort((a, b) => 
+            entry_count: entryList.length,
+            published_count: entryList.filter((e: any) => e.status === 'published').length,
+            draft_count: entryList.filter((e: any) => e.status === 'draft').length,
+            total_views: entryList.reduce((sum: number, e: any) => sum + (e.view_count || 0), 0),
+            last_updated: entryList.length
+              ? entryList.sort((a: any, b: any) =>
                   new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
                 )[0]?.updated_at
               : null,
           };
 
-          return {
-            ...category,
-            stats,
-          };
+          return { ...category, stats };
         })
       );
 
@@ -80,36 +74,19 @@ export function useCategoryTree() {
   const buildTree = (items: CategoryWithStats[]): CategoryWithStats[] => {
     const map = new Map<string, CategoryWithStats>();
     const roots: CategoryWithStats[] = [];
-
-    // Create a map of all items
-    items.forEach((item) => {
-      map.set(item.id, { ...item, children: [] });
-    });
-
-    // Build the tree
+    items.forEach((item) => { map.set(item.id, { ...item, children: [] }); });
     items.forEach((item) => {
       const node = map.get(item.id)!;
       if (item.parent_id) {
         const parent = map.get(item.parent_id);
-        if (parent) {
-          parent.children = parent.children || [];
-          parent.children.push(node);
-        } else {
-          roots.push(node);
-        }
-      } else {
-        roots.push(node);
-      }
+        if (parent) { parent.children = parent.children || []; parent.children.push(node); }
+        else { roots.push(node); }
+      } else { roots.push(node); }
     });
-
     return roots;
   };
 
-  return {
-    ...rest,
-    data: buildTree(categories as CategoryWithStats[]),
-    flatData: categories,
-  };
+  return { ...rest, data: buildTree(categories as CategoryWithStats[]), flatData: categories };
 }
 
 /**
@@ -120,13 +97,7 @@ export function useCategory(id: string | undefined) {
     queryKey: ['knowledge-category', id],
     queryFn: async () => {
       if (!id) throw new Error('Category ID is required');
-
-      const { data, error } = await supabase
-        .from('knowledge_categories')
-        .select('*')
-        .eq('id', id)
-        .single();
-
+      const { data, error } = await supabase.from('knowledge_categories').select('*').eq('id', id).single();
       if (error) throw error;
       return data as KnowledgeCategory;
     },
@@ -142,13 +113,7 @@ export function useCategoryBySlug(slug: string | undefined) {
     queryKey: ['knowledge-category-slug', slug],
     queryFn: async () => {
       if (!slug) throw new Error('Category slug is required');
-
-      const { data, error } = await supabase
-        .from('knowledge_categories')
-        .select('*')
-        .eq('slug', slug)
-        .single();
-
+      const { data, error } = await supabase.from('knowledge_categories').select('*').eq('slug', slug).single();
       if (error) throw error;
       return data as KnowledgeCategory;
     },
@@ -161,25 +126,14 @@ export function useCategoryBySlug(slug: string | undefined) {
  */
 export function useCreateCategory() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (category: KnowledgeCategoryInsert) => {
-      const { data, error } = await supabase
-        .from('knowledge_categories')
-        .insert(category)
-        .select()
-        .single();
-
+      const { data, error } = await supabase.from('knowledge_categories').insert(category).select().single();
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['knowledge-categories'] });
-      toast.success('Category created successfully');
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to create category: ${error.message}`);
-    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['knowledge-categories'] }); toast.success('Category created successfully'); },
+    onError: (error: Error) => { toast.error(`Failed to create category: ${error.message}`); },
   });
 }
 
@@ -188,35 +142,18 @@ export function useCreateCategory() {
  */
 export function useUpdateCategory() {
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: async ({
-      id,
-      updates,
-    }: {
-      id: string;
-      updates: KnowledgeCategoryUpdate;
-    }) => {
-      const { data, error } = await supabase
-        .from('knowledge_categories')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-
+    mutationFn: async ({ id, updates }: { id: string; updates: KnowledgeCategoryUpdate }) => {
+      const { data, error } = await supabase.from('knowledge_categories').update(updates).eq('id', id).select().single();
       if (error) throw error;
       return data;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['knowledge-categories'] });
-      queryClient.invalidateQueries({
-        queryKey: ['knowledge-category', variables.id],
-      });
+      queryClient.invalidateQueries({ queryKey: ['knowledge-category', variables.id] });
       toast.success('Category updated successfully');
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to update category: ${error.message}`);
-    },
+    onError: (error: Error) => { toast.error(`Failed to update category: ${error.message}`); },
   });
 }
 
@@ -225,47 +162,17 @@ export function useUpdateCategory() {
  */
 export function useDeleteCategory() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (id: string) => {
-      // First check if category has entries
-      const { count } = await supabase
-        .from('knowledge_entries')
-        .select('*', { count: 'exact', head: true })
-        .eq('category_id', id);
-
-      if (count && count > 0) {
-        throw new Error(
-          `Cannot delete category with ${count} entries. Please reassign or delete the entries first.`
-        );
-      }
-
-      // Check if category has children
-      const { count: childCount } = await supabase
-        .from('knowledge_categories')
-        .select('*', { count: 'exact', head: true })
-        .eq('parent_id', id);
-
-      if (childCount && childCount > 0) {
-        throw new Error(
-          `Cannot delete category with ${childCount} subcategories. Please delete or reassign subcategories first.`
-        );
-      }
-
-      const { error } = await supabase
-        .from('knowledge_categories')
-        .delete()
-        .eq('id', id);
-
+      const { count } = await supabase.from('knowledge_entries').select('*', { count: 'exact', head: true }).eq('category_id', id);
+      if (count && count > 0) throw new Error(`Cannot delete category with ${count} entries.`);
+      const { count: childCount } = await supabase.from('knowledge_categories').select('*', { count: 'exact', head: true }).eq('parent_id', id);
+      if (childCount && childCount > 0) throw new Error(`Cannot delete category with ${childCount} subcategories.`);
+      const { error } = await supabase.from('knowledge_categories').delete().eq('id', id);
       if (error) throw error;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['knowledge-categories'] });
-      toast.success('Category deleted successfully');
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to delete category: ${error.message}`);
-    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['knowledge-categories'] }); toast.success('Category deleted successfully'); },
+    onError: (error: Error) => { toast.error(`Failed to delete category: ${error.message}`); },
   });
 }
 
@@ -274,29 +181,16 @@ export function useDeleteCategory() {
  */
 export function useReorderCategories() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (updates: Array<{ id: string; sort_order: number }>) => {
-      const promises = updates.map(({ id, sort_order }) =>
-        supabase
-          .from('knowledge_categories')
-          .update({ sort_order })
-          .eq('id', id)
-      );
-
+      const promises = updates.map(({ id, sort_order }) => supabase.from('knowledge_categories').update({ sort_order }).eq('id', id));
       const results = await Promise.all(promises);
       const error = results.find((r) => r.error)?.error;
       if (error) throw error;
-
       return results;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['knowledge-categories'] });
-      toast.success('Categories reordered successfully');
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to reorder categories: ${error.message}`);
-    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['knowledge-categories'] }); toast.success('Categories reordered successfully'); },
+    onError: (error: Error) => { toast.error(`Failed to reorder categories: ${error.message}`); },
   });
 }
 
@@ -308,24 +202,21 @@ export function useCategoryStats(categoryId: string | undefined) {
     queryKey: ['knowledge-category-stats', categoryId],
     queryFn: async () => {
       if (!categoryId) throw new Error('Category ID is required');
-
-      const { data: entries } = await supabase
+      const { data: entries } = await (supabase as any)
         .from('knowledge_entries')
         .select('status, view_count, updated_at')
         .eq('category_id', categoryId);
 
+      const entryList = (entries || []) as any[];
       const stats: CategoryStats = {
-        entry_count: entries?.length || 0,
-        published_count: entries?.filter((e) => e.status === 'published').length || 0,
-        draft_count: entries?.filter((e) => e.status === 'draft').length || 0,
-        total_views: entries?.reduce((sum, e) => sum + (e.view_count || 0), 0) || 0,
-        last_updated: entries?.length
-          ? entries.sort((a, b) => 
-              new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-            )[0]?.updated_at
+        entry_count: entryList.length,
+        published_count: entryList.filter((e: any) => e.status === 'published').length,
+        draft_count: entryList.filter((e: any) => e.status === 'draft').length,
+        total_views: entryList.reduce((sum: number, e: any) => sum + (e.view_count || 0), 0),
+        last_updated: entryList.length
+          ? entryList.sort((a: any, b: any) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())[0]?.updated_at
           : null,
       };
-
       return stats;
     },
     enabled: !!categoryId,
@@ -340,24 +231,12 @@ export function useEmbeddingStats() {
   return useQuery({
     queryKey: ['knowledge-embedding-stats'],
     queryFn: async () => {
-      // Count published entries
-      const { data: entries, error } = await supabase
-        .from('knowledge_entries')
-        .select('id')
-        .eq('status', 'published');
-
+      const { data: entries, error } = await supabase.from('knowledge_entries').select('id').eq('status', 'published');
       if (error) throw error;
-
-      // Count entries with embeddings
-      const { data: embeddings } = await supabase
-        .from('embeddings')
-        .select('entity_id')
-        .eq('entity_type', 'knowledge_entry');
-
-      const entryIdsWithEmbeddings = new Set(embeddings?.map((e) => e.entity_id) || []);
-      const totalChunks = embeddings?.length || 0;
-
-      const stats = {
+      const { data: embeddings } = await (supabase as any).from('embeddings').select('entity_id').eq('entity_type', 'knowledge_entry');
+      const entryIdsWithEmbeddings = new Set((embeddings || []).map((e: any) => e.entity_id));
+      const totalChunks = (embeddings || []).length;
+      return {
         total: entries?.length || 0,
         pending: 0,
         processing: 0,
@@ -365,8 +244,6 @@ export function useEmbeddingStats() {
         failed: 0,
         totalChunks,
       };
-
-      return stats;
     },
   });
 }

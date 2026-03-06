@@ -22,7 +22,16 @@ export function useTaskAttachments(taskId: string | undefined) {
         .order("created_at", { ascending: true });
 
       if (error) throw error;
-      return (data || []) as TaskAttachment[];
+      return (data || []).map((row: any) => ({
+        id: row.id,
+        task_id: row.task_id,
+        file_name: row.file_name,
+        file_size: row.file_size ?? null,
+        file_type: row.file_type ?? null,
+        storage_path: row.file_path || row.storage_path || "",
+        uploaded_by: row.uploaded_by ?? null,
+        created_at: row.created_at,
+      })) as TaskAttachment[];
     },
     enabled: !!taskId,
   });

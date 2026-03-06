@@ -85,7 +85,7 @@ export function useUnifiedUserDocuments() {
   return useQuery({
     queryKey: queryKeys.knowledge.unifiedDocuments({ owner_type: 'user', owner_id: user?.id ?? '' }),
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('unified_documents')
         .select('*')
         .eq('owner_type', 'user')

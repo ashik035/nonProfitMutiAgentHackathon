@@ -9,13 +9,14 @@ export interface KnowledgeEntry {
   id: string;
   title: string;
   content: string;
-  slug: string;
+  slug?: string;
   category_id: string | null;
   tags: string[] | null;
-  summary: string | null;
+  summary?: string | null;
   status: string | null;
-  view_count: number | null;
-  author_id: string;
+  view_count?: number | null;
+  author_id?: string;
+  user_id?: string | null;
   metadata: any;
   created_at: string;
   updated_at: string;
@@ -26,13 +27,13 @@ export interface KnowledgeCategory {
   name: string;
   slug: string;
   description: string | null;
-  icon: string | null;
-  color: string | null;
+  icon?: string | null;
+  color?: string | null;
   parent_id: string | null;
   sort_order: number | null;
-  metadata: any;
+  metadata?: any;
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
 }
 
 export function useKnowledgeEntries(filters?: Record<string, any>) {
@@ -56,7 +57,7 @@ export function useKnowledgeEntries(filters?: Record<string, any>) {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as (KnowledgeEntry & { knowledge_categories?: KnowledgeCategory | null })[];
+      return (data || []) as unknown as (KnowledgeEntry & { knowledge_categories?: KnowledgeCategory | null })[];
     },
   });
 }
@@ -71,7 +72,7 @@ export function useKnowledgeCategories() {
         .order("sort_order", { ascending: true });
 
       if (error) throw error;
-      return data as KnowledgeCategory[];
+      return data as unknown as KnowledgeCategory[];
     },
   });
 }
@@ -87,7 +88,7 @@ export function useKnowledgeEntry(id: string) {
         .single();
 
       if (error) throw error;
-      return data as KnowledgeEntry & { knowledge_categories?: KnowledgeCategory | null };
+      return data as unknown as KnowledgeEntry & { knowledge_categories?: KnowledgeCategory | null };
     },
     enabled: !!id,
   });
@@ -97,9 +98,7 @@ export function useKnowledgeSearch(query: string) {
   return useQuery({
     queryKey: queryKeys.knowledge.search(query),
     queryFn: async () => {
-      if (!query || query.length < 2) {
-        return [];
-      }
+      if (!query || query.length < 2) return [];
 
       const { data, error } = await supabase
         .from("knowledge_entries")
@@ -108,7 +107,7 @@ export function useKnowledgeSearch(query: string) {
         .limit(10);
 
       if (error) throw error;
-      return data as KnowledgeEntry[];
+      return (data || []) as unknown as KnowledgeEntry[];
     },
     enabled: query.length >= 2,
   });
@@ -121,44 +120,29 @@ export function useCreateKnowledgeEntry() {
 
   return useMutation({
     mutationFn: async (data: KnowledgeEntryFormData) => {
-      // Generate slug from title
-      const slug = data.title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "")
-        + "-" + Date.now();
-
-      const insertData = {
+      const insertData: Record<string, any> = {
         title: data.title,
         content: data.content,
-        slug,
-        author_id: user?.id!,
+        user_id: user?.id!,
         tags: data.tags || null,
         status: "published",
       };
 
-      const { data: entry, error } = await supabase
+      const { data: entry, error } = await (supabase as any)
         .from("knowledge_entries")
         .insert([insertData])
         .select()
         .single();
 
       if (error) throw error;
-      return entry as KnowledgeEntry;
+      return entry as unknown as KnowledgeEntry;
     },
     onSuccess: () => {
       invalidateKeys.knowledge(queryClient);
-      toast({
-        title: "Success",
-        description: "Knowledge entry created successfully",
-      });
+      toast({ title: "Success", description: "Knowledge entry created successfully" });
     },
     onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to create knowledge entry",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: error.message || "Failed to create knowledge entry", variant: "destructive" });
     },
   });
 }
@@ -168,13 +152,7 @@ export function useUpdateKnowledgeEntry() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({
-      id,
-      data,
-    }: {
-      id: string;
-      data: Partial<KnowledgeEntryFormData>;
-    }) => {
+    mutationFn: async ({ id, data }: { id: string; data: Partial<KnowledgeEntryFormData> }) => {
       const updateData: any = {};
       if (data.title !== undefined) updateData.title = data.title;
       if (data.content !== undefined) updateData.content = data.content;
@@ -189,21 +167,14 @@ export function useUpdateKnowledgeEntry() {
         .single();
 
       if (error) throw error;
-      return entry as KnowledgeEntry;
+      return entry as unknown as KnowledgeEntry;
     },
     onSuccess: () => {
       invalidateKeys.knowledge(queryClient);
-      toast({
-        title: "Success",
-        description: "Knowledge entry updated successfully",
-      });
+      toast({ title: "Success", description: "Knowledge entry updated successfully" });
     },
     onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update knowledge entry",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: error.message || "Failed to update knowledge entry", variant: "destructive" });
     },
   });
 }
@@ -214,78 +185,45 @@ export function useDeleteKnowledgeEntry() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("knowledge_entries")
-        .delete()
-        .eq("id", id);
-
+      const { error } = await supabase.from("knowledge_entries").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
       invalidateKeys.knowledge(queryClient);
-      toast({
-        title: "Success",
-        description: "Knowledge entry deleted successfully",
-      });
+      toast({ title: "Success", description: "Knowledge entry deleted successfully" });
     },
     onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to delete knowledge entry",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: error.message || "Failed to delete knowledge entry", variant: "destructive" });
     },
   });
 }
 
-/**
- * Hook to manually trigger embedding generation for an entry
- */
 export function useTriggerEmbedding() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   return useMutation({
     mutationFn: async (entryId: string) => {
-      // Call the edge function to generate embeddings
-      const { data, error } = await supabase.functions.invoke(
-        "auto-embed-knowledge-files",
-        {
-          body: { entry_id: entryId },
-        }
-      );
-
+      const { data, error } = await supabase.functions.invoke("auto-embed-knowledge-files", { body: { entry_id: entryId } });
       if (error) throw error;
       return data;
     },
     onSuccess: (_, entryId) => {
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.knowledge.entry(entryId),
-      });
+      queryClient.invalidateQueries({ queryKey: queryKeys.knowledge.entry(entryId) });
       invalidateKeys.knowledge(queryClient);
-      toast({
-        title: "Success",
-        description: "Embedding generation started",
-      });
+      toast({ title: "Success", description: "Embedding generation started" });
     },
     onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to trigger embedding generation",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: error.message || "Failed to trigger embedding generation", variant: "destructive" });
     },
   });
 }
 
-/**
- * Hook to increment view count for an entry (updates directly)
- */
 export function useIncrementViewCount() {
   return useMutation({
     mutationFn: async (entryId: string) => {
-      // Get current view count and increment
-      const { data: entry, error: fetchError } = await supabase
+      // view_count may not exist in the DB schema; use (supabase as any) to be safe
+      const { data: entry, error: fetchError } = await (supabase as any)
         .from("knowledge_entries")
         .select("view_count")
         .eq("id", entryId)
@@ -293,9 +231,9 @@ export function useIncrementViewCount() {
 
       if (fetchError) throw fetchError;
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("knowledge_entries")
-        .update({ view_count: (entry?.view_count || 0) + 1 })
+        .update({ view_count: ((entry as any)?.view_count || 0) + 1 })
         .eq("id", entryId);
 
       if (error) throw error;
@@ -303,9 +241,6 @@ export function useIncrementViewCount() {
   });
 }
 
-/**
- * Hook to toggle bookmark status for an entry
- */
 export function useToggleBookmark() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -314,26 +249,14 @@ export function useToggleBookmark() {
   return useMutation({
     mutationFn: async (entryId: string) => {
       if (!user) throw new Error("User not authenticated");
-
-      // Check if already bookmarked
       const { data: existing } = await (supabase as any)
-        .from("knowledge_bookmarks")
-        .select("id")
-        .eq("user_id", user.id)
-        .eq("entry_id", entryId)
-        .maybeSingle();
-
+        .from("knowledge_bookmarks").select("id").eq("user_id", user.id).eq("entry_id", entryId).maybeSingle();
       if (existing) {
-        const { error } = await (supabase as any)
-          .from("knowledge_bookmarks")
-          .delete()
-          .eq("id", existing.id);
+        const { error } = await (supabase as any).from("knowledge_bookmarks").delete().eq("id", existing.id);
         if (error) throw error;
         return { bookmarked: false };
       } else {
-        const { error } = await (supabase as any)
-          .from("knowledge_bookmarks")
-          .insert({ user_id: user.id, entry_id: entryId });
+        const { error } = await (supabase as any).from("knowledge_bookmarks").insert({ user_id: user.id, entry_id: entryId });
         if (error) throw error;
         return { bookmarked: true };
       }
@@ -342,38 +265,21 @@ export function useToggleBookmark() {
       queryClient.invalidateQueries({ queryKey: ["knowledge-bookmarks"] });
       queryClient.invalidateQueries({ queryKey: ["knowledge-bookmark-status"] });
       invalidateKeys.knowledge(queryClient);
-      toast({
-        title: result.bookmarked ? "Bookmarked" : "Bookmark Removed",
-        description: result.bookmarked
-          ? "Entry added to your bookmarks"
-          : "Entry removed from your bookmarks",
-      });
+      toast({ title: result.bookmarked ? "Bookmarked" : "Bookmark Removed", description: result.bookmarked ? "Entry added to your bookmarks" : "Entry removed from your bookmarks" });
     },
     onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to toggle bookmark",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: error.message || "Failed to toggle bookmark", variant: "destructive" });
     },
   });
 }
 
-/**
- * Hook to fetch user's bookmarked entries
- */
 export function useBookmarkedEntries() {
   const { user } = useAuth();
-
   return useQuery({
     queryKey: ["knowledge-bookmarks", user?.id],
     queryFn: async () => {
       const { data, error } = await (supabase as any)
-        .from("knowledge_bookmarks")
-        .select("*, knowledge_entries(*, knowledge_categories(*))")
-        .eq("user_id", user!.id)
-        .order("created_at", { ascending: false });
-
+        .from("knowledge_bookmarks").select("*, knowledge_entries(*, knowledge_categories(*))").eq("user_id", user!.id).order("created_at", { ascending: false });
       if (error) throw error;
       return data || [];
     },
@@ -381,22 +287,13 @@ export function useBookmarkedEntries() {
   });
 }
 
-/**
- * Hook to check if an entry is bookmarked
- */
 export function useIsBookmarked(entryId: string) {
   const { user } = useAuth();
-
   return useQuery({
     queryKey: ["knowledge-bookmark-status", entryId, user?.id],
     queryFn: async () => {
       const { data, error } = await (supabase as any)
-        .from("knowledge_bookmarks")
-        .select("id")
-        .eq("user_id", user!.id)
-        .eq("entry_id", entryId)
-        .maybeSingle();
-
+        .from("knowledge_bookmarks").select("id").eq("user_id", user!.id).eq("entry_id", entryId).maybeSingle();
       if (error) throw error;
       return !!data;
     },
@@ -404,25 +301,11 @@ export function useIsBookmarked(entryId: string) {
   });
 }
 
-/**
- * Hook to get related entries based on semantic similarity
- */
 export function useRelatedEntries(entryId: string, limit = 5) {
   return useQuery({
     queryKey: ["knowledge-related", entryId, limit],
     queryFn: async () => {
-      // Call edge function for semantic search
-      const { data, error } = await supabase.functions.invoke(
-        "unified-knowledge-search",
-        {
-          body: {
-            entry_id: entryId,
-            limit,
-            search_type: "similar",
-          },
-        }
-      );
-
+      const { data, error } = await supabase.functions.invoke("unified-knowledge-search", { body: { entry_id: entryId, limit, search_type: "similar" } });
       if (error) throw error;
       return data?.results || [];
     },

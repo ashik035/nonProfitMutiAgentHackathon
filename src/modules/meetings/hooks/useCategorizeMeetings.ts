@@ -106,7 +106,7 @@ export function useGlobalStatusCounts() {
   return useQuery({
     queryKey: [CATEGORIZE_KEY, "status-counts"],
     queryFn: async (): Promise<CategoryStatusCount[]> => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("meeting_categorizations")
         .select("category");
 

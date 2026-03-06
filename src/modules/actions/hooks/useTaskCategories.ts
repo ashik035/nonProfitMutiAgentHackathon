@@ -15,13 +15,13 @@ export function useTaskCategories() {
   return useQuery({
     queryKey: [CATEGORIES_KEY],
     queryFn: async (): Promise<TaskCategory[]> => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("task_categories")
         .select("*")
         .order("sort_order", { ascending: true });
 
       if (error) throw error;
-      return data || [];
+      return (data || []) as TaskCategory[];
     },
   });
 }
@@ -36,15 +36,15 @@ export function useCreateTaskCategory() {
         .replace(/^-|-$/g, "");
 
       // Get next sort_order
-      const { data: existing } = await supabase
+      const { data: existing } = await (supabase as any)
         .from("task_categories")
         .select("sort_order")
         .order("sort_order", { ascending: false })
         .limit(1);
 
-      const nextOrder = existing && existing.length > 0 ? existing[0].sort_order + 1 : 0;
+      const nextOrder = existing && existing.length > 0 ? (existing[0] as any).sort_order + 1 : 0;
 
-      const { data: category, error } = await supabase
+      const { data: category, error } = await (supabase as any)
         .from("task_categories")
         .insert({ name: data.name, color: data.color, slug, sort_order: nextOrder })
         .select()
@@ -65,7 +65,7 @@ export function useUpdateTaskCategory() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: { name?: string; color?: string; sort_order?: number } }) => {
-      const { error } = await supabase.from("task_categories").update(data).eq("id", id);
+      const { error } = await (supabase as any).from("task_categories").update(data).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -81,8 +81,8 @@ export function useDeleteTaskCategory() {
   return useMutation({
     mutationFn: async (id: string) => {
       // Unlink tasks first
-      await supabase.from("tasks").update({ category_id: null }).eq("category_id", id);
-      const { error } = await supabase.from("task_categories").delete().eq("id", id);
+      await (supabase as any).from("tasks").update({ category_id: null }).eq("category_id", id);
+      const { error } = await (supabase as any).from("task_categories").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {

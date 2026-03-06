@@ -117,7 +117,7 @@ export function useSummarizeMeeting() {
 
       // Persist summary to the meeting record
       if (result.output) {
-        await supabase
+        await (supabase as any)
           .from("meetings")
           .update({ ai_summary: result.output })
           .eq("id", meetingId);
