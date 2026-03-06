@@ -106,6 +106,39 @@ export async function getModel(
   return null
 }
 
+// Chat completion with Lovable AI gateway (OpenAI-compatible)
+async function chatLovable(
+  apiKey: string,
+  request: ChatCompletionRequest
+): Promise<ChatCompletionResponse> {
+  const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: request.model || 'google/gemini-3-flash-preview',
+      messages: request.messages,
+      temperature: request.temperature ?? 0.7,
+      max_tokens: request.max_tokens ?? 1000,
+    }),
+  })
+
+  if (!response.ok) {
+    const error = await response.text()
+    throw new Error(`Lovable AI error: ${error}`)
+  }
+
+  const data = await response.json()
+  return {
+    content: data.choices[0].message.content,
+    input_tokens: data.usage?.prompt_tokens || 0,
+    output_tokens: data.usage?.completion_tokens || 0,
+    model: data.model || request.model || 'google/gemini-3-flash-preview',
+  }
+}
+
 // Chat completion with OpenAI
 async function chatOpenAI(
   apiKey: string,
@@ -280,32 +313,12 @@ export async function chatCompletion(
   if (!model || !model.ai_providers) {
     const lovableKey = Deno.env.get('LOVABLE_API_KEY')
     if (lovableKey) {
-      const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${lovableKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'google/gemini-3-flash-preview',
-          messages: request.messages,
-          temperature: request.temperature ?? 0.7,
-          max_tokens: request.max_tokens ?? 1000,
-        }),
+      return await chatLovable(lovableKey, {
+        ...request,
+        model: request.model || 'google/gemini-3-flash-preview',
       })
-      if (!response.ok) {
-        const err = await response.text()
-        throw new Error(`Lovable AI error: ${err}`)
-      }
-      const data = await response.json()
-      return {
-        content: data.choices[0].message.content,
-        input_tokens: data.usage?.prompt_tokens || 0,
-        output_tokens: data.usage?.completion_tokens || 0,
-        model: 'google/gemini-3-flash-preview',
-      }
     }
-    throw new Error('No valid chat model found')
+    throw new Error('No valid chat model found and LOVABLE_API_KEY is not configured')
   }
 
   // Get API key
@@ -320,6 +333,9 @@ export async function chatCompletion(
 
   let response: ChatCompletionResponse
   switch (provider) {
+    case 'lovable':
+      response = await chatLovable(apiKey, requestWithModel)
+      break
     case 'openai':
       response = await chatOpenAI(apiKey, requestWithModel)
       break

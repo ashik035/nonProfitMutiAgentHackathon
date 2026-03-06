@@ -162,33 +162,70 @@ serve(async (req) => {
           { role: 'user', content: params.message },
         ]
 
-        // 6. Determine provider and call streaming API
-        const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY')
-        if (!OPENAI_API_KEY) {
-          sendEvent('error', 'OpenAI API key not configured')
-          controller.enqueue(encoder.encode('data: [DONE]\n\n'))
-          controller.close()
-          return
+        // 6. Resolve active provider and API key for streaming
+        const { data: activeProvider } = await supabaseClient
+          .from('ai_providers')
+          .select('slug, api_base_url, api_key_secret_name')
+          .eq('is_active', true)
+          .single()
+
+        // Determine streaming endpoint and API key
+        let streamUrl = 'https://ai.gateway.lovable.dev/v1/chat/completions'
+        let streamApiKey = Deno.env.get('LOVABLE_API_KEY') || ''
+        let modelId = 'google/gemini-3-flash-preview'
+        let providerSlug = 'lovable'
+
+        if (activeProvider) {
+          providerSlug = activeProvider.slug
+          const baseUrl = activeProvider.api_base_url || ''
+
+          if (activeProvider.slug === 'lovable') {
+            streamUrl = 'https://ai.gateway.lovable.dev/v1/chat/completions'
+            streamApiKey = Deno.env.get('LOVABLE_API_KEY') || ''
+            modelId = 'google/gemini-3-flash-preview'
+          } else if (activeProvider.slug === 'openai') {
+            streamUrl = `${baseUrl}/chat/completions`
+            streamApiKey = Deno.env.get('OPENAI_API_KEY') || ''
+            modelId = 'gpt-4o-mini'
+          } else if (activeProvider.slug === 'anthropic') {
+            // Anthropic doesn't use the same SSE format; fall back to Lovable AI
+            streamUrl = 'https://ai.gateway.lovable.dev/v1/chat/completions'
+            streamApiKey = Deno.env.get('LOVABLE_API_KEY') || ''
+            modelId = 'google/gemini-3-flash-preview'
+          } else if (activeProvider.slug === 'google') {
+            // Google streaming uses different format; fall back to Lovable AI gateway
+            streamUrl = 'https://ai.gateway.lovable.dev/v1/chat/completions'
+            streamApiKey = Deno.env.get('LOVABLE_API_KEY') || ''
+            modelId = 'google/gemini-2.5-flash'
+          } else {
+            streamUrl = `${baseUrl}/chat/completions`
+            streamApiKey = Deno.env.get(activeProvider.api_key_secret_name || '') || ''
+            modelId = 'google/gemini-3-flash-preview'
+          }
         }
 
-        // Get model from database or use default
-        let modelId = 'gpt-4o-mini'
+        // Override model if explicitly requested
         if (params.model_id) {
           const { data: modelData } = await supabaseClient
             .from('ai_models')
             .select('model_id')
             .eq('id', params.model_id)
             .single()
-          if (modelData) {
-            modelId = modelData.model_id
-          }
+          if (modelData) modelId = modelData.model_id
         }
 
-        // 7. Call OpenAI streaming API
-        const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        if (!streamApiKey) {
+          sendEvent('error', `API key not configured for provider: ${providerSlug}`)
+          controller.enqueue(encoder.encode('data: [DONE]\n\n'))
+          controller.close()
+          return
+        }
+
+        // 7. Call streaming API (OpenAI-compatible format)
+        const openaiResponse = await fetch(streamUrl, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${OPENAI_API_KEY}`,
+            'Authorization': `Bearer ${streamApiKey}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
@@ -201,7 +238,7 @@ serve(async (req) => {
         })
 
         if (!openaiResponse.ok) {
-          const errorData = await openaiResponse.json()
+          const errorData = await openaiResponse.json().catch(() => ({ error: { message: 'AI provider error' } }))
           sendEvent('error', errorData.error?.message || 'AI provider error')
           controller.enqueue(encoder.encode('data: [DONE]\n\n'))
           controller.close()
@@ -277,7 +314,7 @@ serve(async (req) => {
           role: 'assistant',
           content: fullContent,
           model_used: modelId,
-          provider_used: 'openai',
+          provider_used: providerSlug,
           latency_ms: latency,
           is_streaming: false,
           stream_completed_at: new Date().toISOString(),

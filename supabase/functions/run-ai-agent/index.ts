@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { chatCompletion } from '../_shared/ai-provider-routing.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -11,11 +12,9 @@ serve(async (req) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
-  // GET or ping = health check (no OpenAI call)
   if (req.method === 'GET') {
-    const hasKey = !!Deno.env.get('OPENAI_API_KEY')
     return new Response(
-      JSON.stringify({ ok: true, configured: hasKey, message: hasKey ? 'OpenAI configured' : 'OPENAI_API_KEY not set' }),
+      JSON.stringify({ ok: true, message: 'run-ai-agent is ready' }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     )
   }
@@ -33,16 +32,10 @@ serve(async (req) => {
     }
 
     if (body.ping === true) {
-      const hasKey = !!Deno.env.get('OPENAI_API_KEY')
       return new Response(
-        JSON.stringify({ ok: true, configured: hasKey, message: hasKey ? 'OpenAI configured' : 'OPENAI_API_KEY not set' }),
+        JSON.stringify({ ok: true, message: 'run-ai-agent is ready' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
       )
-    }
-
-    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY')
-    if (!OPENAI_API_KEY) {
-      throw new Error('OPENAI_API_KEY is not configured')
     }
 
     const supabaseClient = createClient(
@@ -86,14 +79,12 @@ serve(async (req) => {
 
         additionalPrompt = personalization?.additional_prompt || ''
       } catch {
-        // Table may not exist yet, skip personalization
         console.warn('user_agent_personalizations query failed, skipping')
       }
     }
 
     const startTime = Date.now()
 
-    // User message: prefer explicit input (Run Agent modal), then execution_context (programmatic calls)
     const userMessage =
       typeof bodyInput === 'string' && bodyInput.trim().length > 0
         ? bodyInput.trim()
@@ -101,40 +92,22 @@ serve(async (req) => {
           ? (typeof execution_context === 'string' ? execution_context : JSON.stringify(execution_context))
           : 'No context provided. Please respond with a default helpful message.'
 
-    // Execute agent with OpenAI
-    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: agent.system_prompt + (additionalPrompt ? `\n\n${additionalPrompt}` : '')
-          },
-          {
-            role: 'user',
-            content: userMessage
-          }
-        ],
-        temperature: 0.7,
-      }),
+    // Execute agent via the shared routing module (provider-agnostic)
+    const result = await chatCompletion(supabaseClient, {
+      messages: [
+        {
+          role: 'system',
+          content: agent.system_prompt + (additionalPrompt ? `\n\n${additionalPrompt}` : ''),
+        },
+        { role: 'user', content: userMessage },
+      ],
+      temperature: agent.provider_config?.temperature ?? 0.7,
+      max_tokens: agent.provider_config?.max_tokens ?? 1000,
     })
 
-    if (!openaiResponse.ok) {
-      const errorText = await openaiResponse.text()
-      console.error('OpenAI API error:', openaiResponse.status, errorText)
-      throw new Error(`AI agent execution failed: ${openaiResponse.status} - ${errorText}`)
-    }
-
-    const data = await openaiResponse.json()
-    const output = data.choices[0].message.content
     const latency = Date.now() - startTime
 
-    // Log agent run (context stores what was sent as user message for audit)
+    // Log agent run
     const { data: run, error: runError } = await supabaseClient
       .from('ai_agent_runs')
       .insert([{
@@ -142,11 +115,10 @@ serve(async (req) => {
         user_id: user_id || null,
         status: 'completed',
         context: typeof bodyInput === 'string' && bodyInput.trim().length > 0 ? bodyInput : execution_context,
-        output: output,
-        token_metrics: data.usage,
+        output: result.content,
+        token_metrics: { prompt_tokens: result.input_tokens, completion_tokens: result.output_tokens },
         latency_ms: latency,
-        provider_used: 'openai',
-        model_used: 'gpt-4o-mini',
+        model_used: result.model,
       }])
       .select()
       .single()
@@ -159,9 +131,10 @@ serve(async (req) => {
       JSON.stringify({
         run_id: run?.id || null,
         status: 'completed',
-        output,
-        token_usage: data.usage,
+        output: result.content,
+        token_usage: { prompt_tokens: result.input_tokens, completion_tokens: result.output_tokens },
         latency_ms: latency,
+        model_used: result.model,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     )

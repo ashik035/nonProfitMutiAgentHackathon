@@ -31,6 +31,9 @@ import {
   AlertCircle,
   RefreshCw,
   ChevronDown,
+  Shield,
+  Key,
+  Radio,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -56,6 +59,8 @@ interface AIProvider {
   name: string;
   slug: string;
   enabled: boolean;
+  is_active: boolean;
+  api_key_secret_name: string | null;
   created_at: string;
   integration_provider_id: string | null;
   integration_provider_name: string | null;
@@ -79,6 +84,7 @@ interface AIModel {
 }
 
 const providerIcons: Record<string, React.ReactNode> = {
+  lovable: <Shield className="h-5 w-5 text-purple-500" />,
   openai: <Brain className="h-5 w-5" />,
   anthropic: <Sparkles className="h-5 w-5" />,
   google: <Cloud className="h-5 w-5" />,
@@ -90,6 +96,9 @@ export default function AIModelManagement() {
   const [models, setModels] = useState<AIModel[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const [apiKeyInputs, setApiKeyInputs] = useState<Record<string, string>>({});
+  const [savingKey, setSavingKey] = useState<string | null>(null);
+  const [expandedKeySlug, setExpandedKeySlug] = useState<string | null>(null);
 
   // Cost calculator state
   const [inputTokens, setInputTokens] = useState(1000);
@@ -118,7 +127,9 @@ export default function AIModelManagement() {
         id: p.id,
         name: p.name,
         slug: p.slug,
-        enabled: (p as any).enabled ?? p.is_active,
+        enabled: (p as any).enabled ?? (p as any).is_active ?? true,
+        is_active: (p as any).is_active ?? false,
+        api_key_secret_name: (p as any).api_key_secret_name ?? null,
         created_at: p.created_at,
         integration_provider_id: null,
         integration_provider_name: null,
@@ -174,6 +185,65 @@ export default function AIModelManagement() {
       toast.error("Failed to update provider");
     } finally {
       setUpdating(false);
+    }
+  };
+
+  const setActiveProvider = async (providerId: string) => {
+    setUpdating(true);
+    try {
+      // Deactivate all
+      const { error: clearError } = await supabase
+        .from("ai_providers")
+        .update({ is_active: false } as any);
+
+      if (clearError) throw clearError;
+
+      // Activate selected
+      const { error: setError } = await supabase
+        .from("ai_providers")
+        .update({ is_active: true } as any)
+        .eq("id", providerId);
+
+      if (setError) throw setError;
+
+      setProviders((prev) =>
+        prev.map((p) => ({ ...p, is_active: p.id === providerId }))
+      );
+      const name = providers.find((p) => p.id === providerId)?.name;
+      toast.success(`${name} is now the active provider`);
+    } catch (error: any) {
+      console.error("Error setting active provider:", error);
+      toast.error("Failed to set active provider");
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const saveApiKey = async (slug: string, secretName: string) => {
+    const key = apiKeyInputs[slug]?.trim();
+    if (!key) {
+      toast.error("Please enter an API key");
+      return;
+    }
+    setSavingKey(slug);
+    try {
+      // Store in app_config — the routing module reads from Deno.env first,
+      // then falls back to app_config for keys stored this way.
+      const configKey = `integrations.${secretName.toLowerCase()}`;
+      const { error } = await supabase
+        .from("app_config")
+        .upsert({ key: configKey, value: key, category: "integrations" }, { onConflict: "key" });
+
+      if (error) throw error;
+
+      toast.success("API key saved. It will be used as a fallback if the environment secret is not set.");
+      setApiKeyInputs((prev) => ({ ...prev, [slug]: "" }));
+      setExpandedKeySlug(null);
+    } catch (error: any) {
+      console.error("Error saving API key:", error);
+      toast.error("Failed to save API key");
+    } finally {
+      setSavingKey(null);
     }
   };
 
@@ -459,12 +529,114 @@ export default function AIModelManagement() {
         </div>
       </div>
 
+      {/* Active Provider Selection */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Radio className="h-5 w-5 text-primary" />
+            Active Provider
+          </CardTitle>
+          <CardDescription>
+            Select which AI provider powers all agent chats and executions. Only one provider is active at a time.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {providers.map((provider) => {
+              const isLovable = provider.slug === "lovable";
+              return (
+                <Card
+                  key={provider.id}
+                  className={`cursor-pointer border-2 transition-colors ${
+                    provider.is_active
+                      ? "border-primary bg-primary/5"
+                      : "border-border hover:border-primary/50"
+                  }`}
+                  onClick={() => !provider.is_active && setActiveProvider(provider.id)}
+                >
+                  <CardContent className="p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="rounded-lg border p-2 bg-background">
+                          {providerIcons[provider.slug] ?? <Brain className="h-5 w-5" />}
+                        </div>
+                        <div>
+                          <p className="font-semibold">{provider.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {models.filter((m) => m.provider_id === provider.id && m.enabled).length} models
+                          </p>
+                        </div>
+                      </div>
+                      {provider.is_active && (
+                        <Badge className="gap-1 bg-primary text-primary-foreground">
+                          <CheckCircle2 className="h-3 w-3" />
+                          Active
+                        </Badge>
+                      )}
+                    </div>
+
+                    {/* Lovable AI: built-in, no key needed */}
+                    {isLovable ? (
+                      <div className="flex items-center gap-2 pt-2 border-t text-sm text-green-600 dark:text-green-400">
+                        <Shield className="h-3.5 w-3.5" />
+                        Built-in — No API key required
+                      </div>
+                    ) : (
+                      <div className="pt-2 border-t space-y-2">
+                        <button
+                          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setExpandedKeySlug(expandedKeySlug === provider.slug ? null : provider.slug);
+                          }}
+                        >
+                          <Key className="h-3 w-3" />
+                          {expandedKeySlug === provider.slug ? "Hide API Key" : "Configure API Key"}
+                        </button>
+                        {expandedKeySlug === provider.slug && (
+                          <div
+                            className="flex gap-2"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Input
+                              type="password"
+                              placeholder={`Enter ${provider.api_key_secret_name || "API key"}`}
+                              value={apiKeyInputs[provider.slug] || ""}
+                              onChange={(e) =>
+                                setApiKeyInputs((prev) => ({ ...prev, [provider.slug]: e.target.value }))
+                              }
+                              className="h-8 text-xs"
+                            />
+                            <Button
+                              size="sm"
+                              className="h-8 text-xs shrink-0"
+                              disabled={savingKey === provider.slug}
+                              onClick={() => saveApiKey(provider.slug, provider.api_key_secret_name || "")}
+                            >
+                              {savingKey === provider.slug ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                "Save"
+                              )}
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Providers Overview */}
       <Card>
         <CardHeader>
-          <CardTitle>AI Providers</CardTitle>
+          <CardTitle>All Providers</CardTitle>
           <CardDescription>
-            Enable or disable AI providers for your platform. Configure API keys in the Integrations section.
+            Enable or disable providers. Use the Active Provider section above to control which one is used for chat.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -476,7 +648,7 @@ export default function AIModelManagement() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="rounded-lg border p-2">
-                          {providerIcons[provider.slug]}
+                          {providerIcons[provider.slug] ?? <Brain className="h-5 w-5" />}
                         </div>
                         <div>
                           <p className="font-semibold">{provider.name}</p>
@@ -495,7 +667,12 @@ export default function AIModelManagement() {
 
                     {/* API Key Status */}
                     <div className="flex items-center justify-between pt-2 border-t">
-                      {provider.is_connected ? (
+                      {provider.slug === "lovable" ? (
+                        <Badge variant="default" className="gap-1 bg-green-500">
+                          <Shield className="h-3 w-3" />
+                          Built-in
+                        </Badge>
+                      ) : provider.is_connected ? (
                         <Badge variant="default" className="gap-1">
                           <CheckCircle2 className="h-3 w-3" />
                           API Configured
