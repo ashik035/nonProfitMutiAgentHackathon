@@ -9,8 +9,8 @@ import { toast } from "sonner";
 import { queryKeys, invalidateKeys } from "@/lib/cache";
 import type { Deal, DealFormData, DealFilters, DealActivity, DealPipelineStats, DealStage, DealActivityType } from "../types";
 
-const DEAL_SELECT = "*, owner:profiles!deals_owner_id_profiles_fkey(full_name, email), client:clients(name), contact:contacts(first_name, last_name, email)";
-const ACTIVITY_SELECT = "*, user:profiles!deal_activities_user_id_profiles_fkey(full_name)";
+const DEAL_SELECT = "*, client:clients(name), contact:contacts(first_name, last_name, email)";
+const ACTIVITY_SELECT = "*";
 
 /** Metadata keys stored on deals.metadata (including URLs & Links and Advanced) */
 const DEAL_METADATA_KEYS = [
@@ -27,7 +27,7 @@ export function useDeals(filters?: DealFilters) {
   return useQuery({
     queryKey: queryKeys.deals.list(filters),
     queryFn: async (): Promise<Deal[]> => {
-      let query = supabase
+      let query = (supabase as any)
         .from("deals")
         .select(DEAL_SELECT)
         .order("updated_at", { ascending: false });
@@ -50,7 +50,7 @@ export function useDeal(slug: string) {
   return useQuery({
     queryKey: queryKeys.deals.detail(slug),
     queryFn: async (): Promise<Deal> => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("deals")
         .select(DEAL_SELECT)
         .eq("slug", slug)
@@ -124,9 +124,9 @@ export function useDealsAnalytics() {
   return useQuery({
     queryKey: queryKeys.deals.analytics,
     queryFn: async (): Promise<DealsAnalyticsData> => {
-      const { data: deals, error } = await supabase
+      const { data: deals, error } = await (supabase as any)
         .from("deals")
-        .select("id, stage, value, created_at, updated_at, closed_at, client_id, owner_id, client:clients(name), owner:profiles!deals_owner_id_profiles_fkey(full_name)");
+        .select("id, stage, value, created_at, updated_at, closed_at, client_id, owner_id, client:clients(name)");
       if (error) throw error;
       const rows = (deals || []) as Array<{
         id: string;
@@ -443,7 +443,7 @@ export function useUpdateDealStage() {
       if (error) throw error;
 
       // Activity logging is best-effort (client cannot run a single transaction across deals + deal_activities).
-      const { error: activityError } = await supabase.from("deal_activities").insert({
+      const { error: activityError } = await (supabase as any).from("deal_activities").insert({
         deal_id: id,
         activity_type: "stage_change",
         content: `Stage changed${fromStage ? ` from ${fromStage}` : ""} to ${stage}${stage === "won" ? " - Deal closed as won" : stage === "lost" ? " - Deal closed as lost" : ""}`,
@@ -466,7 +466,7 @@ export function useDealActivities(dealId: string) {
   return useQuery({
     queryKey: queryKeys.deals.activities(dealId),
     queryFn: async (): Promise<DealActivity[]> => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("deal_activities")
         .select(ACTIVITY_SELECT)
         .eq("deal_id", dealId)
@@ -483,7 +483,7 @@ export function useAddDealActivity() {
   const { user } = useAuth();
   return useMutation({
     mutationFn: async ({ dealId, activityType, content }: { dealId: string; activityType: DealActivityType; content: string }) => {
-      const { error } = await supabase.from("deal_activities").insert({
+      const { error } = await (supabase as any).from("deal_activities").insert({
         deal_id: dealId,
         activity_type: activityType,
         content,

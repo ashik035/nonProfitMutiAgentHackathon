@@ -24,7 +24,7 @@ export function useMeetingActionItems(meetingId: string) {
   return useQuery({
     queryKey: [ACTION_ITEMS_KEY, meetingId],
     queryFn: async (): Promise<MeetingTakeaway[]> => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("meeting_takeaways")
         .select("*")
         .eq("meeting_id", meetingId)
@@ -48,7 +48,7 @@ export function useMyActionItems() {
   return useQuery({
     queryKey: [ACTION_ITEMS_KEY, "my", user?.id],
     queryFn: async (): Promise<ActionItemWithMeeting[]> => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("meeting_takeaways")
         .select("*, meeting:meetings(id, title, scheduled_at)")
         .eq("takeaway_type", "action_item")

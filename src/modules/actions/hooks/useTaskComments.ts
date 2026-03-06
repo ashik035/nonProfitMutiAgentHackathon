@@ -12,17 +12,13 @@ import type { TaskComment } from "../types/tasks";
 
 const COMMENTS_KEY = "actions-task-comments";
 
-/**
- * Fetch comments for a task, organized into threads.
- * Fetches profiles separately because task_comments.user_id references auth.users (no direct FK to profiles in schema).
- */
 export function useTaskComments(taskId: string | undefined) {
   return useQuery({
     queryKey: [COMMENTS_KEY, taskId],
     queryFn: async (): Promise<TaskComment[]> => {
       if (!taskId) return [];
 
-      const { data: rows, error } = await supabase
+      const { data: rows, error } = await (supabase as any)
         .from("task_comments")
         .select("*")
         .eq("task_id", taskId)
@@ -32,8 +28,7 @@ export function useTaskComments(taskId: string | undefined) {
 
       const comments = (rows || []) as (TaskComment & { profiles?: unknown })[];
 
-      // Fetch profiles for all comment authors (user_id matches profiles.id in this app)
-      const userIds = [...new Set(comments.map((c) => c.user_id).filter(Boolean))];
+      const userIds = [...new Set(comments.map((c) => c.user_id).filter(Boolean))] as string[];
       const profileMap: Record<string, { full_name: string | null; email: string | null; avatar_url: string | null }> = {};
       if (userIds.length > 0) {
         const { data: profiles } = await supabase
@@ -55,7 +50,6 @@ export function useTaskComments(taskId: string | undefined) {
         profiles: undefined,
       })) as TaskComment[];
 
-      // Build thread tree: top-level comments with nested replies
       const topLevel = withUser.filter((c) => !c.parent_comment_id);
       const replies = withUser.filter((c) => c.parent_comment_id);
 
@@ -68,9 +62,6 @@ export function useTaskComments(taskId: string | undefined) {
   });
 }
 
-/**
- * Add a comment to a task.
- */
 export function useAddComment() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -85,7 +76,7 @@ export function useAddComment() {
       content: string;
       parentCommentId?: string;
     }) => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("task_comments")
         .insert({
           task_id: taskId,
@@ -99,13 +90,9 @@ export function useAddComment() {
       if (error) throw error;
       return data;
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: [COMMENTS_KEY, variables.taskId],
-      });
-      queryClient.refetchQueries({
-        queryKey: [COMMENTS_KEY, variables.taskId],
-      });
+    onSuccess: (_: unknown, variables: { taskId: string }) => {
+      queryClient.invalidateQueries({ queryKey: [COMMENTS_KEY, variables.taskId] });
+      queryClient.refetchQueries({ queryKey: [COMMENTS_KEY, variables.taskId] });
       toast.success("Comment added");
     },
     onError: (error: Error) => {
@@ -114,15 +101,12 @@ export function useAddComment() {
   });
 }
 
-/**
- * Update a comment.
- */
 export function useUpdateComment() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ id, taskId, content }: { id: string; taskId: string; content: string }) => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("task_comments")
         .update({
           content,
@@ -133,10 +117,8 @@ export function useUpdateComment() {
 
       if (error) throw error;
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: [COMMENTS_KEY, variables.taskId],
-      });
+    onSuccess: (_: unknown, variables: { id: string; taskId: string }) => {
+      queryClient.invalidateQueries({ queryKey: [COMMENTS_KEY, variables.taskId] });
     },
     onError: (error: Error) => {
       toast.error("Failed to update comment", { description: error.message });
@@ -144,21 +126,16 @@ export function useUpdateComment() {
   });
 }
 
-/**
- * Delete a comment.
- */
 export function useDeleteComment() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ id, taskId }: { id: string; taskId: string }) => {
-      const { error } = await supabase.from("task_comments").delete().eq("id", id);
+      const { error } = await (supabase as any).from("task_comments").delete().eq("id", id);
       if (error) throw error;
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: [COMMENTS_KEY, variables.taskId],
-      });
+    onSuccess: (_: unknown, variables: { id: string; taskId: string }) => {
+      queryClient.invalidateQueries({ queryKey: [COMMENTS_KEY, variables.taskId] });
       toast.success("Comment deleted");
     },
     onError: (error: Error) => {

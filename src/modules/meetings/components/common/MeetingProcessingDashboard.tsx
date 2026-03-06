@@ -37,13 +37,13 @@ export default function MeetingProcessingDashboard() {
 
     return {
       total: data.length,
-      processed: data.filter((f) => f.processing_status === "completed").length,
+      processed: data.filter((f: any) => (f as any).processing_status === "completed").length,
       pending: data.filter(
-        (f) =>
-          f.processing_status === "pending" ||
-          f.processing_status === "processing"
+        (f: any) =>
+          (f as any).processing_status === "pending" ||
+          (f as any).processing_status === "processing"
       ).length,
-      failed: data.filter((f) => f.processing_status === "failed").length,
+      failed: data.filter((f: any) => (f as any).processing_status === "failed").length,
     };
   }, [data]);
 

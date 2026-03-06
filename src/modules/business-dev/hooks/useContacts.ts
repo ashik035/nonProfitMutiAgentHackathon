@@ -15,11 +15,9 @@ export function useContacts(search?: string) {
   return useQuery({
     queryKey: [CONTACTS_KEY, search],
     queryFn: async (): Promise<Contact[]> => {
-      const contactColumns =
-        "id,first_name,last_name,email,phone,company,title,linkedin_url,client_id,source,tags,notes,last_contacted_at,created_by,created_at,updated_at,data_source,external_url,last_synced_at";
-      let query = supabase
+      let query = (supabase as any)
         .from("contacts")
-        .select(`${contactColumns},followup:lead_followup_contacts(id,contact_id,status,priority,next_follow_up,follow_up_notes,assigned_to,converted_deal_id,created_at,updated_at)`)
+        .select(`*,followup:lead_followup_contacts(id,contact_id,status,priority,next_follow_up,follow_up_notes,assigned_to,converted_deal_id,created_at,updated_at)`)
         .order("updated_at", { ascending: false })
         .order("id", { ascending: true });
 
@@ -29,7 +27,7 @@ export function useContacts(search?: string) {
       if (error) throw error;
       return (data || []).map((c: any) => {
         const followupList = Array.isArray(c.followup) ? c.followup : [];
-        const ownFollowup = followupList.find((f: { contact_id?: string }) => f.contact_id === c.id) ?? followupList[0] ?? null;
+        const ownFollowup = followupList.find((f: any) => f.contact_id === c.id) ?? followupList[0] ?? null;
         const { followup: _f, ...contactRow } = c;
         return { ...contactRow, followup: ownFollowup } as Contact;
       });
@@ -42,16 +40,14 @@ export function useContact(id: string) {
   return useQuery({
     queryKey: [CONTACTS_KEY, id],
     queryFn: async (): Promise<Contact> => {
-      const contactColumns =
-        "id,first_name,last_name,email,phone,company,title,linkedin_url,client_id,source,tags,notes,last_contacted_at,created_by,created_at,updated_at,data_source,external_url,last_synced_at";
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("contacts")
-        .select(`${contactColumns},followup:lead_followup_contacts(id,contact_id,status,priority,next_follow_up,follow_up_notes,assigned_to,converted_deal_id,created_at,updated_at)`)
+        .select(`*,followup:lead_followup_contacts(id,contact_id,status,priority,next_follow_up,follow_up_notes,assigned_to,converted_deal_id,created_at,updated_at)`)
         .eq("id", id)
         .single();
       if (error) throw error;
       const followupList = Array.isArray(data.followup) ? data.followup : [];
-      const ownFollowup = followupList.find((f: { contact_id?: string }) => f.contact_id === data.id) ?? followupList[0] ?? null;
+      const ownFollowup = followupList.find((f: any) => f.contact_id === data.id) ?? followupList[0] ?? null;
       const { followup: _f, ...contactRow } = data;
       return { ...contactRow, followup: ownFollowup } as Contact;
     },
@@ -69,10 +65,8 @@ export function useCreateContact() {
         last_name: data.last_name || null,
         email: data.email || null,
         phone: data.phone || null,
-        company: data.company || null,
         title: data.title || null,
         client_id: data.client_id || null,
-        created_by: user?.id || null,
       }).select().single();
       if (error) throw error;
       return contact;
@@ -86,7 +80,7 @@ export function useUpdateContact() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<ContactFormData> }) => {
-      const { error } = await supabase.from("contacts").update({
+      const { error } = await (supabase as any).from("contacts").update({
         ...data,
         updated_at: new Date().toISOString(),
       }).eq("id", id);
@@ -113,7 +107,7 @@ export function useLeadFollowUps() {
   return useQuery({
     queryKey: [CONTACTS_KEY, "followups"],
     queryFn: async (): Promise<(LeadFollowUp & { contact: Contact })[]> => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("lead_followup_contacts")
         .select("*, contact:contact_id(*, followup:lead_followup_contacts(*))")
         .order("next_follow_up", { ascending: true });
@@ -134,7 +128,7 @@ export function useCreateLeadFollowUp() {
   const { user } = useAuth();
   return useMutation({
     mutationFn: async ({ contactId, priority, notes }: { contactId: string; priority?: string; notes?: string }) => {
-      const { error } = await supabase.from("lead_followup_contacts").insert({
+      const { error } = await (supabase as any).from("lead_followup_contacts").insert({
         contact_id: contactId,
         status: "new",
         priority: priority || "medium",
@@ -152,7 +146,7 @@ export function useUpdateLeadFollowUp() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<LeadFollowUp> }) => {
-      const { error } = await supabase.from("lead_followup_contacts").update({
+      const { error } = await (supabase as any).from("lead_followup_contacts").update({
         ...data,
         updated_at: new Date().toISOString(),
       }).eq("id", id);

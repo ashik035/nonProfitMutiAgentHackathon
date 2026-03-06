@@ -41,7 +41,7 @@ export function StreamPeopleModal({
       if (error) throw error;
       const list = rows || [];
       if (list.length === 0) return [];
-      const userIds = [...new Set(list.map((r: { user_id: string }) => r.user_id))];
+      const userIds = [...new Set(list.map((r: { user_id: string }) => r.user_id))] as string[];
       const { data: profiles } = await supabase
         .from("profiles")
         .select("id, full_name, email")

@@ -77,7 +77,7 @@ export default function KnowledgeByCategory() {
     );
   }
 
-  const colorClass = CATEGORY_COLORS[category.color || "blue"] || "bg-blue-500";
+  const colorClass = CATEGORY_COLORS[(category as any).color || "blue"] || "bg-blue-500";
   const publishedCount = entries.filter((e) => e.status === "published").length;
 
   return (
@@ -120,7 +120,7 @@ export default function KnowledgeByCategory() {
               </div>
               <div className="h-4 w-px bg-border" />
               <div className="text-sm text-muted-foreground">
-                Updated {formatDate(category.updated_at)}
+                Updated {formatDate((category as any).updated_at || category.created_at)}
               </div>
             </div>
           </div>
