@@ -1,6 +1,6 @@
 /**
- * All Deals Page - Business Opportunities structure
- * Matches reference: Overview, Active Pipeline, Archive, Analytics with stage pills, counts, Export, Sync
+ * Donor & Grants Pipeline Page
+ * Overview, Active Pipeline, Archive, Analytics with stage pills, counts, Export, Sync
  */
 
 import { useState, useEffect } from "react";
@@ -37,25 +37,25 @@ type ArchiveStage = "won" | "accepted" | "lost";
 
 const ACTIVE_STAGE_TABS: { value: DealStage | "all"; label: string; icon: "Grid" | "Users" | "Search" | "FileText" | "Calculator" | "CheckCircle" }[] = [
   { value: "all", label: "All", icon: "Grid" },
-  { value: "lead", label: "Lead", icon: "Users" },
-  { value: "discovery", label: "Discovery", icon: "Search" },
+  { value: "lead", label: "Identify", icon: "Users" },
+  { value: "discovery", label: "Qualify", icon: "Search" },
   { value: "qualified", label: "Qualified", icon: "CheckCircle" },
-  { value: "estimation", label: "Estimation", icon: "Calculator" },
-  { value: "proposal", label: "Proposal", icon: "FileText" },
+  { value: "estimation", label: "Cultivate", icon: "Calculator" },
+  { value: "proposal", label: "Propose", icon: "FileText" },
 ];
 
 const ARCHIVE_STAGE_TABS: { value: ArchiveStage; label: string; icon: "Trophy" | "ThumbsUp" | "XCircle" }[] = [
-  { value: "won", label: "Won", icon: "Trophy" },
+  { value: "won", label: "Funded", icon: "Trophy" },
   { value: "accepted", label: "Accepted", icon: "ThumbsUp" },
-  { value: "lost", label: "Lost", icon: "XCircle" },
+  { value: "lost", label: "Declined", icon: "XCircle" },
 ];
 
 const STAGE_ONLY_STAGES: DealStage[] = ["lead", "discovery", "estimation", "proposal"];
 const STAGE_PAGE_TITLES: Record<string, { title: string; subtitle: string }> = {
-  lead: { title: "Lead Deals", subtitle: "Track and manage lead-stage opportunities" },
-  discovery: { title: "Discovery Deals", subtitle: "Deals in the discovery phase" },
-  estimation: { title: "Estimation Deals", subtitle: "Deals being estimated for pricing" },
-  proposal: { title: "Proposal Deals", subtitle: "Deals with active proposals" },
+  lead: { title: "Identify Prospects", subtitle: "Track and manage newly identified donor prospects" },
+  discovery: { title: "Qualify Prospects", subtitle: "Prospects being qualified for cultivation" },
+  estimation: { title: "Cultivate Prospects", subtitle: "Prospects in active cultivation" },
+  proposal: { title: "Grant Applications", subtitle: "Prospects with active grant applications" },
 };
 
 const STAGE_COLORS: Record<DealStage | "all", string> = {
@@ -199,7 +199,7 @@ export default function DealsPage() {
       updated_at: d.updated_at,
     }));
     generateDealsCSV(rows, `deals-export-${new Date().toISOString().slice(0, 10)}`);
-    toast.success("Deals exported successfully");
+    toast.success("Prospects exported successfully");
   };
 
   const handleViewDetails = (slug: string) => {
@@ -228,7 +228,7 @@ export default function DealsPage() {
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link to="/deals">Business Opportunities</Link>
+                  <Link to="/deals">Donor & Grants Pipeline</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -285,15 +285,15 @@ export default function DealsPage() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Business Opportunities</BreadcrumbPage>
+            <BreadcrumbPage>Donor & Grants Pipeline</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-primary">Business Opportunities</h1>
-          <p className="text-muted-foreground">Manage your sales pipeline and track deal progress</p>
+          <h1 className="text-2xl font-bold text-primary">Donor & Grants Pipeline</h1>
+          <p className="text-muted-foreground">Track donor cultivation and grant prospects through your pipeline</p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={handleExport}>
@@ -318,7 +318,7 @@ export default function DealsPage() {
           </Button>
           <Button onClick={() => navigate("/deals/new")}>
             <Plus className="h-4 w-4 mr-2" />
-            New Deal
+            New Prospect
           </Button>
         </div>
       </div>
@@ -360,7 +360,7 @@ export default function DealsPage() {
             </span>
             <div className="min-w-0 flex-1 text-left">
               <span className="block text-sm font-semibold leading-tight">Active Pipeline</span>
-              <span className="block text-xs text-muted-foreground leading-tight">Open opportunities</span>
+              <span className="block text-xs text-muted-foreground leading-tight">Active prospects</span>
             </div>
             {activeCount > 0 && (
               <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
@@ -387,7 +387,7 @@ export default function DealsPage() {
             </span>
             <div className="min-w-0 flex-1 text-left">
               <span className="block text-sm font-semibold leading-tight">Archive</span>
-              <span className="block text-xs text-muted-foreground leading-tight">Won & Lost</span>
+              <span className="block text-xs text-muted-foreground leading-tight">Funded & Declined</span>
             </div>
             {archiveCount > 0 && (
               <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
@@ -425,7 +425,7 @@ export default function DealsPage() {
 
         <TabsContent value="all" className="mt-6">
           <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">Open opportunities</p>
+            <p className="text-sm text-muted-foreground">Active prospects</p>
             <div className="flex flex-wrap gap-2">
               {ACTIVE_STAGE_TABS.map((t) => {
                 const count = t.value === "all" ? activeCount : (stats?.by_stage?.[t.value as DealStage]?.count ?? 0);
@@ -510,7 +510,7 @@ export default function DealsPage() {
 
         <TabsContent value="archive" className="mt-6">
           <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">Won & Lost</p>
+            <p className="text-sm text-muted-foreground">Funded & Declined</p>
             {/* Archive stage pills: Won, Accepted, Lost */}
             <div className="flex flex-wrap gap-2 justify-center">
               {ARCHIVE_STAGE_TABS.map((t) => {

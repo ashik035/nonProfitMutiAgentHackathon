@@ -1,6 +1,6 @@
 /**
  * Deals Analytics Tab - KPIs, Stage Distribution, Monthly Trend,
- * Deal Velocity by Stage, Top 10 Clients by Value, Top 10 Owners by Win Rate
+ * Deal Velocity by Stage, Top 10 Organizations by Value, Top 10 Owners by Funding Rate
  * Matches reference screenshots for /deals?tab=analytics
  */
 
@@ -45,8 +45,8 @@ export default function DealsAnalytics() {
   const monthlyChartConfig: ChartConfig = useMemo(
     () => ({
       month: { label: "Month" },
-      dealsCreated: { label: "Deals Created", color: "#18181b" },
-      dealsWon: { label: "Deals Won", color: "#18181b" },
+      dealsCreated: { label: "Prospects Created", color: "#18181b" },
+      dealsWon: { label: "Prospects Funded", color: "#18181b" },
       totalValue: { label: "Total Value ($)", color: "#18181b" },
     }),
     []
@@ -76,8 +76,8 @@ export default function DealsAnalytics() {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
         <BarChart3 className="h-12 w-12 mb-4 opacity-40" />
-        <p className="text-lg font-medium">No deals data yet</p>
-        <p className="text-sm">Create deals to see analytics</p>
+        <p className="text-lg font-medium">No prospect data yet</p>
+        <p className="text-sm">Create prospects to see analytics</p>
       </div>
     );
   }
@@ -94,7 +94,7 @@ export default function DealsAnalytics() {
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Value</p>
                 <p className="text-2xl font-bold">{formatCurrency(kpis.totalValue)}</p>
-                <p className="text-xs text-muted-foreground">Across all deals</p>
+                <p className="text-xs text-muted-foreground">Across all prospects</p>
               </div>
               <DollarSign className="h-8 w-8 text-muted-foreground/50" />
             </div>
@@ -104,7 +104,7 @@ export default function DealsAnalytics() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Deals</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Prospects</p>
                 <p className="text-2xl font-bold">{kpis.totalDeals.toLocaleString()}</p>
                 <p className="text-xs text-muted-foreground">In pipeline</p>
               </div>
@@ -116,9 +116,9 @@ export default function DealsAnalytics() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Avg Deal Size</p>
+                <p className="text-sm font-medium text-muted-foreground">Avg Funding Ask</p>
                 <p className="text-2xl font-bold">{formatCurrency(kpis.avgDealSize)}</p>
-                <p className="text-xs text-muted-foreground">Per deal</p>
+                <p className="text-xs text-muted-foreground">Per prospect</p>
               </div>
               <TrendingUp className="h-8 w-8 text-muted-foreground/50" />
             </div>
@@ -128,7 +128,7 @@ export default function DealsAnalytics() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Win Rate</p>
+                <p className="text-sm font-medium text-muted-foreground">Funding Rate</p>
                 <p className="text-2xl font-bold">{kpis.winRate}%</p>
                 <p className="text-xs text-muted-foreground">Conversion rate</p>
               </div>
@@ -141,7 +141,7 @@ export default function DealsAnalytics() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground flex items-center gap-1">
-                  Stagnant Deals
+                  Stagnant Prospects
                   <AlertTriangle className="h-4 w-4 text-amber-500" />
                 </p>
                 <p className="text-2xl font-bold">{kpis.stagnantCount}</p>
@@ -189,8 +189,8 @@ export default function DealsAnalytics() {
                 <YAxis yAxisId="right" orientation="right" tickLine={false} axisLine={false} fontSize={12} tickFormatter={(v) => (v >= 1000 ? `${v / 1000}K` : String(v))} />
                 <ChartTooltip content={<ChartTooltipContent formatter={(v) => (typeof v === "number" && v > 1000 ? formatCurrency(v) : v)} />} />
                 <Legend />
-                <Bar yAxisId="left" dataKey="dealsCreated" name="Deals Created" fill="#18181b" radius={[4, 4, 0, 0]} />
-                <Bar yAxisId="left" dataKey="dealsWon" name="Deals Won" fill="#3f3f46" radius={[4, 4, 0, 0]} />
+                <Bar yAxisId="left" dataKey="dealsCreated" name="Prospects Created" fill="#18181b" radius={[4, 4, 0, 0]} />
+                <Bar yAxisId="left" dataKey="dealsWon" name="Prospects Funded" fill="#3f3f46" radius={[4, 4, 0, 0]} />
                 <Bar yAxisId="right" dataKey="totalValue" name="Total Value ($)" fill="#18181b" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ChartContainer>
@@ -228,7 +228,7 @@ export default function DealsAnalytics() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Top 10 Clients by Value</CardTitle>
+            <CardTitle className="text-base">Top 10 Organizations by Value</CardTitle>
           </CardHeader>
           <CardContent>
             {topClientsByValue.length === 0 ? (
@@ -253,10 +253,10 @@ export default function DealsAnalytics() {
         </Card>
       </div>
 
-      {/* Top 10 Owners by Win Rate */}
+      {/* Top 10 Owners by Funding Rate */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Top 10 Owners by Win Rate</CardTitle>
+          <CardTitle className="text-base">Top 10 Owners by Funding Rate</CardTitle>
         </CardHeader>
         <CardContent>
           {topOwnersByWinRate.length === 0 ? (

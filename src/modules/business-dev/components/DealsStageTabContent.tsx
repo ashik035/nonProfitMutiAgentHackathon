@@ -1,6 +1,6 @@
 /**
  * Stage Tab Content - Table or card view for deals by stage
- * Lead page: Deal Name, Client, Value, Owner, Pod, Close Date, Actions
+ * Lead page: Prospect Name, Client, Value, Owner, Pod, Close Date, Actions
  * Other stages: full columns including Stage, Amount, Probability, Updated
  */
 
@@ -28,13 +28,13 @@ type SortColumn = "title" | "value" | "updated_at" | "expected_close_date";
 type SortDir = "asc" | "desc";
 
 const STAGE_CONFIG: Record<DealStage, { label: string; color: string }> = {
-  lead: { label: "Lead", color: "#6b7280" },
-  discovery: { label: "Discovery", color: "#3b82f6" },
+  lead: { label: "Identify", color: "#6b7280" },
+  discovery: { label: "Qualify", color: "#3b82f6" },
   qualified: { label: "Qualified", color: "#2563eb" },
-  estimation: { label: "Estimation", color: "#8b5cf6" },
-  proposal: { label: "Proposal", color: "#f59e0b" },
-  won: { label: "Won", color: "#22c55e" },
-  lost: { label: "Lost", color: "#ef4444" },
+  estimation: { label: "Cultivate", color: "#8b5cf6" },
+  proposal: { label: "Propose", color: "#f59e0b" },
+  won: { label: "Funded", color: "#22c55e" },
+  lost: { label: "Declined", color: "#ef4444" },
 };
 
 function formatShortCurrency(val: number) {
@@ -172,7 +172,7 @@ export default function DealsStageTabContent({
     return (
       <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
         <Handshake className="h-12 w-12 mb-4 opacity-40" />
-        <p className="text-lg font-medium">No deals found</p>
+        <p className="text-lg font-medium">No prospects found</p>
         <p className="text-sm text-muted-foreground">Try adjusting your filters</p>
       </div>
     );
@@ -260,11 +260,11 @@ export default function DealsStageTabContent({
                   onClick={() => handleSort("title")}
                 >
                   <span className="inline-flex items-center gap-1">
-                    Deal Name
+                    Prospect Name
                     {sortBy === "title" ? (sortDir === "asc" ? <ArrowUp className="h-3.5 w-3.5" /> : <ArrowDown className="h-3.5 w-3.5" />) : <ArrowUpDown className="h-3.5 w-3.5 opacity-50" />}
                   </span>
                 </TableHead>
-                <TableHead>Client</TableHead>
+                <TableHead>Organization</TableHead>
                 {!isSimpleColumnsView && <TableHead>Stage</TableHead>}
                 <TableHead
                   className="cursor-pointer hover:bg-muted/50 select-none"

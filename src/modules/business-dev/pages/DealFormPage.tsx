@@ -22,34 +22,34 @@ import { useContacts } from "../hooks/useContacts";
 import type { DealFormData, DealStage } from "../types";
 
 const STAGES: { value: DealStage; label: string }[] = [
-  { value: "lead", label: "Lead" },
-  { value: "discovery", label: "Discovery" },
+  { value: "lead", label: "Identify" },
+  { value: "discovery", label: "Qualify" },
   { value: "qualified", label: "Qualified" },
-  { value: "estimation", label: "Estimation" },
-  { value: "proposal", label: "Proposal" },
-  { value: "won", label: "Won" },
-  { value: "lost", label: "Lost" },
+  { value: "estimation", label: "Cultivate" },
+  { value: "proposal", label: "Propose" },
+  { value: "won", label: "Funded" },
+  { value: "lost", label: "Declined" },
 ];
 
 const DEAL_TYPES = [
-  { value: "new_business", label: "New Business" },
+  { value: "new_business", label: "New Donor" },
   { value: "renewal", label: "Renewal" },
-  { value: "upsell", label: "Upsell" },
+  { value: "upsell", label: "Upgrade" },
   { value: "other", label: "Other" },
 ];
 
 const CATEGORIES = [
-  { value: "services", label: "Services" },
-  { value: "product", label: "Product" },
-  { value: "license", label: "License" },
-  { value: "subscription", label: "Subscription" },
+  { value: "services", label: "Grant" },
+  { value: "product", label: "Major Gift" },
+  { value: "license", label: "Corporate Sponsorship" },
+  { value: "subscription", label: "Recurring Giving" },
   { value: "other", label: "Other" },
 ];
 
 const LEAD_SOURCES = [
   { value: "Referral", label: "Referral" },
   { value: "Website", label: "Website" },
-  { value: "Cold outreach", label: "Cold outreach" },
+  { value: "Cold outreach", label: "Outreach" },
   { value: "Event", label: "Event" },
   { value: "Other", label: "Other" },
 ];
@@ -241,10 +241,10 @@ export default function DealFormPage() {
         </Button>
         <div>
           <h1 className="text-2xl font-bold text-primary">
-            {isEdit ? "Edit Deal" : "Create New Deal"}
+            {isEdit ? "Edit Prospect" : "Create New Prospect"}
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            {isEdit ? "Update the business opportunity." : "Add a new business opportunity to the pipeline."}
+            {isEdit ? "Update the donor or grant prospect." : "Add a new prospect to the cultivation pipeline."}
           </p>
         </div>
       </div>
@@ -255,7 +255,7 @@ export default function DealFormPage() {
             <Tabs defaultValue="basic" className="w-full">
               <TabsList className="grid w-full grid-cols-4 mb-6">
                 <TabsTrigger value="basic">Basic Info</TabsTrigger>
-                <TabsTrigger value="details">Deal Details</TabsTrigger>
+                <TabsTrigger value="details">Prospect Details</TabsTrigger>
                 <TabsTrigger value="urls">URLs & Links</TabsTrigger>
                 <TabsTrigger value="advanced">Advanced</TabsTrigger>
               </TabsList>
@@ -265,24 +265,24 @@ export default function DealFormPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="title">Deal Name *</Label>
+                      <Label htmlFor="title">Prospect Name *</Label>
                       <Input
                         id="title"
                         value={form.title}
                         onChange={(e) => set("title", e.target.value)}
-                        placeholder="Enter deal name"
+                        placeholder="Enter prospect name"
                         className="mt-1.5"
                       />
                     </div>
                     <div>
-                      <Label>Client *</Label>
+                      <Label>Donor / Funder *</Label>
                       <Select
                         value={form.client_id || "__none__"}
                         onValueChange={(v) => set("client_id", v === "__none__" ? undefined : v)}
                       >
-                        <SelectTrigger className="mt-1.5"><SelectValue placeholder="Select client..." /></SelectTrigger>
+                        <SelectTrigger className="mt-1.5"><SelectValue placeholder="Select organization..." /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="__none__">Select client...</SelectItem>
+                          <SelectItem value="__none__">Select organization...</SelectItem>
                           {clients.map((c) => (
                             <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                           ))}
@@ -301,7 +301,7 @@ export default function DealFormPage() {
                       </Select>
                     </div>
                     <div>
-                      <Label>Deal Type</Label>
+                      <Label>Prospect Type</Label>
                       <Select
                         value={form.deal_type || ""}
                         onValueChange={(v) => set("deal_type", v || undefined)}
@@ -315,7 +315,7 @@ export default function DealFormPage() {
                       </Select>
                     </div>
                     <div>
-                      <Label>Deal Owner *</Label>
+                      <Label>Assigned To *</Label>
                       <Select
                         value={form.owner_id || "__none__"}
                         onValueChange={(v) => set("owner_id", v === "__none__" ? undefined : v)}
@@ -351,7 +351,7 @@ export default function DealFormPage() {
                   </div>
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="value">Deal Value ($) *</Label>
+                      <Label htmlFor="value">Funding Ask ($) *</Label>
                       <Input
                         id="value"
                         type="number"
@@ -435,12 +435,12 @@ export default function DealFormPage() {
               {/* Deal Details */}
               <TabsContent value="details" className="space-y-4 mt-0">
                 <div className="space-y-2">
-                  <Label htmlFor="description">Deal Description</Label>
+                  <Label htmlFor="description">Prospect Description</Label>
                   <Textarea
                     id="description"
                     value={form.description || ""}
                     onChange={(e) => set("description", e.target.value)}
-                    placeholder="Detailed description of the deal..."
+                    placeholder="Describe the donor prospect or grant opportunity..."
                     rows={4}
                     className="mt-1.5 resize-y"
                   />
@@ -464,9 +464,9 @@ export default function DealFormPage() {
                   <div className="space-y-2">
                     <Label>Pipeline</Label>
                     <Input
-                      value={form.pipeline ?? "Sales pipeline"}
+                      value={form.pipeline ?? "Donor pipeline"}
                       onChange={(e) => set("pipeline", e.target.value)}
-                      placeholder="Sales pipeline"
+                      placeholder="Donor pipeline"
                       className="mt-1.5"
                     />
                   </div>
@@ -638,10 +638,10 @@ export default function DealFormPage() {
               {/* Advanced */}
               <TabsContent value="advanced" className="space-y-6 mt-0">
                 <div className="space-y-4">
-                  <h3 className="text-sm font-medium text-foreground">Client Contact Information</h3>
+                  <h3 className="text-sm font-medium text-foreground">Organization Contact Information</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="company_name">Company Name</Label>
+                      <Label htmlFor="company_name">Organization Name</Label>
                       <Input
                         id="company_name"
                         value={advanced.company_name}
@@ -650,7 +650,7 @@ export default function DealFormPage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="client_email">Client Email</Label>
+                      <Label htmlFor="client_email">Contact Email</Label>
                       <Input
                         id="client_email"
                         type="email"
@@ -740,7 +740,7 @@ export default function DealFormPage() {
                 {isPending ? (
                   <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{isEdit ? "Saving..." : "Creating..."}</>
                 ) : (
-                  isEdit ? "Save Changes" : "Create Deal"
+                  isEdit ? "Save Changes" : "Create Prospect"
                 )}
               </Button>
             </div>

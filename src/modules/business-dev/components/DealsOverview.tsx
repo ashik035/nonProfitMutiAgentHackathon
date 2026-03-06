@@ -1,6 +1,6 @@
 /**
- * Deals Overview Tab - Matches Business Opportunities reference
- * KPIs, Active Pipeline by stage, Closed Deals Summary, Revenue Projection, Stage Conversion Funnel
+ * Pipeline Overview Tab — Donor & Grants Pipeline
+ * KPIs, Active Pipeline by stage, Closed Summary, Projection, Stage Conversion Funnel
  */
 
 import { useMemo, useState } from "react";
@@ -26,13 +26,13 @@ import type { DealStage } from "../types";
 
 const ACTIVE_STAGES: DealStage[] = ["lead", "discovery", "qualified", "estimation", "proposal"];
 const STAGE_LABELS: Record<DealStage, string> = {
-  lead: "Lead",
-  discovery: "Discovery",
+  lead: "Identify",
+  discovery: "Qualify",
   qualified: "Qualified",
-  estimation: "Estimation",
-  proposal: "Proposal",
-  won: "Won",
-  lost: "Lost",
+  estimation: "Cultivate",
+  proposal: "Propose",
+  won: "Funded",
+  lost: "Declined",
 };
 const STAGE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   lead: Briefcase,

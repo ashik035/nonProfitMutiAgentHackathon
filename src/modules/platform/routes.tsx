@@ -38,6 +38,9 @@ import ReconciliationPage from "@/pages/ReconciliationPage";
 import EventsPage from "@/pages/EventsPage";
 import GrantsPage from "@/pages/GrantsPage";
 import BoardReportsPage from "@/pages/BoardReportsPage";
+import AIAgentsPage from "@/pages/AIAgentsPage";
+import AIAgentDetailPage from "@/pages/AIAgentDetailPage";
+import AIAgentSettingsPage from "@/pages/AIAgentSettingsPage";
 
 /**
  * Public routes - no auth required
@@ -73,9 +76,9 @@ export const coreProtectedRoutes = (
       <Route path="/notifications" element={<Notifications />} />
     </Route>
 
-    {/* AI features */}
+    {/* AI features (legacy admin agents) */}
     <Route element={<ModuleRoute requiresFeatureFlag="enableAIAgents" />}>
-      <Route path="/ai-agents" element={<AIAgents />} />
+      <Route path="/ai-agents-legacy" element={<AIAgents />} />
       <Route path="/ai-chat" element={<AIChat />} />
     </Route>
 
@@ -88,6 +91,9 @@ export const coreProtectedRoutes = (
     <Route path="/events" element={<EventsPage />} />
     <Route path="/grants" element={<GrantsPage />} />
     <Route path="/board-reports" element={<BoardReportsPage />} />
+    <Route path="/ai-agents" element={<AIAgentsPage />} />
+    <Route path="/ai-agents/:id" element={<AIAgentDetailPage />} />
+    <Route path="/ai-agents/:id/settings" element={<AIAgentSettingsPage />} />
   </>
 );
 

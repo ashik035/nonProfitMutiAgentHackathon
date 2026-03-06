@@ -111,13 +111,13 @@ export interface DealsAnalyticsData {
 }
 
 const STAGE_LABELS: Record<DealStage, string> = {
-  lead: "Lead",
-  discovery: "Discovery",
+  lead: "Identify",
+  discovery: "Qualify",
   qualified: "Qualified",
-  estimation: "Estimation",
-  proposal: "Proposal",
-  won: "Won",
-  lost: "Lost",
+  estimation: "Cultivate",
+  proposal: "Propose",
+  won: "Funded",
+  lost: "Declined",
 };
 
 export function useDealsAnalytics() {

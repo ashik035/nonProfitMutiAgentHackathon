@@ -24,13 +24,13 @@ import { useAssignMeeting } from "@/modules/meetings/hooks/useMeetingAssignment"
 import type { DealStage, DealActivityType } from "../types";
 
 const STAGE_CONFIG: Record<DealStage, { label: string; color: string }> = {
-  lead: { label: "Lead", color: "#6b7280" },
-  discovery: { label: "Discovery", color: "#3b82f6" },
+  lead: { label: "Identify", color: "#6b7280" },
+  discovery: { label: "Qualify", color: "#3b82f6" },
   qualified: { label: "Qualified", color: "#2563eb" },
-  estimation: { label: "Estimation", color: "#8b5cf6" },
-  proposal: { label: "Proposal", color: "#f59e0b" },
-  won: { label: "Won", color: "#22c55e" },
-  lost: { label: "Lost", color: "#ef4444" },
+  estimation: { label: "Cultivate", color: "#8b5cf6" },
+  proposal: { label: "Propose", color: "#f59e0b" },
+  won: { label: "Funded", color: "#22c55e" },
+  lost: { label: "Declined", color: "#ef4444" },
 };
 
 const STAGES: DealStage[] = ["lead", "discovery", "qualified", "estimation", "proposal", "won", "lost"];
@@ -94,8 +94,8 @@ export default function DealDetailPage() {
   if (!deal) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-        <p className="text-lg font-medium">Deal not found</p>
-        <Button variant="outline" className="mt-4" onClick={() => navigate("/deals")}>Back to Deals</Button>
+        <p className="text-lg font-medium">Prospect not found</p>
+        <Button variant="outline" className="mt-4" onClick={() => navigate("/deals")}>Back to Pipeline</Button>
       </div>
     );
   }
@@ -185,8 +185,8 @@ export default function DealDetailPage() {
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Delete deal?</AlertDialogTitle>
-                <AlertDialogDescription>This will permanently delete "{deal.title}" and all associated activities.</AlertDialogDescription>
+                <AlertDialogTitle>Delete prospect?</AlertDialogTitle>
+                <AlertDialogDescription>This will permanently delete "{deal.title}" and all associated activities and comments.</AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -240,7 +240,7 @@ export default function DealDetailPage() {
         <TabsContent value="overview" className="space-y-4 mt-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <Card className="lg:col-span-2">
-              <CardHeader><CardTitle className="text-base">Deal Information</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="text-base">Prospect Information</CardTitle></CardHeader>
               <CardContent className="space-y-4">
                 {deal.description && <p className="text-sm text-muted-foreground">{deal.description}</p>}
                 <div className="grid grid-cols-2 gap-4 text-sm">
@@ -373,7 +373,7 @@ export default function DealDetailPage() {
             </Button>
           </div>
           {linkedMeetings.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">No meetings linked to this deal.</p>
+            <p className="text-sm text-muted-foreground py-8 text-center">No meetings linked to this prospect.</p>
           ) : (
             <div className="space-y-2">
               {linkedMeetings.map((item) => (
@@ -409,12 +409,12 @@ export default function DealDetailPage() {
         <TabsContent value="ai-coach" className="mt-4 space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2"><Bot className="h-4 w-4" />Deal Coach</CardTitle>
-              <p className="text-sm text-muted-foreground">Get AI-powered advice on deal strategy, objection handling, and next steps using the MEDDPICC framework.</p>
+              <CardTitle className="text-base flex items-center gap-2"><Bot className="h-4 w-4" />Cultivation Coach</CardTitle>
+              <p className="text-sm text-muted-foreground">Get AI-powered advice on cultivation strategy, engagement approach, and next steps for this prospect.</p>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex flex-wrap gap-2">
-                {["Analyze this deal with MEDDPICC", "What should my next steps be?", "Draft a follow-up email", "Help me handle objections"].map((suggestion) => (
+                {["Analyze this prospect's cultivation stage", "What should my next steps be?", "Draft a follow-up email", "Help me strengthen the relationship"].map((suggestion) => (
                   <Button key={suggestion} variant="outline" size="sm" className="text-xs" onClick={() => setCoachQuery(suggestion)}>
                     {suggestion}
                   </Button>
@@ -422,7 +422,7 @@ export default function DealDetailPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Textarea
-                  placeholder="Ask the Deal Coach a question about this deal..."
+                  placeholder="Ask the Cultivation Coach about this prospect..."
                   value={coachQuery}
                   onChange={(e) => setCoachQuery(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleAskCoach(); } }}
@@ -449,8 +449,8 @@ export default function DealDetailPage() {
       <Dialog open={lostDialogOpen} onOpenChange={setLostDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Mark deal as lost</DialogTitle>
-            <DialogDescription>Optionally provide a reason why this deal was lost.</DialogDescription>
+            <DialogTitle>Mark as declined</DialogTitle>
+            <DialogDescription>Optionally provide a reason why this prospect was declined.</DialogDescription>
           </DialogHeader>
           <div>
             <Label htmlFor="lost-reason">Reason (optional)</Label>
@@ -464,7 +464,7 @@ export default function DealDetailPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setLostDialogOpen(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={handleConfirmLost}>Mark as Lost</Button>
+            <Button variant="destructive" onClick={handleConfirmLost}>Mark as Declined</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

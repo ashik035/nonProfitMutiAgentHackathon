@@ -2,20 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 
- * AI-Forward Design System
- * Palette: Electric Blue, Cyan, Clean White, Deep Navy
- * Style: Bold, modern, agentic with AI status indicators
+/*
+ * Nonprofit Control Tower Design System
+ * Palette: Light base, calm blue & green accents, amber alerts
+ * Style: Clean, trustworthy, professional nonprofit aesthetic
  * All colors in HSL format
  */
 
 @layer base {
   :root {
-    /* Core palette - Light mode with bold AI-forward colors */
-    --background: 0 0% 100%;
+    /* Core palette - Light, clean nonprofit aesthetic */
+    --background: 210 40% 98%;
     --foreground: 222 47% 11%;
 
-    /* Cards - Pure white with crisp edges */
+    /* Cards - Pure white */
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
 
@@ -23,59 +23,60 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    /* Primary - Electric Blue (bold, AI-forward) */
-    --primary: 199 89% 48%;
+    /* Primary - Calm blue */
+    --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary - Light cool gray */
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
+    /* Secondary - Soft green */
+    --secondary: 138 76% 97%;
+    --secondary-foreground: 143 64% 24%;
 
-    /* Muted - Soft blue-gray */
+    /* Muted - Slate-100 */
     --muted: 210 40% 96%;
     --muted-foreground: 215 16% 47%;
 
-    /* Accent - Cyan glow */
-    --accent: 187 100% 42%;
-    --accent-foreground: 0 0% 100%;
+    /* Accent - Slate-100 */
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 47% 11%;
 
-    /* Destructive */
-    --destructive: 0 84% 60%;
+    /* Destructive - Red-600 */
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Borders - Crisp but subtle */
+    /* Borders - Slate-200 */
     --border: 214 32% 91%;
     --input: 214 32% 91%;
-    --ring: 199 89% 48%;
+    --ring: 217 91% 60%;
 
     --radius: 0.75rem;
 
-    /* Sidebar - Clean with blue tint */
+    /* Sidebar - Slate-50 with blue active */
     --sidebar-background: 210 40% 98%;
-    --sidebar-foreground: 222 47% 11%;
-    --sidebar-primary: 199 89% 48%;
+    --sidebar-foreground: 215 20% 40%;
+    --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 199 89% 48%;
+    --sidebar-accent: 217 91% 60%;
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 214 32% 91%;
-    --sidebar-ring: 199 89% 48%;
+    --sidebar-ring: 217 91% 60%;
 
     /* AI-specific tokens */
-    --ai-glow: 199 89% 48%;
-    --ai-pulse: 187 100% 42%;
-    --ai-gradient-start: 199 89% 48%;
-    --ai-gradient-end: 187 100% 42%;
+    --ai-glow: 217 91% 60%;
+    --ai-pulse: 143 64% 40%;
+    --ai-gradient-start: 217 91% 60%;
+    --ai-gradient-end: 143 64% 40%;
 
     /* Status colors */
-    --success: 158 64% 52%;
+    --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
-    --warning: 43 96% 56%;
+    --warning: 38 92% 50%;
     --warning-foreground: 0 0% 0%;
-    --info: 199 89% 48%;
+    --info: 217 91% 60%;
     --info-foreground: 0 0% 100%;
   }
 
   .dark {
+    /* Dark mode keeps a softer look for nonprofit */
     --background: 222 47% 6%;
     --foreground: 210 40% 98%;
 
@@ -85,7 +86,7 @@
     --popover: 222 47% 8%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 199 89% 48%;
+    --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 217 33% 17%;
@@ -94,35 +95,35 @@
     --muted: 217 33% 17%;
     --muted-foreground: 215 20% 65%;
 
-    --accent: 187 100% 42%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 217 33% 17%;
+    --accent-foreground: 210 40% 98%;
 
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 217 33% 17%;
     --input: 217 33% 17%;
-    --ring: 199 89% 48%;
+    --ring: 217 91% 60%;
 
     --sidebar-background: 222 47% 5%;
     --sidebar-foreground: 210 40% 90%;
-    --sidebar-primary: 199 89% 55%;
+    --sidebar-primary: 217 91% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 199 89% 55%;
+    --sidebar-accent: 217 91% 65%;
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 217 33% 17%;
-    --sidebar-ring: 199 89% 55%;
+    --sidebar-ring: 217 91% 65%;
 
-    --ai-glow: 199 89% 55%;
-    --ai-pulse: 187 100% 50%;
-    --ai-gradient-start: 199 89% 55%;
-    --ai-gradient-end: 187 100% 50%;
+    --ai-glow: 217 91% 65%;
+    --ai-pulse: 143 64% 50%;
+    --ai-gradient-start: 217 91% 65%;
+    --ai-gradient-end: 143 64% 50%;
 
-    --success: 158 64% 52%;
+    --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
-    --warning: 43 96% 56%;
+    --warning: 38 92% 50%;
     --warning-foreground: 0 0% 0%;
-    --info: 199 89% 55%;
+    --info: 217 91% 65%;
     --info-foreground: 0 0% 100%;
   }
 }

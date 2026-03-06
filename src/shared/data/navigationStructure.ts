@@ -13,7 +13,7 @@
 import type { ModuleId } from "@/shared/config/modules";
 
 /**
- * Agency roles that can see a nav item or group.
+ * Organization roles that can see a nav item or group.
  * When omitted the item is visible to all roles.
  */
 export type AgencyRole = "owner" | "pm" | "ic";
@@ -30,7 +30,7 @@ export interface NavItem {
   children?: NavItem[]; // Nested sub-items (e.g., Streams under Tasks)
   /** When true, parent is rendered as a section header only (collapsible), not a link; children are the links */
   headerOnly?: boolean;
-  /** When set, only these agency roles see the item. Admins always see everything. */
+  /** When set, only these organization roles see the item. Admins always see everything. */
   agencyRoles?: AgencyRole[];
 }
 
@@ -42,7 +42,7 @@ export interface NavGroup {
   module?: ModuleId;
   featureFlag?: string;
   items: NavItem[];
-  /** When set, only these agency roles see the group. Admins always see everything. */
+  /** When set, only these organization roles see the group. Admins always see everything. */
   agencyRoles?: AgencyRole[];
 }
 
@@ -69,16 +69,17 @@ export const navigationGroups: NavGroup[] = [
       { title: "Events", href: "/events", icon: "CalendarDays" },
       { title: "Grants", href: "/grants", icon: "BookOpen" },
       { title: "Board Reports", href: "/board-reports", icon: "FileText" },
+      { title: "AI Agent Center", href: "/ai-agents", icon: "Bot" },
     ],
   },
   {
     id: "business-dev",
-    title: "Sales Hub",
-    icon: "Briefcase",
+    title: "Donor & Grants Pipeline",
+    icon: "Heart",
     module: "business-dev",
     items: [
       {
-        title: "Companies",
+        title: "Organizations",
         href: "/clients",
         icon: "Building2",
         module: "business-dev",
@@ -92,23 +93,23 @@ export const navigationGroups: NavGroup[] = [
         featureFlag: "enableClients",
       },
       {
-        title: "Business Opportunities",
+        title: "Cultivation Pipeline",
         href: "/deals",
         icon: "Handshake",
         module: "business-dev",
         featureFlag: "enableClients",
         headerOnly: true,
         children: [
-          { title: "Deals Dashboard", href: "/deals?tab=overview", icon: "LayoutDashboard", module: "business-dev", featureFlag: "enableClients" },
-          { title: "All Deals", href: "/deals", icon: "LayoutDashboard", module: "business-dev", featureFlag: "enableClients" },
-          { title: "Lead", href: "/deals?tab=all&stage=lead", icon: "Users", module: "business-dev", featureFlag: "enableClients" },
-          { title: "Discovery", href: "/deals?tab=all&stage=discovery", icon: "Search", module: "business-dev", featureFlag: "enableClients" },
-          { title: "Estimation", href: "/deals?tab=all&stage=estimation", icon: "Calculator", module: "business-dev", featureFlag: "enableClients" },
-          { title: "Proposal", href: "/deals?tab=all&stage=proposal", icon: "FileText", module: "business-dev", featureFlag: "enableClients" },
+          { title: "Pipeline Dashboard", href: "/deals?tab=overview", icon: "LayoutDashboard", module: "business-dev", featureFlag: "enableClients" },
+          { title: "All Prospects", href: "/deals", icon: "LayoutDashboard", module: "business-dev", featureFlag: "enableClients" },
+          { title: "Identify", href: "/deals?tab=all&stage=lead", icon: "Users", module: "business-dev", featureFlag: "enableClients" },
+          { title: "Qualify", href: "/deals?tab=all&stage=discovery", icon: "Search", module: "business-dev", featureFlag: "enableClients" },
+          { title: "Cultivate", href: "/deals?tab=all&stage=estimation", icon: "Calculator", module: "business-dev", featureFlag: "enableClients" },
+          { title: "Propose", href: "/deals?tab=all&stage=proposal", icon: "FileText", module: "business-dev", featureFlag: "enableClients" },
         ],
       },
       {
-        title: "Lead Follow-Up",
+        title: "Donor Follow-Up",
         href: "/lead-followup",
         icon: "Target",
         module: "lead-followup",
@@ -231,7 +232,7 @@ export const navigationGroups: NavGroup[] = [
     id: "operations",
     title: "Operations",
     icon: "Settings2",
-    agencyRoles: ["owner", "pm"], // ICs don't need operations
+    agencyRoles: ["owner", "pm"], // Only leadership roles see operations
     items: [
       {
         title: "Feedback",
