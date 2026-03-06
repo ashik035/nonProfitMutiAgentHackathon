@@ -16,9 +16,9 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     const accounts = [
-      { email: "ceo@demo.example.com", password: "Demo@123", role: "admin", fullName: "CEO Demo" },
-      { email: "demo@demo.example.com", password: "Demo@123", role: "moderator", fullName: "PM Demo" },
-      { email: "ic@demo.example.com", password: "Demo@123", role: "user", fullName: "IC Demo" },
+      { email: "ceo@collabai.software", password: "Demo@123", role: "admin", fullName: "CEO Demo" },
+      { email: "demo@collabai.software", password: "Demo@123", role: "moderator", fullName: "PM Demo" },
+      { email: "ic@collabai.software", password: "Demo@123", role: "user", fullName: "IC Demo" },
     ];
 
     const results = [];

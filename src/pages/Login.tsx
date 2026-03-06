@@ -9,9 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Brain, Shield, Crown, Briefcase, Code, LogOut, User } from "lucide-react";
 
 const TEST_ACCOUNTS = [
-  { label: "CEO / Owner", email: "ceo@demo.example.com", role: "owner", icon: Crown, color: "border-amber-500/30 hover:bg-amber-500/10" },
-  { label: "Project Manager", email: "demo@demo.example.com", role: "pm", icon: Briefcase, color: "border-blue-500/30 hover:bg-blue-500/10" },
-  { label: "IC", email: "ic@demo.example.com", role: "ic", icon: Code, color: "border-emerald-500/30 hover:bg-emerald-500/10" },
+  { label: "CEO / Owner", email: "ceo@collabai.software", role: "owner", icon: Crown, color: "border-amber-500/30 hover:bg-amber-500/10" },
+  { label: "Project Manager", email: "demo@collabai.software", role: "pm", icon: Briefcase, color: "border-blue-500/30 hover:bg-blue-500/10" },
+  { label: "IC", email: "ic@collabai.software", role: "ic", icon: Code, color: "border-emerald-500/30 hover:bg-emerald-500/10" },
 ] as const;
 
 const TEST_PASSWORD = "Demo@123"; // Must match docs/public_website/features.md; ensure demo users exist in Supabase Auth.
