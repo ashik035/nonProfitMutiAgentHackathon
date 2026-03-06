@@ -12,11 +12,9 @@ export function ThemeSync() {
   const { setTheme } = useTheme();
 
   useEffect(() => {
-    if (!preferences?.appearance?.theme) return;
-
-    const saved = preferences.appearance.theme;
-    // next-themes supports "system"; when enableSystem is true it uses OS preference
-    const themeToApply = saved === "system" ? "system" : saved;
+    const saved = preferences?.appearance?.theme;
+    // Default to light if no preference saved or preference is "system"
+    const themeToApply = saved && saved !== "system" ? saved : "light";
     setTheme(themeToApply);
   }, [preferences?.appearance?.theme, setTheme]);
 
