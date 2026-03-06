@@ -375,6 +375,7 @@ export type Database = {
           model: string | null
           model_used: string | null
           output: Json | null
+          output_text: string | null
           provider_used: string | null
           run_type: string | null
           started_at: string | null
@@ -399,6 +400,7 @@ export type Database = {
           model?: string | null
           model_used?: string | null
           output?: Json | null
+          output_text?: string | null
           provider_used?: string | null
           run_type?: string | null
           started_at?: string | null
@@ -423,6 +425,7 @@ export type Database = {
           model?: string | null
           model_used?: string | null
           output?: Json | null
+          output_text?: string | null
           provider_used?: string | null
           run_type?: string | null
           started_at?: string | null

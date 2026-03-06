@@ -43,8 +43,8 @@ export interface AgentRun {
   input: unknown;
   output: unknown;
   // TEXT columns added via migration
-  context: string | null;
-  output_text: string | null;
+  context?: string | null;
+  output_text?: string | null;
   error: string | null;
   error_message: string | null;
   status: string | null;
