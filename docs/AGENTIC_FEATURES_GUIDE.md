@@ -821,8 +821,9 @@ DROP TABLE IF EXISTS agent_memories CASCADE;
 **Checklist:**
 1. Is `memory_enabled` true on the agent?
 2. Is `extract-agent-memories` edge function deployed?
-3. Are embeddings being generated? (Check `generate-embeddings` function)
-4. Check Supabase function logs for errors
+3. Extraction runs automatically after each message exchange for memory-enabled agents (conversation chat and streaming chat); no manual trigger required.
+4. Are embeddings being generated? (Check `generate-embeddings` function)
+5. Check Supabase function logs for errors
 
 ### Memory Retrieval Returns Empty
 

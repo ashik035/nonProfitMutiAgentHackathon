@@ -207,6 +207,26 @@ export const navigationGroups: NavGroup[] = [
     ],
   },
   {
+    id: "ai",
+    title: "AI",
+    icon: "Bot",
+    items: [
+      {
+        title: "AI Agents",
+        href: "/ai-agents",
+        icon: "Bot",
+        featureFlag: "enableAIAgents",
+      },
+      {
+        title: "AI Chat",
+        href: "/ai-chat",
+        icon: "MessageSquare",
+        featureFlag: "enableAIAgents",
+        isAI: true,
+      },
+    ],
+  },
+  {
     id: "operations",
     title: "Operations",
     icon: "Settings2",

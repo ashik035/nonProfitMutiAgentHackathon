@@ -808,6 +808,9 @@ User → Frontend → Agent Orchestrator
 
 ## 🚀 Quick Wins (Start Immediately)
 
+### Completed
+- **Memory System MVP** (completed March 6, 2025) — Retrieval and extraction are wired for conversation chat (`agent-conversation-chat`) and streaming chat (`agent-chat-stream`). Only agents with `memory_enabled = true` use the flow. Database tables and consolidated migration: `20260306150000_agentic_conversation_memory_consolidated.sql`.
+
 ### Week 1-2: Low-Hanging Fruit
 1. **Complete MCP Database Tables** (2 days)
    - Already designed, just need to run migration
@@ -832,11 +835,6 @@ User → Frontend → Agent Orchestrator
    - Implement basic planning loop
    - Goal → Steps → Execute → Verify
    - No LangGraph yet (add later)
-
-6. **Memory System MVP** (10 days)
-   - Short-term memory (conversation history - already have)
-   - Long-term memory (user preferences - new)
-   - Memory injection in prompts
 
 ---
 

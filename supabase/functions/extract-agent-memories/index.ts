@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { chatCompletion } from '../_shared/ai-provider-routing.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -72,17 +73,8 @@ serve(async (req) => {
         )
       }
 
-      // Use AI to extract memories
-      const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY')
-      if (!OPENAI_API_KEY) {
-        return new Response(
-          JSON.stringify({ error: 'OpenAI API key not configured' }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
-        )
-      }
-
       const conversationText = messages
-        .map((m: any) => `${m.role}: ${m.content}`)
+        .map((m: { role: string; content: string }) => `${m.role}: ${m.content}`)
         .join('\n')
 
       const extractionPrompt = `Analyze this conversation and extract important memories that would be useful to remember for future conversations.
@@ -108,29 +100,19 @@ Return ONLY valid JSON, no other text. Example format:
   {"memory_type": "preference", "content": "User prefers bullet-point summaries", "relevance_score": 0.8}
 ]`
 
-      const extractionResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${OPENAI_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
+      const response = await chatCompletion(
+        supabaseClient,
+        {
           messages: [
             { role: 'system', content: 'You are a memory extraction assistant. Extract useful memories from conversations. Always respond with valid JSON only.' },
             { role: 'user', content: extractionPrompt },
           ],
           temperature: 0.3,
           max_tokens: 1000,
-        }),
-      })
+        }
+      )
 
-      if (!extractionResponse.ok) {
-        throw new Error('AI extraction failed')
-      }
-
-      const extractionData = await extractionResponse.json()
-      const extractedContent = extractionData.choices?.[0]?.message?.content || '[]'
+      const extractedContent = response.content || '[]'
 
       try {
         // Clean up response and parse JSON
@@ -143,12 +125,12 @@ Return ONLY valid JSON, no other text. Example format:
 
         // Validate and sanitize
         memoriesToStore = memoriesToStore
-          .filter((m: any) =>
+          .filter((m: { memory_type?: string; content?: string }) =>
             m.memory_type &&
             m.content &&
             ['summary', 'fact', 'preference', 'decision', 'pattern', 'context'].includes(m.memory_type)
           )
-          .map((m: any) => ({
+          .map((m: { memory_type: string; content: string; relevance_score?: number }) => ({
             memory_type: m.memory_type,
             content: String(m.content).slice(0, 1000), // Limit content length
             relevance_score: Math.min(Math.max(Number(m.relevance_score) || 0.8, 0.5), 1.0),

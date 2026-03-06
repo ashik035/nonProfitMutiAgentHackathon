@@ -76,6 +76,46 @@ serve(async (req) => {
       additionalContext = personalization.additional_prompt
     }
 
+    // 2.5. Get relevant memories if agent has memory enabled
+    let memoryContext = ''
+    if (agent.memory_enabled) {
+      try {
+        const baseUrl = Deno.env.get('SUPABASE_URL')
+        const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+        if (baseUrl && serviceKey) {
+          const memoryRes = await fetch(`${baseUrl}/functions/v1/retrieve-agent-memories`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${serviceKey}` },
+            body: JSON.stringify({
+              agent_id,
+              user_id,
+              query: message,
+              memory_types: ['short_term', 'long_term', 'episodic'],
+              limit: 5,
+              similarity_threshold: 0.7,
+              include_recent: true,
+              recent_days: 7,
+            }),
+          })
+          if (memoryRes.ok) {
+            const memoryData = await memoryRes.json()
+            if (memoryData?.memories && memoryData.memories.length > 0) {
+              const formattedMemories = memoryData.memories
+                .map((m: { memory_category?: string; content?: string; similarity?: number }) => {
+                  const category = m.memory_category ? `[${m.memory_category}]` : ''
+                  const similarity = m.similarity != null ? ` (relevance: ${(m.similarity * 100).toFixed(0)}%)` : ''
+                  return `${category} ${m.content ?? ''}${similarity}`
+                })
+                .join('\n')
+              memoryContext = '\n\nRELEVANT CONTEXT FROM PREVIOUS CONVERSATIONS:\n' + formattedMemories + '\n'
+            }
+          }
+        }
+      } catch (memError) {
+        console.error('Memory retrieval error:', memError)
+      }
+    }
+
     // 3. Get RAG context if enabled (semantic search over user + org knowledge)
     let ragContext = ''
     if (include_rag) {
@@ -122,6 +162,7 @@ serve(async (req) => {
       agent.system_prompt,
       additionalContext,
       ragContext,
+      memoryContext,
     ].filter(Boolean).join('\n\n')
 
     const messages: { role: 'user' | 'assistant' | 'system'; content: string }[] = [
@@ -186,6 +227,15 @@ serve(async (req) => {
       .from('ai_agents')
       .update({ usage_count: (agent.usage_count || 0) + 1 })
       .eq('id', agent_id)
+
+    // 12. Extract memories (fire-and-forget) when memory enabled
+    if (agent.memory_enabled) {
+      fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/extract-agent-memories`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
+        body: JSON.stringify({ agent_id, user_id, conversation_id, auto_extract: true }),
+      }).catch((err) => console.error('Background memory extraction error:', err))
+    }
 
     return new Response(
       JSON.stringify({
