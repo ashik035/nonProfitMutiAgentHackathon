@@ -47,6 +47,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Brain, Loader2, Plus, Edit, Play, Pause, Trash2, History, MessageSquare } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import {
   QuickStartWizard,
   AgentCategoryGuide,
@@ -56,7 +57,16 @@ import {
   HITLApprovalInfo,
 } from "@/components/admin/AgentConfigurationGuide";
 
+// Safely convert any value to a displayable string
+function toDisplayString(value: unknown): string {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "string") return value;
+  if (typeof value === "object") return JSON.stringify(value, null, 2);
+  return String(value);
+}
+
 export default function AIAgents() {
+  const navigate = useNavigate();
   const { data: agents, isLoading } = useAIAgents();
   const { data: recentRuns } = useAgentRuns();
   const createAgent = useCreateAgent();
@@ -476,15 +486,23 @@ export default function AIAgents() {
 
                 <div className="flex gap-2">
                   {agent.is_enabled && (
-                    <Button
-                      size="sm"
-                      variant="default"
-                      className="flex-1"
-                      onClick={() => openRunDialog(agent)}
-                    >
-                      <Play className="mr-2 h-3 w-3" />
-                      Run
-                    </Button>
+                    <>
+                      <Button
+                        size="sm"
+                        variant="default"
+                        onClick={() => navigate(`/ai-chat?agent=${agent.id}`)}
+                      >
+                        <MessageSquare className="mr-2 h-3 w-3" />
+                        Chat
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => openRunDialog(agent)}
+                      >
+                        <Play className="h-3 w-3" />
+                      </Button>
+                    </>
                   )}
                   <Button
                     size="sm"
@@ -584,29 +602,37 @@ export default function AIAgents() {
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      <div>
-                        <Label className="text-xs text-muted-foreground">Input:</Label>
-                        <p className="text-sm mt-1">{run.input}</p>
-                      </div>
-                      {run.output && (
+                      {(run.context || run.input) && (
+                        <div>
+                          <Label className="text-xs text-muted-foreground">Input:</Label>
+                          <p className="text-sm mt-1 whitespace-pre-wrap">
+                            {run.context || toDisplayString(run.input)}
+                          </p>
+                        </div>
+                      )}
+                      {(run.output_text || run.output) && (
                         <div>
                           <Label className="text-xs text-muted-foreground">Output:</Label>
                           <div className="mt-1 text-sm prose prose-slate dark:prose-invert max-w-none prose-p:my-1.5 prose-ul:my-1.5 prose-table:text-xs prose-headings:mb-1 prose-headings:mt-2">
                             <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                              {run.output}
+                              {run.output_text || toDisplayString(run.output)}
                             </ReactMarkdown>
                           </div>
                         </div>
                       )}
-                      {run.error_message && (
+                      {(run.error_message || run.error) && (
                         <div>
                           <Label className="text-xs text-destructive">Error:</Label>
-                          <p className="text-sm mt-1 text-destructive">{run.error_message}</p>
+                          <p className="text-sm mt-1 text-destructive">
+                            {run.error_message || run.error}
+                          </p>
                         </div>
                       )}
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(run.created_at).toLocaleString()}
-                      </p>
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                        <span>{new Date(run.created_at).toLocaleString()}</span>
+                        {run.model_used && <span>· {run.model_used}</span>}
+                        {run.provider_used && <span>· {run.provider_used}</span>}
+                      </div>
                     </CardContent>
                   </Card>
                 ))}

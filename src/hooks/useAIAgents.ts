@@ -39,18 +39,22 @@ export interface AgentRun {
   id: string;
   agent_id: string;
   user_id: string;
-  input: string | null;
-  output: string | null;
-  status: string | null;
+  // input is JSONB in the live DB; we read it as unknown and stringify for display
+  input: unknown;
+  output: unknown;
+  // TEXT columns added via migration
+  context: string | null;
+  output_text: string | null;
+  error: string | null;
   error_message: string | null;
+  status: string | null;
   latency_ms: number | null;
-  context: unknown;
   token_metrics: unknown;
   provider_used: string | null;
   model_used: string | null;
-  metadata: unknown;
+  tokens_used: number | null;
   created_at: string;
-  updated_at: string;
+  updated_at: string | null;
 }
 
 export interface AgentFormData {
@@ -109,7 +113,7 @@ export function useAIAgent(id: string) {
   });
 }
 
-// Fetch agent runs
+// Fetch agent runs — admins see all runs, regular users see their own
 export function useAgentRuns(agentId?: string) {
   const { user } = useAuth();
 
@@ -120,14 +124,10 @@ export function useAgentRuns(agentId?: string) {
         .from("ai_agent_runs")
         .select("*")
         .order("created_at", { ascending: false })
-        .limit(50);
+        .limit(100);
 
       if (agentId) {
         query = query.eq("agent_id", agentId);
-      }
-
-      if (user) {
-        query = query.eq("user_id", user.id);
       }
 
       const { data, error } = await query;
@@ -328,18 +328,18 @@ export function useRunAgent() {
 
         if (error) throw error;
 
-        // Update run with result (include provider/model from run-ai-agent)
+        // Update run with result
         const { error: updateError } = await supabase
           .from("ai_agent_runs")
           .update({
-            output: data.output,
+            output_text: data.output,
             status: "completed",
             latency_ms: executionTime,
             token_metrics: data.token_usage ?? null,
-            provider_used: "openai",
-            model_used: "gpt-4o-mini",
-            updated_at: new Date().toISOString(),
-          })
+            provider_used: data.model_used ? undefined : "lovable",
+            model_used: data.model_used ?? null,
+            completed_at: new Date().toISOString(),
+          } as any)
           .eq("id", run.id);
 
         if (updateError) throw updateError;
@@ -351,10 +351,11 @@ export function useRunAgent() {
           .from("ai_agent_runs")
           .update({
             status: "failed",
+            error: (error as Error).message,
             error_message: (error as Error).message,
             latency_ms: Date.now() - startTime,
-            updated_at: new Date().toISOString(),
-          })
+            completed_at: new Date().toISOString(),
+          } as any)
           .eq("id", run.id);
 
         throw error;

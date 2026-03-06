@@ -114,11 +114,12 @@ serve(async (req) => {
         agent_id: agent.id,
         user_id: user_id || null,
         status: 'completed',
-        context: typeof bodyInput === 'string' && bodyInput.trim().length > 0 ? bodyInput : execution_context,
-        output: result.content,
+        context: typeof bodyInput === 'string' && bodyInput.trim().length > 0 ? bodyInput : String(execution_context ?? ''),
+        output_text: result.content,
         token_metrics: { prompt_tokens: result.input_tokens, completion_tokens: result.output_tokens },
         latency_ms: latency,
         model_used: result.model,
+        completed_at: new Date().toISOString(),
       }])
       .select()
       .single()
