@@ -65,7 +65,6 @@ const URL_LINK_KEYS = [
   "internal_estimate_doc_url",
   "client_estimate_doc_url",
   "pandadoc_proposal_url",
-  "hubspot_deal_url",
   "leadslift_crm_deal_url",
   "google_drive_folder_url",
   "workboard_ai_link",
@@ -78,7 +77,6 @@ const initialUrlLinks: Record<(typeof URL_LINK_KEYS)[number], string> = {
   internal_estimate_doc_url: "",
   client_estimate_doc_url: "",
   pandadoc_proposal_url: "",
-  hubspot_deal_url: "",
   leadslift_crm_deal_url: "",
   google_drive_folder_url: "",
   workboard_ai_link: "",
@@ -94,8 +92,6 @@ const ADVANCED_KEYS = [
   "contact_phone",
   "website",
   "linkedin_profile",
-  "hubspot_deal_id",
-  "hubspot_owner_id",
   "type_of_work",
 ] as const;
 
@@ -107,8 +103,6 @@ const initialAdvanced: Record<(typeof ADVANCED_KEYS)[number], string> = {
   contact_phone: "",
   website: "",
   linkedin_profile: "",
-  hubspot_deal_id: "",
-  hubspot_owner_id: "",
   type_of_work: "",
 };
 
@@ -587,15 +581,6 @@ export default function DealFormPage() {
                         placeholder="https://"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="hubspot_deal_url">HubSpot Deal URL</Label>
-                      <Input
-                        id="hubspot_deal_url"
-                        value={urlLinks.hubspot_deal_url}
-                        onChange={(e) => setUrlLinks((u) => ({ ...u, hubspot_deal_url: e.target.value }))}
-                        placeholder="https://"
-                      />
-                    </div>
                     <div className="space-y-2 md:col-span-2">
                       <Label htmlFor="leadslift_crm_deal_url">LeadsLift CRM Deal URL</Label>
                       <Input
@@ -720,29 +705,6 @@ export default function DealFormPage() {
                       placeholder="https://linkedin.com/in/"
                       className="w-full"
                     />
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <h3 className="text-sm font-medium text-foreground">HubSpot Integration</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="hubspot_deal_id">HubSpot Deal ID</Label>
-                      <Input
-                        id="hubspot_deal_id"
-                        value={advanced.hubspot_deal_id}
-                        onChange={(e) => setAdvanced((a) => ({ ...a, hubspot_deal_id: e.target.value }))}
-                        placeholder="Deal ID"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="hubspot_owner_id">HubSpot Owner ID</Label>
-                      <Input
-                        id="hubspot_owner_id"
-                        value={advanced.hubspot_owner_id}
-                        onChange={(e) => setAdvanced((a) => ({ ...a, hubspot_owner_id: e.target.value }))}
-                        placeholder="Owner ID"
-                      />
-                    </div>
                   </div>
                 </div>
                 <div className="space-y-4">

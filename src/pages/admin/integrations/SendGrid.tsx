@@ -57,8 +57,8 @@ export default function SendGridIntegration() {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      from_email: "noreply@sjinnovation.com",
-      from_name: "SJ Innovation",
+      from_email: "noreply@organization.com",
+      from_name: "Organization",
       api_key: "",
       is_enabled: false,
       enable_open_tracking: true,
@@ -69,8 +69,8 @@ export default function SendGridIntegration() {
   useEffect(() => {
     if (config) {
       form.reset({
-        from_email: config.from_email || "noreply@sjinnovation.com",
-        from_name: config.from_name || "SJ Innovation",
+        from_email: config.from_email || "noreply@organization.com",
+        from_name: config.from_name || "Organization",
         api_key: "", // Never pre-fill; show placeholder if key exists
         is_enabled: config.is_enabled ?? false,
         enable_open_tracking: config.enable_open_tracking ?? true,

@@ -16,8 +16,8 @@ import { AlertCircle, CheckCircle2, Mail, Settings, Eye, EyeOff } from 'lucide-r
 export default function LeadFollowUpAdmin() {
   const [sendGridApiKey, setSendGridApiKey] = useState('')
   const [showApiKey, setShowApiKey] = useState(false)
-  const [fromEmail, setFromEmail] = useState('noreply@sjinnovation.com')
-  const [fromName, setFromName] = useState('SJ Innovation')
+  const [fromEmail, setFromEmail] = useState('noreply@organization.com')
+  const [fromName, setFromName] = useState('Organization')
   const [enableOpenTracking, setEnableOpenTracking] = useState(true)
   const [enableClickTracking, setEnableClickTracking] = useState(true)
   const [isConfigured, setIsConfigured] = useState(false)

@@ -16,10 +16,10 @@ const ACTIVITY_SELECT = "*";
 const DEAL_METADATA_KEYS = [
   "deal_type", "category", "next_step", "pipeline", "assigned_pod",
   "estimate_url", "internal_estimate_doc_url", "client_estimate_doc_url",
-  "pandadoc_proposal_url", "hubspot_deal_url", "leadslift_crm_deal_url",
+  "pandadoc_proposal_url", "leadslift_crm_deal_url",
   "google_drive_folder_url", "workboard_ai_link", "collaborative_ai_link", "client_agent_folder",
   "company_name", "client_email", "contact_first_name", "contact_last_name", "contact_phone",
-  "website", "linkedin_profile", "hubspot_deal_id", "hubspot_owner_id", "type_of_work",
+  "website", "linkedin_profile", "type_of_work",
 ] as const;
 
 export function useDeals(filters?: DealFilters) {

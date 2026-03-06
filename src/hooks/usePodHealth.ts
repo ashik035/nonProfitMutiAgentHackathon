@@ -1,6 +1,8 @@
 /**
  * Pod Health Hooks
  * React Query hooks for pod health and performance tracking
+ * Note: productivity_records table has been removed. These hooks now return
+ * pod structure data without productivity metrics.
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -24,124 +26,34 @@ export const podHealthKeys = {
 // ============================================
 
 /**
- * Fetch aggregated pod health KPIs
+ * Fetch aggregated pod health KPIs.
+ * Returns pod count and zero placeholders for productivity metrics
+ * (productivity_records table removed).
  */
 export function usePodHealth() {
   return useQuery({
     queryKey: podHealthKeys.stats(),
     queryFn: async (): Promise<PodHealthStats> => {
-      // Get all active pods with members
       const { data: pods, error: podsError } = await supabase
         .from('pods')
-        .select('id, name')
+        .select('id')
         .eq('is_active', true);
 
       if (podsError) throw podsError;
 
-      const { data: podEmployees } = await (supabase as any)
-        .from('pod_employees')
-        .select('pod_id, employee_id, user_id')
-        .eq('is_active', true);
-
-      if (!podEmployees || podEmployees.length === 0) {
-        return {
-          pods_tracked: 0,
-          avg_throughput_pct: 0,
-          sla_adherence_pct: 0,
-          coaching_needs_count: 0,
-        };
-      }
-
-      // Get employee emails for productivity lookup
-      const employeeIds = [...new Set(podEmployees.map((pe: any) => pe.employee_id).filter(Boolean))] as string[];
-      
-      // Try to get employee emails from employee_profiles
-      const { data: employees } = await (supabase as any)
-        .from('employee_profiles')
-        .select('id, email')
-        .in('id', employeeIds);
-
-      const emailMap = new Map<string, string>();
-      (employees || []).forEach((emp: any) => {
-        if (emp.id && emp.email) {
-          emailMap.set(emp.id, emp.email);
-        }
-      });
-
-      // Get latest productivity records (current week or most recent)
-      const { data: productivity } = await (supabase as any)
-        .from('productivity_records')
-        .select('employee_email, utilization_pct, efficiency_score')
-        .order('week_start', { ascending: false })
-        .limit(1000); // Get recent records
-
-      // Group by employee email
-      const productivityMap = new Map<string, { utilization: number; efficiency: number }>();
-      (productivity || []).forEach((prod: any) => {
-        if (!productivityMap.has(prod.employee_email)) {
-          productivityMap.set(prod.employee_email, {
-            utilization: prod.utilization_pct || 0,
-            efficiency: prod.efficiency_score || 0,
-          });
-        }
-      });
-
-      // Calculate metrics per pod
-      let totalThroughput = 0;
-      let totalSlaAdherent = 0;
-      let totalMembers = 0;
-      let coachingNeeds = 0;
-
-      pods?.forEach((pod) => {
-        const members = podEmployees.filter((pe) => pe.pod_id === pod.id);
-        if (members.length === 0) return;
-
-        let podThroughput = 0;
-        let podSlaAdherent = 0;
-        let podMembersWithData = 0;
-
-        members.forEach((member) => {
-          const email = member.employee_id ? emailMap.get(member.employee_id) : null;
-          if (!email) return;
-
-          const prod = productivityMap.get(email);
-          if (!prod) return;
-
-          const productivity = (prod.utilization + prod.efficiency) / 2;
-          podThroughput += productivity;
-          podMembersWithData += 1;
-
-          if (productivity >= 85) {
-            podSlaAdherent += 1;
-          }
-          if (productivity < 60) {
-            coachingNeeds += 1;
-          }
-        });
-
-        if (podMembersWithData > 0) {
-          totalThroughput += podThroughput / podMembersWithData;
-          totalSlaAdherent += podSlaAdherent;
-          totalMembers += podMembersWithData;
-        }
-      });
-
-      const podsTracked = (pods || []).length;
-      const avgThroughput = podsTracked > 0 ? totalThroughput / podsTracked : 0;
-      const slaAdherence = totalMembers > 0 ? (totalSlaAdherent / totalMembers) * 100 : 0;
-
       return {
-        pods_tracked: podsTracked,
-        avg_throughput_pct: Math.round(avgThroughput * 10) / 10,
-        sla_adherence_pct: Math.round(slaAdherence * 10) / 10,
-        coaching_needs_count: coachingNeeds,
+        pods_tracked: (pods || []).length,
+        avg_throughput_pct: 0,
+        sla_adherence_pct: 0,
+        coaching_needs_count: 0,
       };
     },
   });
 }
 
 /**
- * Fetch pod health records for all pods
+ * Fetch pod health records for all pods.
+ * Returns pod structure with zero productivity metrics.
  */
 export function usePodHealthRecords() {
   return useQuery({
@@ -160,83 +72,25 @@ export function usePodHealthRecords() {
         .select('pod_id, employee_id, user_id, role')
         .eq('is_active', true);
 
-      // Get managers
-      const managers = podEmployees?.filter((pe) => pe.role === 'manager') || [];
-      const managerMap = new Map<string, typeof managers[0]>();
-      managers.forEach((m) => {
-        managerMap.set(m.pod_id, m);
-      });
+      const managers = (podEmployees || []).filter((pe: any) => pe.role === 'manager');
+      const managerMap = new Map<string, any>();
+      managers.forEach((m: any) => managerMap.set(m.pod_id, m));
 
-      // Get employee emails
-      const employeeIds = [...new Set(podEmployees?.map((pe: any) => pe.employee_id).filter(Boolean) || [])] as string[];
+      const employeeIds = [...new Set((podEmployees || []).map((pe: any) => pe.employee_id).filter(Boolean))] as string[];
       const { data: employees } = await (supabase as any)
         .from('employee_profiles')
-        .select('id, email, full_name')
+        .select('id, full_name, email')
         .in('id', employeeIds);
 
-      const emailMap = new Map<string, string>();
       const nameMap = new Map<string, string>();
       (employees || []).forEach((emp: any) => {
-        if (emp.id && emp.email) {
-          emailMap.set(emp.id, emp.email);
-          nameMap.set(emp.id, emp.full_name || emp.email);
-        }
+        if (emp.id) nameMap.set(emp.id, emp.full_name || emp.email || '');
       });
 
-      // Get productivity data
-      const emails = [...emailMap.values()];
-      const { data: productivity } = await (supabase as any)
-        .from('productivity_records')
-        .select('employee_email, utilization_pct, efficiency_score')
-        .in('employee_email', emails)
-        .order('week_start', { ascending: false })
-        .limit(1000);
-
-      const productivityMap = new Map<string, number>();
-      (productivity || []).forEach((prod: any) => {
-        if (!productivityMap.has(prod.employee_email)) {
-          const avg = ((prod.utilization_pct || 0) + (prod.efficiency_score || 0)) / 2;
-          productivityMap.set(prod.employee_email, avg);
-        }
-      });
-
-      // Calculate metrics per pod
-      const records: PodHealthRecord[] = (pods || []).map((pod) => {
-        const members = podEmployees?.filter((pe) => pe.pod_id === pod.id) || [];
+      return (pods || []).map((pod: any) => {
+        const members = (podEmployees || []).filter((pe: any) => pe.pod_id === pod.id);
         const manager = managerMap.get(pod.id);
-
-        let throughputSum = 0;
-        let slaAdherent = 0;
-        let coachingNeeds = 0;
-        let membersWithData = 0;
-
-        members.forEach((member) => {
-          const email = member.employee_id ? emailMap.get(member.employee_id) : null;
-          if (!email) return;
-
-          const productivity = productivityMap.get(email);
-          if (productivity === undefined) return;
-
-          throughputSum += productivity;
-          membersWithData += 1;
-
-          if (productivity >= 85) {
-            slaAdherent += 1;
-          }
-          if (productivity < 60) {
-            coachingNeeds += 1;
-          }
-        });
-
-        const throughput = membersWithData > 0 ? throughputSum / membersWithData : 0;
-        const slaAdherence = membersWithData > 0 ? (slaAdherent / membersWithData) * 100 : 0;
-        const isOutOfSla = slaAdherence < 90;
-
-        // Get manager name
-        let managerName: string | null = null;
-        if (manager?.employee_id) {
-          managerName = nameMap.get(manager.employee_id) || null;
-        }
+        const managerName = manager?.employee_id ? nameMap.get(manager.employee_id) || null : null;
 
         return {
           pod_id: pod.id,
@@ -245,20 +99,19 @@ export function usePodHealthRecords() {
           manager_id: manager?.user_id || null,
           manager_name: managerName,
           member_count: members.length,
-          throughput_pct: Math.round(throughput * 10) / 10,
-          sla_adherence_pct: Math.round(slaAdherence * 10) / 10,
-          coaching_needs_count: coachingNeeds,
-          is_out_of_sla: isOutOfSla,
+          throughput_pct: 0,
+          sla_adherence_pct: 0,
+          coaching_needs_count: 0,
+          is_out_of_sla: false,
         };
       });
-
-      return records;
     },
   });
 }
 
 /**
- * Fetch member performance for a specific pod
+ * Fetch member performance for a specific pod.
+ * Returns member list without productivity metrics.
  */
 export function usePodMemberPerformance(podId: string | undefined) {
   return useQuery({
@@ -275,61 +128,32 @@ export function usePodMemberPerformance(podId: string | undefined) {
       if (peError) throw peError;
       if (!podEmployees || podEmployees.length === 0) return [];
 
-      const employeeIds = podEmployees.map((pe) => pe.employee_id).filter(Boolean);
+      const employeeIds = podEmployees.map((pe: any) => pe.employee_id).filter(Boolean);
       const { data: employees } = await (supabase as any)
         .from('employee_profiles')
-        .select('id, email, full_name, department, location')
+        .select('id, email, full_name, location')
         .in('id', employeeIds);
 
       const employeeMap = new Map<string, any>();
-      (employees || []).forEach((emp: any) => {
-        employeeMap.set(emp.id, emp);
-      });
-
-      const emails = (employees || []).map((e: any) => e.email).filter(Boolean);
-      const { data: productivity } = await (supabase as any)
-        .from('productivity_records')
-        .select('employee_email, utilization_pct, efficiency_score')
-        .in('employee_email', emails)
-        .order('week_start', { ascending: false })
-        .limit(1000);
-
-      const productivityMap = new Map<string, number>();
-      (productivity || []).forEach((prod: any) => {
-        if (!productivityMap.has(prod.employee_email)) {
-          const avg = ((prod.utilization_pct || 0) + (prod.efficiency_score || 0)) / 2;
-          productivityMap.set(prod.employee_email, avg);
-        }
-      });
+      (employees || []).forEach((emp: any) => employeeMap.set(emp.id, emp));
 
       const performances: PodMemberPerformance[] = podEmployees
-        .map((pe) => {
+        .map((pe: any) => {
           const emp = pe.employee_id ? employeeMap.get(pe.employee_id) : null;
           if (!emp) return null;
-
-          const productivity = productivityMap.get(emp.email) || null;
-
           return {
             employee_id: pe.employee_id || '',
             employee_name: emp.full_name || emp.email,
             email: emp.email,
-            department: emp.department || null,
+            department: null,
             location: emp.location || null,
-            productivity_pct: productivity,
+            productivity_pct: null,
             role: (pe.role as 'manager' | 'member') || null,
           };
         })
         .filter(Boolean) as PodMemberPerformance[];
 
-      return performances.sort((a, b) => {
-        // Sort by productivity descending, then by name
-        if (a.productivity_pct !== null && b.productivity_pct !== null) {
-          return b.productivity_pct - a.productivity_pct;
-        }
-        if (a.productivity_pct !== null) return -1;
-        if (b.productivity_pct !== null) return 1;
-        return a.employee_name.localeCompare(b.employee_name);
-      });
+      return performances.sort((a, b) => a.employee_name.localeCompare(b.employee_name));
     },
     enabled: !!podId,
   });
@@ -353,16 +177,13 @@ export function useAssignPodManager() {
       podId: string;
       employeeId: string | null;
     }): Promise<void> => {
-      // First, remove existing manager role from this pod
       await (supabase as any)
         .from('pod_employees')
         .update({ role: 'member' })
         .eq('pod_id', podId)
         .eq('role', 'manager');
 
-      // If employeeId is provided, set as manager
       if (employeeId) {
-        // Check if employee is already in pod
         const { data: existing } = await supabase
           .from('pod_employees')
           .select('id')
@@ -371,14 +192,12 @@ export function useAssignPodManager() {
           .single();
 
         if (existing) {
-          // Update existing
           const { error } = await (supabase as any)
             .from('pod_employees')
             .update({ role: 'manager' })
             .eq('id', existing.id);
           if (error) throw error;
         } else {
-          // Insert new
           const { error } = await (supabase as any).from('pod_employees').insert({
             pod_id: podId,
             employee_id: employeeId,
@@ -400,4 +219,3 @@ export function useAssignPodManager() {
     },
   });
 }
-
