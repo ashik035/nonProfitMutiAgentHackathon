@@ -9,10 +9,10 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Brain, Shield, Building2, FolderKanban, DollarSign, Settings, ShieldCheck, LogOut, User } from "lucide-react";
 
 const TEST_ACCOUNTS = [
-  { label: "Executive Director", email: "ceo@collabai.software", role: "executive_director", icon: Building2, color: "border-blue-500/30 hover:bg-blue-500/10" },
-  { label: "Development Director", email: "demo@collabai.software", role: "development_director", icon: FolderKanban, color: "border-green-500/30 hover:bg-green-500/10" },
-  { label: "Finance Manager", email: "finance@collabai.software", role: "finance_manager", icon: DollarSign, color: "border-amber-500/30 hover:bg-amber-500/10" },
-  { label: "Operations Manager", email: "ic@collabai.software", role: "operations_manager", icon: Settings, color: "border-teal-500/30 hover:bg-teal-500/10" },
+  { label: "Executive Director", email: "director@nonprofitai.software", role: "executive_director", icon: Building2, color: "border-blue-500/30 hover:bg-blue-500/10" },
+  { label: "Development Director", email: "development@nonprofitai.software", role: "development_director", icon: FolderKanban, color: "border-green-500/30 hover:bg-green-500/10" },
+  { label: "Finance Manager", email: "finance@nonprofitai.software", role: "finance_manager", icon: DollarSign, color: "border-amber-500/30 hover:bg-amber-500/10" },
+  { label: "Operations Manager", email: "operations@nonprofitai.software", role: "operations_manager", icon: Settings, color: "border-teal-500/30 hover:bg-teal-500/10" },
 ] as const;
 
 const TEST_PASSWORD = "Demo@123"; // Must match docs/public_website/features.md; ensure demo users exist in Supabase Auth.
