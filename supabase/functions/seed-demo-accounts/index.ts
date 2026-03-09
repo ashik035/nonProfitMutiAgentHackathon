@@ -44,6 +44,7 @@ Deno.serve(async (req) => {
               { user_id: existing.id, role: account.role },
               { onConflict: "user_id,role" }
             );
+            await supabase.from("profiles").update({ full_name: account.fullName }).eq("id", existing.id);
             results.push({ email: account.email, status: "already_exists", role: account.role });
             continue;
           }
