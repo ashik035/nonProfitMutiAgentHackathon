@@ -10,8 +10,8 @@ interface Profile {
   full_name?: string;
   avatar_url?: string;
   role?: string;
-  // Agency role for dashboard routing (owner | pm | ic)
-  agencyRole?: "owner" | "pm" | "ic";
+  // Agency role for dashboard routing — resolved to new nonprofit roles in useAgencyRole()
+  agencyRole?: string;
 }
 
 interface AuthContextType {
@@ -64,7 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Fetch agency role preferences from user_role_preferences table
   const fetchAgencyPreferences = async (
     userId: string
-  ): Promise<{ agencyRole?: "owner" | "pm" | "ic" }> => {
+  ): Promise<{ agencyRole?: string }> => {
     try {
       const { data, error } = await (supabase as any)
         .from("user_role_preferences")
@@ -79,7 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       return {
-        agencyRole: (data?.agency_role as "owner" | "pm" | "ic" | null) ?? undefined,
+        agencyRole: (data?.agency_role as string | null) ?? undefined,
       };
     } catch (error) {
       console.error("Error fetching agency preferences:", error);

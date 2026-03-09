@@ -7,7 +7,14 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Settings, Save, RefreshCw, Building2, Mail, Zap, Shield, Loader2, Database } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Settings, Save, RefreshCw, Building2, Mail, Zap, Shield, Loader2, Database, Bot, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -23,6 +30,16 @@ export default function SystemSettings() {
     seedSampleData: false,
   });
   const [isSeeding, setIsSeeding] = useState(false);
+
+  // AI Agent Configuration (UI-only, no Supabase write yet)
+  const [agentRunFrequency, setAgentRunFrequency] = useState("daily");
+  const [agentAlertThreshold, setAgentAlertThreshold] = useState("medium");
+  const [agentHumanApproval, setAgentHumanApproval] = useState(false);
+
+  // Data Security Settings (UI-only, no Supabase write yet)
+  const [dataRetentionPeriod, setDataRetentionPeriod] = useState("1-year");
+  const [noRetainAI, setNoRetainAI] = useState(false);
+  const [auditLogRetention, setAuditLogRetention] = useState("1-year");
 
   // Load config into local state when it arrives
   useEffect(() => {
@@ -668,6 +685,138 @@ export default function SystemSettings() {
               Number of days before a user session expires
             </p>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* AI Agent Configuration */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Bot className="h-5 w-5" />
+            <CardTitle>AI Agent Configuration</CardTitle>
+          </div>
+          <CardDescription>Configure how AI agents run and surface findings</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="agentFrequency">Run Frequency</Label>
+            <Select value={agentRunFrequency} onValueChange={setAgentRunFrequency}>
+              <SelectTrigger id="agentFrequency">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="hourly">Every hour</SelectItem>
+                <SelectItem value="six-hours">Every 6 hours</SelectItem>
+                <SelectItem value="daily">Daily</SelectItem>
+                <SelectItem value="manual">Manual only</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Separator />
+
+          <div className="space-y-2">
+            <Label htmlFor="alertThreshold">Alert Threshold</Label>
+            <Select value={agentAlertThreshold} onValueChange={setAgentAlertThreshold}>
+              <SelectTrigger id="alertThreshold">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="low">Low — surface all findings</SelectItem>
+                <SelectItem value="medium">Medium — surface moderate+ findings</SelectItem>
+                <SelectItem value="high">High — surface critical findings only</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Separator />
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label>Human Approval Required</Label>
+              <p className="text-sm text-muted-foreground">
+                Require human approval before applying AI suggestions
+              </p>
+            </div>
+            <Switch
+              checked={agentHumanApproval}
+              onCheckedChange={setAgentHumanApproval}
+            />
+          </div>
+
+          <Button
+            onClick={() => toast.success("Agent settings saved successfully")}
+            className="gap-2"
+          >
+            <Save className="h-4 w-4" />
+            Save Agent Settings
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Data Security */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Lock className="h-5 w-5" />
+            <CardTitle>Data Security</CardTitle>
+          </div>
+          <CardDescription>Configure data retention and AI privacy settings</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="dataRetention">Data Retention Period</Label>
+            <Select value={dataRetentionPeriod} onValueChange={setDataRetentionPeriod}>
+              <SelectTrigger id="dataRetention">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="30-days">30 days</SelectItem>
+                <SelectItem value="90-days">90 days</SelectItem>
+                <SelectItem value="1-year">1 year</SelectItem>
+                <SelectItem value="indefinite">Indefinite</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Separator />
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label>No-Retain AI Mode</Label>
+              <p className="text-sm text-muted-foreground">
+                Do not store conversation or suggestion data in AI systems
+              </p>
+            </div>
+            <Switch
+              checked={noRetainAI}
+              onCheckedChange={setNoRetainAI}
+            />
+          </div>
+
+          <Separator />
+
+          <div className="space-y-2">
+            <Label htmlFor="auditRetention">Audit Log Retention</Label>
+            <Select value={auditLogRetention} onValueChange={setAuditLogRetention}>
+              <SelectTrigger id="auditRetention">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="90-days">90 days</SelectItem>
+                <SelectItem value="1-year">1 year</SelectItem>
+                <SelectItem value="7-years">7 years</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Button
+            onClick={() => toast.success("Security settings saved successfully")}
+            className="gap-2"
+          >
+            <Save className="h-4 w-4" />
+            Save Security Settings
+          </Button>
         </CardContent>
       </Card>
     </div>

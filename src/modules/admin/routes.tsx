@@ -55,6 +55,7 @@ import CommonKnowledgeManagement from "@/pages/admin/CommonKnowledgeManagement";
 import ImplementationStatus from "@/pages/admin/ImplementationStatus";
 import DashboardWidgets from "@/pages/admin/DashboardWidgets";
 import AgencyRoles from "@/pages/admin/AgencyRoles";
+import OrganizationSettings from "@/pages/admin/OrganizationSettings";
 import SeedRunner from "@/pages/admin/SeedRunner";
 import GeminiRAGConfig from "@/pages/admin/GeminiRAGConfig";
 import MemoryAnalytics from "@/pages/admin/MemoryAnalytics";
@@ -113,6 +114,7 @@ export const adminRoutes = (
     <Route path="/admin/settings/project-modules" element={<ProjectModules />} />
     <Route path="/admin/settings/dashboard-widgets" element={<DashboardWidgets />} />
     <Route path="/admin/settings/agency-roles" element={<AgencyRoles />} />
+    <Route path="/admin/organization-settings" element={<OrganizationSettings />} />
 
     <Route path="/admin/integrations" element={<Integrations />} />
     <Route path="/admin/integrations/oauth/callback" element={<OAuthCallback />} />

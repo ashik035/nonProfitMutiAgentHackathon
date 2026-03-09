@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Users, Building2, FolderKanban, User, Search, Loader2 } from "lucide-react";
+import { Users, Building2, FolderKanban, User, Search, Loader2, DollarSign, Settings, ShieldCheck } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -23,24 +23,30 @@ import {
   useUpsertAgencyRole,
   type UserAgencyRow,
 } from "@/hooks/useAgencyRoleAdmin";
-import type { AgencyRole } from "@/hooks/useAgencyRole";
+import { type AgencyRole, ROLE_DISPLAY_NAMES } from "@/hooks/useAgencyRole";
 
 const ROLE_LABELS: Record<string, string> = {
-  owner: "Owner",
-  pm: "PM",
-  ic: "IC",
+  executive_director: ROLE_DISPLAY_NAMES.executive_director,
+  development_director: ROLE_DISPLAY_NAMES.development_director,
+  finance_manager: ROLE_DISPLAY_NAMES.finance_manager,
+  operations_manager: ROLE_DISPLAY_NAMES.operations_manager,
+  admin: ROLE_DISPLAY_NAMES.admin,
 };
 
 const ROLE_COLORS: Record<string, string> = {
-  owner: "bg-purple-500/15 text-purple-700 dark:text-purple-400",
-  pm: "bg-blue-500/15 text-blue-700 dark:text-blue-400",
-  ic: "bg-green-500/15 text-green-700 dark:text-green-400",
+  executive_director: "bg-blue-500/15 text-blue-700 dark:text-blue-400",
+  development_director: "bg-green-500/15 text-green-700 dark:text-green-400",
+  finance_manager: "bg-amber-500/15 text-amber-700 dark:text-amber-400",
+  operations_manager: "bg-teal-500/15 text-teal-700 dark:text-teal-400",
+  admin: "bg-slate-500/15 text-slate-700 dark:text-slate-400",
 };
 
 const ROLE_ICONS: Record<string, React.ElementType> = {
-  owner: Building2,
-  pm: FolderKanban,
-  ic: User,
+  executive_director: Building2,
+  development_director: FolderKanban,
+  finance_manager: DollarSign,
+  operations_manager: Settings,
+  admin: ShieldCheck,
 };
 
 function initials(name: string | null, email: string | null): string {
@@ -108,9 +114,11 @@ function UserRow({ row }: { row: UserAgencyRow }) {
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="none">No role</SelectItem>
-          <SelectItem value="owner">Owner</SelectItem>
-          <SelectItem value="pm">PM</SelectItem>
-          <SelectItem value="ic">IC</SelectItem>
+          <SelectItem value="executive_director">Executive Director</SelectItem>
+          <SelectItem value="development_director">Development Director</SelectItem>
+          <SelectItem value="finance_manager">Finance Manager</SelectItem>
+          <SelectItem value="operations_manager">Operations Manager</SelectItem>
+          <SelectItem value="admin">Administrator</SelectItem>
         </SelectContent>
       </Select>
     </div>
@@ -165,7 +173,7 @@ export default function AgencyRoles() {
               </CardDescription>
             </div>
             <div className="flex gap-2 flex-wrap">
-              {(["owner", "pm", "ic"] as const).map((role) => (
+              {(["executive_director", "development_director", "finance_manager", "operations_manager", "admin"] as const).map((role) => (
                 <Badge
                   key={role}
                   variant="outline"
@@ -218,16 +226,24 @@ export default function AgencyRoles() {
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground space-y-1.5">
           <p>
-            <strong className="text-foreground">Owner</strong> — Organization-level metrics, watch list,
-            and AI digest.
+            <strong className="text-foreground">Executive Director</strong> — Organization at a glance:
+            data health, grant deadlines, board reports, donor growth.
           </p>
           <p>
-            <strong className="text-foreground">PM</strong> — Project manager view: my projects
-            table, team capacity by pod, meetings this week.
+            <strong className="text-foreground">Development Director</strong> — Donor and engagement
+            activity: untagged attendees, pipeline prospects, follow-up tasks.
           </p>
           <p>
-            <strong className="text-foreground">IC</strong> — Individual contributor: My Work
-            kanban, my projects list, meetings, AI digest.
+            <strong className="text-foreground">Finance Manager</strong> — Financial operations:
+            unmatched transactions, restricted fund alerts, grant utilization.
+          </p>
+          <p>
+            <strong className="text-foreground">Operations Manager</strong> — System and data operations:
+            data health, active AI agents, integrations, pending AI actions.
+          </p>
+          <p>
+            <strong className="text-foreground">Administrator</strong> — Combined view of all dashboard
+            cards and system administration.
           </p>
         </CardContent>
       </Card>

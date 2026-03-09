@@ -6,6 +6,11 @@ import { RoleSetupModal } from "@/components/dashboards/RoleSetupModal";
 import { useDashboardStats, useRecentActivity, getTimeAgo, useAITeamSummary } from "@/hooks/useDashboard";
 
 // Lazy-load role dashboards so they don't inflate the main bundle
+const ExecutiveDirectorDashboard = lazy(() => import("@/components/dashboard/ExecutiveDirectorDashboard"));
+const DevelopmentDirectorDashboard = lazy(() => import("@/components/dashboard/DevelopmentDirectorDashboard"));
+const FinanceManagerDashboard = lazy(() => import("@/components/dashboard/FinanceManagerDashboard"));
+const OperationsManagerDashboard = lazy(() => import("@/components/dashboard/OperationsManagerDashboard"));
+// Legacy dashboards kept for backwards compat
 const OwnerDashboard = lazy(() => import("@/pages/dashboards/OwnerDashboard"));
 const PMDashboard = lazy(() => import("@/pages/dashboards/PMDashboard"));
 const ICDashboard = lazy(() => import("@/pages/dashboards/ICDashboard"));
@@ -79,31 +84,40 @@ export default function Dashboard() {
   if (loading) return <DashboardFallback />;
 
   // Route to role-specific dashboards.
-  // Admins always see the full generic dashboard.
+  // Admins see the combined generic dashboard (all cards).
   if (!isAdmin) {
-    if (agencyRole === "owner") {
+    if (agencyRole === "executive_director") {
       return (
         <Suspense fallback={<DashboardFallback />}>
-          <OwnerDashboard />
+          <ExecutiveDirectorDashboard />
         </Suspense>
       );
     }
-    if (agencyRole === "pm") {
+    if (agencyRole === "development_director") {
       return (
         <Suspense fallback={<DashboardFallback />}>
-          <PMDashboard />
+          <DevelopmentDirectorDashboard />
         </Suspense>
       );
     }
-    if (agencyRole === "ic") {
+    if (agencyRole === "finance_manager") {
       return (
         <Suspense fallback={<DashboardFallback />}>
-          <ICDashboard />
+          <FinanceManagerDashboard />
         </Suspense>
       );
     }
-    // agencyRole === null → show role-selection modal; render generic dashboard behind it
-    if (agencyRole === null) {
+    if (agencyRole === "operations_manager") {
+      return (
+        <Suspense fallback={<DashboardFallback />}>
+          <OperationsManagerDashboard />
+        </Suspense>
+      );
+    }
+    if (agencyRole === "admin") {
+      // Admin agency role sees the full generic dashboard below
+    } else if (agencyRole === null) {
+      // agencyRole === null → show role-selection modal
       return <RoleSetupModal open />;
     }
   }

@@ -16,7 +16,12 @@ import type { ModuleId } from "@/shared/config/modules";
  * Organization roles that can see a nav item or group.
  * When omitted the item is visible to all roles.
  */
-export type AgencyRole = "owner" | "pm" | "ic";
+export type AgencyRole =
+  | "executive_director"
+  | "development_director"
+  | "finance_manager"
+  | "operations_manager"
+  | "admin";
 
 export interface NavItem {
   title: string;
@@ -232,7 +237,7 @@ export const navigationGroups: NavGroup[] = [
     id: "operations",
     title: "Operations",
     icon: "Settings2",
-    agencyRoles: ["owner", "pm"], // Only leadership roles see operations
+    agencyRoles: ["executive_director", "development_director"], // Only leadership roles see operations
     items: [
       {
         title: "Feedback",
@@ -472,6 +477,11 @@ export const adminNavigation: NavGroup[] = [
         title: "System Settings",
         href: "/admin/settings",
         icon: "Settings",
+      },
+      {
+        title: "Organization Settings",
+        href: "/admin/organization-settings",
+        icon: "Building2",
       },
       {
         title: "Integrations",

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Building2, FolderKanban, User, Loader2 } from "lucide-react";
+import { Building2, FolderKanban, DollarSign, Settings, ShieldCheck, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -25,31 +25,40 @@ interface RoleOption {
 
 const ROLE_OPTIONS: RoleOption[] = [
   {
-    role: "owner",
-    label: "Organization Owner",
-    subtitle: "Health metrics, watch list, and AI digest",
+    role: "executive_director",
+    label: "Executive Director",
+    subtitle: "Organization at a glance: data health, grants, board reports, donor growth",
     icon: Building2,
-    color: "text-purple-700 dark:text-purple-400",
-    bgColor: "bg-purple-500/10",
-    borderColor: "border-purple-500/40",
-  },
-  {
-    role: "pm",
-    label: "Project Manager",
-    subtitle: "My projects table, team capacity, meetings this week",
-    icon: FolderKanban,
     color: "text-blue-700 dark:text-blue-400",
     bgColor: "bg-blue-500/10",
     borderColor: "border-blue-500/40",
   },
   {
-    role: "ic",
-    label: "Individual Contributor",
-    subtitle: "My Work kanban, my projects, meetings, AI digest",
-    icon: User,
+    role: "development_director",
+    label: "Development Director",
+    subtitle: "Donor and engagement activity: pipeline, follow-ups, event attendees",
+    icon: FolderKanban,
     color: "text-green-700 dark:text-green-400",
     bgColor: "bg-green-500/10",
     borderColor: "border-green-500/40",
+  },
+  {
+    role: "finance_manager",
+    label: "Finance Manager",
+    subtitle: "Financial operations: transactions, restricted funds, grant utilization",
+    icon: DollarSign,
+    color: "text-amber-700 dark:text-amber-400",
+    bgColor: "bg-amber-500/10",
+    borderColor: "border-amber-500/40",
+  },
+  {
+    role: "operations_manager",
+    label: "Operations Manager",
+    subtitle: "System and data operations: AI agents, integrations, data health",
+    icon: Settings,
+    color: "text-teal-700 dark:text-teal-400",
+    bgColor: "bg-teal-500/10",
+    borderColor: "border-teal-500/40",
   },
 ];
 
