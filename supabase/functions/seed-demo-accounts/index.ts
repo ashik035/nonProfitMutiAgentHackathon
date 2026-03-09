@@ -16,9 +16,10 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     const accounts = [
-      { email: "ceo@collabai.software", password: "Demo@123", role: "admin", fullName: "CEO Demo" },
-      { email: "demo@collabai.software", password: "Demo@123", role: "moderator", fullName: "PM Demo" },
-      { email: "ic@collabai.software", password: "Demo@123", role: "user", fullName: "IC Demo" },
+      { email: "ceo@collabai.software", password: "Demo@123", role: "admin", fullName: "Executive Director" },
+      { email: "demo@collabai.software", password: "Demo@123", role: "moderator", fullName: "Development Director" },
+      { email: "finance@collabai.software", password: "Demo@123", role: "user", fullName: "Finance Manager" },
+      { email: "ic@collabai.software", password: "Demo@123", role: "user", fullName: "Operations Manager" },
     ];
 
     const results = [];
@@ -43,6 +44,7 @@ Deno.serve(async (req) => {
               { user_id: existing.id, role: account.role },
               { onConflict: "user_id,role" }
             );
+            await supabase.from("profiles").update({ full_name: account.fullName }).eq("id", existing.id);
             results.push({ email: account.email, status: "already_exists", role: account.role });
             continue;
           }
