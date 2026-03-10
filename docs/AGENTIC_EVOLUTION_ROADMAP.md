@@ -809,7 +809,7 @@ User → Frontend → Agent Orchestrator
 ## 🚀 Quick Wins (Start Immediately)
 
 ### Completed
-- **Memory System MVP** (completed March 6, 2025) — Retrieval and extraction are wired for conversation chat (`agent-conversation-chat`) and streaming chat (`agent-chat-stream`). Only agents with `memory_enabled = true` use the flow. Database tables and consolidated migration: `20260306150000_agentic_conversation_memory_consolidated.sql`.
+- **Memory System MVP** (completed March 10, 2026) — Retrieval and extraction are wired server-side for both `agent-conversation-chat` and `agent-chat-stream`. Only agents with `memory_enabled = true` use the flow. Database tables and consolidated migration: `20260306150000_agentic_conversation_memory_consolidated.sql`. UI: agent selector and conversation header show a "Memory" badge for memory-enabled agents.
 
 ### Week 1-2: Low-Hanging Fruit
 1. **Complete MCP Database Tables** (2 days)
