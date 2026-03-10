@@ -18,6 +18,7 @@ import {
 import {
   Send,
   Bot,
+  Brain,
   Loader2,
   Sparkles,
   RefreshCw,
@@ -141,6 +142,7 @@ export function AgentConversationView({
   const agent = conversation?.ai_agents;
   const conversationStarters = (agent as any)?.conversation_starters || [];
   const welcomeMessage = (agent as any)?.welcome_message;
+  const memoryEnabled = (agent as any)?.memory_enabled === true;
 
   const isLoading = conversationLoading || messagesLoading;
   const hasMessages = messages && messages.length > 0;
@@ -157,7 +159,15 @@ export function AgentConversationView({
               </AvatarFallback>
             </Avatar>
             <div>
-              <h2 className="font-semibold">{agent?.name || "AI Assistant"}</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="font-semibold">{agent?.name || "AI Assistant"}</h2>
+                {memoryEnabled && (
+                  <Badge variant="secondary" className="text-xs px-1.5 py-0 h-5 gap-1">
+                    <Brain className="h-3 w-3" />
+                    Memory
+                  </Badge>
+                )}
+              </div>
               {conversation?.title && (
                 <p className="text-sm text-muted-foreground truncate max-w-[300px]">
                   {conversation.title}

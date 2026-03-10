@@ -818,12 +818,13 @@ DROP TABLE IF EXISTS agent_memories CASCADE;
 
 **Problem:** Conversations don't create memories
 
+> **Note:** Memory extraction is automatic. After every assistant response, `agent-conversation-chat` (and `agent-chat-stream`) fire a background POST to `extract-agent-memories` — no manual trigger or client-side hook call is required.
+
 **Checklist:**
-1. Is `memory_enabled` true on the agent?
+1. Is `memory_enabled` true on the agent? (Check the agent card in `/ai-agents` — it shows a "Memory" badge when enabled.)
 2. Is `extract-agent-memories` edge function deployed?
-3. Extraction runs automatically after each message exchange for memory-enabled agents (conversation chat and streaming chat); no manual trigger required.
-4. Are embeddings being generated? (Check `generate-embeddings` function)
-5. Check Supabase function logs for errors
+3. Are embeddings being generated? (Check `generate-embeddings` function)
+4. Check Supabase function logs for errors
 
 ### Memory Retrieval Returns Empty
 
