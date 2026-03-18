@@ -42,6 +42,8 @@ import AIAgentsPage from "@/pages/AIAgentsPage";
 import AIAgentDetailPage from "@/pages/AIAgentDetailPage";
 import AIAgentSettingsPage from "@/pages/AIAgentSettingsPage";
 import IntegrationCenterPage from "@/pages/IntegrationCenterPage";
+import AgentsBrowse from "@/pages/AgentsBrowse";
+import AgentDetail from "@/pages/AgentDetail";
 
 /**
  * Public routes - no auth required
