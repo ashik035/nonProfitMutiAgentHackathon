@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeftRight, AlertTriangle, BarChart3, Sparkles, X } from "lucide-react";
+import AITeamsDashboardCard from "@/components/dashboards/AITeamsDashboardCard";
 import {
   DEMO_RECONCILIATION,
   DEMO_GRANTS,
