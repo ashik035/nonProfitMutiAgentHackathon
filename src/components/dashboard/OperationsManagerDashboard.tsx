@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ShieldCheck, Bot, Zap, Clock, Sparkles, X } from "lucide-react";
+import AITeamsDashboardCard from "@/components/dashboards/AITeamsDashboardCard";
 import {
   DEMO_DATA_HEALTH,
   DEMO_AGENTS,
