@@ -1,88 +1,79 @@
 
 
-# Plan: Create Nonprofit Control Tower Roadmap Document
+# AI Agent Browse System — Implementation Plan
 
-## Objective
-Create a comprehensive `docs/nonprofit-control-tower-roadmap.md` file that serves as the execution guide for transforming the SJ Control Tower into the Nonprofit Control Tower. No code changes -- document only.
+## Summary
 
-## What the Document Will Cover
+Build a full agent discovery experience with a **Browse page** (`/agents`), **Agent Detail page** (`/agents/:slug`), a **Dashboard card**, and contextual **presence indicators**. All agent/team data lives in a single static config file. The existing `/ai-agents` operational pages remain untouched.
 
-The roadmap MD will be structured as sequential, testable steps so that Claude Code (or you) can execute them one at a time:
+---
 
-### Document Structure
+## New Files to Create
 
-**Section 1 -- Project Overview**
-- Product name, tagline, selling point (agentic layer on top of existing CRM)
-- Tech stack (unchanged: React 18 + TypeScript + Vite + Supabase + shadcn/ui)
+### 1. `src/components/ai/agentTeamConfig.ts` — Static Team & Agent Config
+- Define `AgentTeamAgent` and `AgentTeamDef` interfaces
+- Export `agentTeams` record with 4 nonprofit-relevant teams:
+  - **Donor Intelligence Team** (`sales` → repurposed for nonprofit): Deal Coach → Donor Coach, etc.
+  - **Meeting AI Team** (`meetings`): Meeting Summarizer, Action Extractor, Efficiency Analyzer, Client Call Analyzer
+  - **Strategy AI Team** (`eos`): EOS Coach, Pattern Detective, Pod Health, Quarterly Digest
+  - **Project AI Team** (`projects`): Project Analyst, Bug & Feature Planner, Technical Planner, Code Reviewer
+- Each agent has: `name`, `slug`, `description`, `icon` (Lucide name), `capabilities[]`, `howToUse[]`, `whereToFind?`
+- Each team has: `id`, `name`, `tagline`, `accentColor`, `gradientFrom`, `gradientTo`
+- Export helpers: `allTeams`, `findAgentBySlug()`, `findTeamForAgent()`
 
-**Section 2 -- Module Decisions (Final)**
+### 2. `src/pages/AgentsBrowse.tsx` — Browse Page
+- Page header with Sparkles icon + title "AI Agents"
+- **Team Cards grid** (2-col): overlapping gradient icon circles, team name/tagline, "Explore Team" button that smooth-scrolls to detail section
+- **Team Detail Sections**: each with `id="team-{id}"` + `scroll-mt-24`, 4-col grid of `AgentBrowseCard`
+- **AgentBrowseCard** sub-component: gradient header strip → overlapping icon circle → name + "By Nonprofit AI" → category badge → description → "Learn More" button linking to `/agents/{slug}`
+- Skeleton loader on mount
 
-| Module | Action | Notes |
-|--------|--------|-------|
-| EOS | DELETE entirely | Remove `src/modules/eos/` (17 pages, components, hooks, types), all EOS nav groups, admin EOS section, routes from `App.tsx`, registry entry |
-| Productivity | DELETE entirely | Remove `src/modules/productivity/` (4 pages, hooks, types), nav items, admin "Productivity Import", registry entry |
-| Client Portal | DELETE | Remove `src/pages/client/` (2 files), routes from `App.tsx` |
-| Meetings | KEEP, hidden by default | Set `defaultEnabled: false` in `MODULE_REGISTRY`; no other changes |
-| Projects | KEEP, toggleable | Keep as-is, admin can enable/disable |
-| Business Dev | KEEP, toggleable | Keep as-is, admin can enable/disable |
-| Lead Follow-Up | KEEP, enabled | Stays active, users will use it |
-| Actions/Tasks | KEEP, toggleable | Already gated by feature flag |
-| Knowledge | KEEP | No changes |
-| Admin | KEEP | Simplify nav (remove EOS/Productivity sections) |
-| Platform | KEEP | Core, always enabled |
+### 3. `src/pages/AgentDetail.tsx` — Agent Detail Page
+- Resolve agent via `findAgentBySlug(slug)` from URL param; fallback to 404
+- **Hero**: gradient banner with decorative circles → overlapping icon → name + team badge + description → "Go to [Section]" CTA
+- **Main column** (2/3): Accordion with Capabilities, How to Use, Where to Find — all open by default
+- **Sidebar** (1/3): Info card (built by, team, category) + Related Agents card (sibling agents with gradient icons)
+- Mobile-responsive: single column on small screens
 
-**Section 3 -- Step-by-Step Execution Plan**
+### 4. `src/components/dashboards/AITeamsDashboardCard.tsx` — Dashboard Card
+- Horizontally scrollable row of mini team cards with gradient strips + overlapping icons
+- "Browse All Agents →" link at bottom
+- Subtle rainbow gradient overlay on outer card
 
-Each step is a single, testable unit:
+### 5. `src/components/ai/AIAgentPresenceIndicator.tsx` — Presence Pill
+- Small animated pill with pulsing dot + sparkles + agent name
+- Clicking navigates to `/agents/{slug}`
+- Uses team gradient for border tint
 
-- **Step 1**: Remove EOS module
-  - Files to delete: `src/modules/eos/` (entire directory)
-  - Files to edit: `App.tsx` (remove `eosRoutes` import and usage), `modules.ts` (remove `eos` from `ModuleId` union and `MODULE_REGISTRY`), `navigationStructure.ts` (remove "Strategy (EOS)" group, remove admin "EOS" group, remove `eosOnly` properties), `AppSidebar.tsx` (remove `isEosUser` logic), `env.ts` (remove `eos` from env map)
-  - Test: Build succeeds, app loads, no EOS nav items visible
+### 6. `src/components/ai/AgentTeamBanner.tsx` — Contextual Banner
+- Collapsible banner accepting `teamId` prop
+- Collapsed: overlapping icons + team name + chevron toggle
+- Expanded: horizontal scroll of agent mini-cards
 
-- **Step 2**: Remove Productivity module
-  - Files to delete: `src/modules/productivity/` (entire directory)
-  - Files to edit: `App.tsx` (remove `productivityRoutes`), `modules.ts` (remove from type and registry), `navigationStructure.ts` (remove Productivity/Processes from "Operations" group, remove "Productivity Import" from admin nav), `env.ts`
-  - Test: Build succeeds, no productivity nav items
+---
 
-- **Step 3**: Remove Client Portal
-  - Files to delete: `src/pages/client/ClientPortalDashboard.tsx`, `src/pages/client/ProjectDashboard.tsx`
-  - Files to edit: `App.tsx` (remove both client portal routes and imports)
-  - Test: Build succeeds, `/client/*` routes gone
+## Files to Modify
 
-- **Step 4**: Set Meetings to hidden by default
-  - File to edit: `modules.ts` -- change meetings `defaultEnabled` from `true` to `false`
-  - Test: Meetings nav hidden unless admin enables it
+### 7. `src/modules/platform/routes.tsx`
+- Add routes: `/agents` → `AgentsBrowse`, `/agents/:slug` → `AgentDetail`
+- Keep existing `/ai-agents` routes unchanged
 
-- **Step 5**: Rebrand to Nonprofit Control Tower
-  - Update sidebar branding, landing page title/tagline
-  - Update `BrandingContext` defaults if hardcoded
+### 8. `src/shared/data/navigationStructure.ts`
+- Add "AI Agents" item with href `/agents` to the `nonprofit-ops` nav group (or as a standalone item)
+- Keep existing "AI Agent Center" (`/ai-agents`) for operational view
 
-- **Step 6**: Clean up admin navigation
-  - Remove EOS admin group, productivity import, any orphaned references
-  - Keep: Users & Access, Knowledge & AI, System, AI & Automation, Content & Feedback
+### 9. Dashboard files (all 4 role dashboards)
+- Import and render `AITeamsDashboardCard` on each dashboard
 
-- **Step 7+**: New nonprofit modules (future phases)
-  - Data Health, Reconciliation, Events, Grants, Board Reports
-  - AI Agent Center (5 nonprofit operational agents)
-  - Integration Center (CRM/Finance/Payment/Email tiles)
-  - New user roles (Executive Director, Development Director, Finance Manager, Operations Manager)
+---
 
-**Section 4 -- New Nonprofit Modules Spec** (brief descriptions for future build)
+## Technical Details
 
-**Section 5 -- Design Guidelines**
-- Calm, trust-oriented color palette
-- "Operations Intelligence" language
-- Never show CRM-like record tables
-- Always reinforce "Connected to [CRM]" messaging
-
-**Section 6 -- Demo Data Requirements**
-
-## File to Create
-- `docs/nonprofit-control-tower-roadmap.md` -- single comprehensive file
-
-## What Will NOT Change
-- Zero code files modified or deleted
-- No module removals yet
-- No navigation changes yet
+- **Icons**: Use `icons` object from `lucide-react` for dynamic icon lookup by string name, with `Bot` fallback
+- **Gradients**: All stored as HSL value strings (`"280 70% 50%"`), applied via inline `style={{ background: linear-gradient(135deg, hsl(...), hsl(...)) }}`
+- **Overlapping circles**: `flex` with negative margins, `ring-3 ring-background`, descending z-index
+- **Category badges**: Color map keyed by team id → Tailwind classes with dark mode variants
+- **Scroll**: Team card click → `document.getElementById("team-{id}")?.scrollIntoView({ behavior: "smooth" })`
+- **No database changes** — purely static config + frontend components
+- **No breaking changes** to existing `/ai-agents` operational pages
 
