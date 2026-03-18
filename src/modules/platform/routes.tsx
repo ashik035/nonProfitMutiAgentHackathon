@@ -98,6 +98,10 @@ export const coreProtectedRoutes = (
     <Route path="/ai-agents/:id" element={<AIAgentDetailPage />} />
     <Route path="/ai-agents/:id/settings" element={<AIAgentSettingsPage />} />
     <Route path="/integration-center" element={<IntegrationCenterPage />} />
+
+    {/* Agent discovery pages */}
+    <Route path="/agents" element={<AgentsBrowse />} />
+    <Route path="/agents/:slug" element={<AgentDetail />} />
   </>
 );
 
