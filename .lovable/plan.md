@@ -1,88 +1,104 @@
 
 
-# Plan: Create Nonprofit Control Tower Roadmap Document
+# Documentation Cleanup & Update Plan
 
-## Objective
-Create a comprehensive `docs/nonprofit-control-tower-roadmap.md` file that serves as the execution guide for transforming the SJ Control Tower into the Nonprofit Control Tower. No code changes -- document only.
+## Problem
 
-## What the Document Will Cover
+The project has been rebranded from "CollabAi / SJ Control Tower" to **Nonprofit Control Tower (NonprofitAI.software)**, with modules removed (EOS, Productivity, Client Portal) and new nonprofit features added (Grants, Events, Board Reports, Data Health, Reconciliation, AI Agent Browse). But the documentation still references the old branding, old modules, and contains many stale one-off reports.
 
-The roadmap MD will be structured as sequential, testable steps so that Claude Code (or you) can execute them one at a time:
+---
 
-### Document Structure
+## Files to DELETE (root)
 
-**Section 1 -- Project Overview**
-- Product name, tagline, selling point (agentic layer on top of existing CRM)
-- Tech stack (unchanged: React 18 + TypeScript + Vite + Supabase + shadcn/ui)
+These are legacy implementation guides and status docs from the old "SJ Control Tower / CollabAi" era — no longer relevant:
 
-**Section 2 -- Module Decisions (Final)**
+| File | Reason |
+|------|--------|
+| `LEAD_FOLLOWUP_IMPLEMENTATION_GUIDE.md` | Old implementation tracker, lead-followup is embedded in business-dev |
+| `POD_MANAGEMENT_IMPLEMENTATION_STATUS.md` | Pod management status doc, stale |
+| `QUICK_REAL_DATA_INTEGRATION.md` | Old wiring guide for lead-followup pages |
+| `.pr-body.md` | One-off PR description, not project docs |
+| `deploy-edge-functions.sh` | References "CollabAI", outdated function list (24 V1 functions — now 120+) |
+| `verify-deployment.sh` | References "CollabAI", outdated verification script |
 
-| Module | Action | Notes |
-|--------|--------|-------|
-| EOS | DELETE entirely | Remove `src/modules/eos/` (17 pages, components, hooks, types), all EOS nav groups, admin EOS section, routes from `App.tsx`, registry entry |
-| Productivity | DELETE entirely | Remove `src/modules/productivity/` (4 pages, hooks, types), nav items, admin "Productivity Import", registry entry |
-| Client Portal | DELETE | Remove `src/pages/client/` (2 files), routes from `App.tsx` |
-| Meetings | KEEP, hidden by default | Set `defaultEnabled: false` in `MODULE_REGISTRY`; no other changes |
-| Projects | KEEP, toggleable | Keep as-is, admin can enable/disable |
-| Business Dev | KEEP, toggleable | Keep as-is, admin can enable/disable |
-| Lead Follow-Up | KEEP, enabled | Stays active, users will use it |
-| Actions/Tasks | KEEP, toggleable | Already gated by feature flag |
-| Knowledge | KEEP | No changes |
-| Admin | KEEP | Simplify nav (remove EOS/Productivity sections) |
-| Platform | KEEP | Core, always enabled |
+## Files to DELETE (docs/)
 
-**Section 3 -- Step-by-Step Execution Plan**
+| File | Reason |
+|------|--------|
+| `docs/AGENTIC_EVOLUTION_ROADMAP.md` | Strategic planning doc for "SJ Control Tower" — superseded by nonprofit roadmap |
+| `docs/AGENTIC_FEATURES_GUIDE.md` | Old agentic features guide, pre-nonprofit |
+| `docs/AGENTIC_QUICK_REFERENCE.md` | Quick ref for old agentic system |
+| `docs/AUDIT_REPORT_20260306.md` | One-time cleanup audit report — historical, not ongoing reference |
+| `docs/CODE_REVIEW_REPORT_5_COMMITS.md` | One-time code review snapshot |
+| `docs/IMPLEMENTATION_PLAN.md` | Old "Control Tower Framework" implementation plan |
+| `docs/PHASE_2_QUICK_REFERENCE.md` | Phase 2 multi-agent/HITL reference — not implemented in nonprofit version |
+| `docs/QA_REPORT_PROJECTS_PRODUCTIVITY_KNOWLEDGE.md` | Old QA report, Productivity module removed |
+| `docs/GUARDRAILS_GUIDE.md` | AI guardrails setup from old framework |
+| `docs/HITL_SETUP_GUIDE.md` | Human-in-the-loop config from old framework |
+| `docs/MULTI_AGENT_TUTORIAL.md` | Multi-agent tutorial from old framework |
+| `docs/02-modules/02-eos.md` | EOS module removed |
+| `docs/02-modules/08-productivity.md` | Productivity module removed |
+| `docs/02-modules/PRODUCTIVITY_MODULE_REPLICATION_PLAN.md` | Productivity removed |
+| `docs/02-modules/projects-gap-analysis.md` | Old gap analysis |
+| `docs/02-modules/eos/` | EOS subdirectory — module removed |
 
-Each step is a single, testable unit:
+## Files to UPDATE
 
-- **Step 1**: Remove EOS module
-  - Files to delete: `src/modules/eos/` (entire directory)
-  - Files to edit: `App.tsx` (remove `eosRoutes` import and usage), `modules.ts` (remove `eos` from `ModuleId` union and `MODULE_REGISTRY`), `navigationStructure.ts` (remove "Strategy (EOS)" group, remove admin "EOS" group, remove `eosOnly` properties), `AppSidebar.tsx` (remove `isEosUser` logic), `env.ts` (remove `eos` from env map)
-  - Test: Build succeeds, app loads, no EOS nav items visible
+### 1. `README.md` (root)
+- Rebrand from "CollabAi Framework" to "Nonprofit Control Tower"
+- Update features list: Dashboard, Grants Management, Events, Board Reports, Data Health, Reconciliation, AI Agents, Knowledge Base
+- Update tagline to "Operational Intelligence Layer for Modern Nonprofits"
 
-- **Step 2**: Remove Productivity module
-  - Files to delete: `src/modules/productivity/` (entire directory)
-  - Files to edit: `App.tsx` (remove `productivityRoutes`), `modules.ts` (remove from type and registry), `navigationStructure.ts` (remove Productivity/Processes from "Operations" group, remove "Productivity Import" from admin nav), `env.ts`
-  - Test: Build succeeds, no productivity nav items
+### 2. `CLAUDE.md` (root)
+- Update project overview from "SJ Control Tower / SJ Innovation Framework" to "Nonprofit Control Tower"
+- Remove references to removed modules (EOS, Productivity, Client Portal)
+- Add new nonprofit modules (Grants, Events, Board Reports, Data Health, Reconciliation)
+- Update module table and project structure
+- Update demo accounts to `@nonprofitai.software` domain
+- Add AI Agent Browse system to component/route references
 
-- **Step 3**: Remove Client Portal
-  - Files to delete: `src/pages/client/ClientPortalDashboard.tsx`, `src/pages/client/ProjectDashboard.tsx`
-  - Files to edit: `App.tsx` (remove both client portal routes and imports)
-  - Test: Build succeeds, `/client/*` routes gone
+### 3. `docs/README.md`
+- Rebrand from "CollabAi" to "Nonprofit Control Tower"
+- Remove links to deleted files
+- Update quick links
 
-- **Step 4**: Set Meetings to hidden by default
-  - File to edit: `modules.ts` -- change meetings `defaultEnabled` from `true` to `false`
-  - Test: Meetings nav hidden unless admin enables it
+### 4. `docs/nonprofit-control-tower-roadmap.md`
+- Keep as primary roadmap — mark completed steps as done (module removal, rebranding, demo data, AI agents browse)
 
-- **Step 5**: Rebrand to Nonprofit Control Tower
-  - Update sidebar branding, landing page title/tagline
-  - Update `BrandingContext` defaults if hardcoded
+### 5. `docs/00-getting-started/README.md` + child files
+- Update branding references from CollabAi to Nonprofit Control Tower
 
-- **Step 6**: Clean up admin navigation
-  - Remove EOS admin group, productivity import, any orphaned references
-  - Keep: Users & Access, Knowledge & AI, System, AI & Automation, Content & Feedback
+### 6. `docs/02-modules/README.md`
+- Remove entries for EOS (02) and Productivity (08)
+- Add entries for new nonprofit modules: Grants, Events, Board Reports, Data Health, Reconciliation, AI Agent Browse
 
-- **Step 7+**: New nonprofit modules (future phases)
-  - Data Health, Reconciliation, Events, Grants, Board Reports
-  - AI Agent Center (5 nonprofit operational agents)
-  - Integration Center (CRM/Finance/Payment/Email tiles)
-  - New user roles (Executive Director, Development Director, Finance Manager, Operations Manager)
+### 7. `docs/03-development/README.md`
+- Update project name and structure references
 
-**Section 4 -- New Nonprofit Modules Spec** (brief descriptions for future build)
+### 8. `docs/06-ai-features/README.md`
+- Add documentation for AI Agent Browse system (teams, detail pages, presence indicators)
 
-**Section 5 -- Design Guidelines**
-- Calm, trust-oriented color palette
-- "Operations Intelligence" language
-- Never show CRM-like record tables
-- Always reinforce "Connected to [CRM]" messaging
+---
 
-**Section 6 -- Demo Data Requirements**
+## New Files to CREATE
 
-## File to Create
-- `docs/nonprofit-control-tower-roadmap.md` -- single comprehensive file
+### 1. `docs/02-modules/10-nonprofit-operations.md`
+- Document the nonprofit-specific modules: Grants, Events, Board Reports, Data Health, Reconciliation
+- Cover demo data architecture (`nonprofitDemoData.ts`)
+- Document role-based dashboards (Executive Director, Development Director, Finance Manager, Operations Manager)
 
-## What Will NOT Change
-- Zero code files modified or deleted
-- No module removals yet
-- No navigation changes yet
+### 2. `docs/02-modules/11-ai-agent-browse.md`
+- Document the AI Agent Browse system: team config, browse page, detail page, dashboard card, presence indicators, contextual banners
+- Reference `agentTeamConfig.ts` as single source of truth
+
+---
+
+## Summary
+
+- **Delete 22 files** (6 root + 16 docs) — all stale/legacy
+- **Update 7 files** — rebrand + remove old module references
+- **Create 2 files** — document new nonprofit features and AI agent system
+- **Keep** `docs/nonprofit-control-tower-roadmap.md` as the living roadmap
+
+This gives you a clean, current doc set you can load into Claude for project management and decision-making.
 
