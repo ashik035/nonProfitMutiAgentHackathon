@@ -359,6 +359,46 @@ export function AppSidebar({ open = true, onToggleSidebar }: AppSidebarProps) {
               const isExpanded = expandedGroups[group.id] ?? true;
               const groupActive = isGroupActive(group);
 
+              // For non-admin users: if only one group is visible, render items flat (no collapsible wrapper)
+              const shouldFlatten = !isAdmin && visibleGroups.length === 1;
+
+              if (shouldFlatten) {
+                return (
+                  <div key={group.id} className="space-y-0.5">
+                    {group.items.filter(isItemVisible).map((item) => {
+                      const Icon = resolveIcon(item.icon);
+                      const isActive = isRouteActive(item.href);
+                      return (
+                        <Link
+                          key={item.href}
+                          to={item.href}
+                          className={cn(
+                            "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150",
+                            isActive
+                              ? "bg-primary text-primary-foreground shadow-sm"
+                              : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                          )}
+                        >
+                          <Icon
+                            className={cn(
+                              "h-[18px] w-[18px] shrink-0",
+                              isActive
+                                ? "text-primary-foreground"
+                                : "text-muted-foreground group-hover:text-sidebar-accent-foreground"
+                            )}
+                          />
+                          <span className="flex-1">{item.title}</span>
+                          {item.isAI && <AIIndicator variant="dot" size="sm" />}
+                          {isActive && (
+                            <ChevronRight className="h-4 w-4 text-primary-foreground/70" />
+                          )}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                );
+              }
+
               return (
                 <Collapsible
                   key={group.id}
