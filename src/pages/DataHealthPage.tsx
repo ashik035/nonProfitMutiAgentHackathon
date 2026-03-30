@@ -132,6 +132,118 @@ export default function DataHealthPage() {
       {/* Health Score */}
       <HealthScoreCard score={DEMO_DATA_HEALTH.score} />
 
+      {/* Mid-Donor Upgrade Opportunities */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-primary" />
+            Mid-Donor Upgrade Opportunities
+          </CardTitle>
+          <CardDescription>
+            AI-identified donors with high potential for giving-level advancement
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* 3-column stat cards */}
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Card className="bg-green-50 ring-1 ring-green-200 border-0">
+              <CardContent className="p-5">
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 text-green-700"><TrendingUp className="h-5 w-5" /></div>
+                  <div className="flex-1">
+                    <p className="text-2xl font-bold text-green-700">{DEMO_MID_DONOR_UPGRADES.upgradeReady}</p>
+                    <p className="text-sm font-medium text-foreground">Upgrade-Ready Donors</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Giving $250–$499/year consistently for 3+ years</p>
+                  </div>
+                </div>
+                <Button size="sm" variant="outline" className="mt-4 gap-1.5">
+                  <Eye className="h-3.5 w-3.5" /> View Upgrade Pipeline
+                </Button>
+              </CardContent>
+            </Card>
+            <Card className="bg-amber-50 ring-1 ring-amber-200 border-0">
+              <CardContent className="p-5">
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 text-amber-700"><Sparkles className="h-5 w-5" /></div>
+                  <div className="flex-1">
+                    <p className="text-2xl font-bold text-amber-700">{DEMO_MID_DONOR_UPGRADES.highReadiness}</p>
+                    <p className="text-sm font-medium text-foreground">High-Readiness</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Attended 2+ events, engaged beyond the gift</p>
+                  </div>
+                </div>
+                <Button size="sm" variant="outline" className="mt-4 gap-1.5">
+                  <Send className="h-3.5 w-3.5" /> Start Outreach
+                </Button>
+              </CardContent>
+            </Card>
+            <Card className="bg-blue-50 ring-1 ring-blue-200 border-0">
+              <CardContent className="p-5">
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 text-blue-700"><UserPlus className="h-5 w-5" /></div>
+                  <div className="flex-1">
+                    <p className="text-2xl font-bold text-blue-700">{DEMO_MID_DONOR_UPGRADES.newThisMonth}</p>
+                    <p className="text-sm font-medium text-foreground">New This Month</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Recently crossed the $250 threshold</p>
+                  </div>
+                </div>
+                <Button size="sm" variant="outline" className="mt-4 gap-1.5">
+                  <Eye className="h-3.5 w-3.5" /> Review Profiles
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Donor signal list */}
+          <div className="rounded-lg border">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b bg-muted/50">
+                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Donor</th>
+                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Avg Giving</th>
+                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Years</th>
+                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Events</th>
+                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Score</th>
+                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Readiness</th>
+                    <th className="px-4 py-3 text-right font-medium text-muted-foreground">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {DEMO_MID_DONOR_UPGRADES.donors.map((donor) => (
+                    <tr key={donor.name} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
+                      <td className="px-4 py-3 font-medium">{donor.name}</td>
+                      <td className="px-4 py-3">${donor.avgGiving}/yr</td>
+                      <td className="px-4 py-3">{donor.years} years</td>
+                      <td className="px-4 py-3">{donor.eventsAttended}</td>
+                      <td className="px-4 py-3">
+                        <span className={`font-semibold ${donor.score >= 80 ? "text-green-600" : donor.score >= 60 ? "text-amber-600" : "text-muted-foreground"}`}>
+                          {donor.score}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <Badge variant={donor.readiness === "High Readiness" ? "default" : donor.readiness === "Ready" ? "secondary" : "outline"}>
+                          {donor.readiness}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="gap-1.5"
+                          onClick={() => toastSuccess(`Outreach task created for ${donor.name}`)}
+                        >
+                          <Send className="h-3.5 w-3.5" /> Create Outreach Task
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Insight Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <InsightCard
