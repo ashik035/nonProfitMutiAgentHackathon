@@ -19,6 +19,15 @@ export function AdminRoute() {
     return <Navigate to="/login" replace />;
   }
 
+  // Profile is fetched asynchronously after loading=false — wait for it
+  if (!profile) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   // Check if user has admin or moderator role
   const isAdmin = profile?.role === "admin" || profile?.role === "moderator";
 

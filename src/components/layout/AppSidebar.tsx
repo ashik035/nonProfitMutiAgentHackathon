@@ -187,6 +187,8 @@ export function AppSidebar({ open = true, onToggleSidebar }: AppSidebarProps) {
 
   // Filter groups - show if at least one item is visible
   const isGroupVisible = (group: NavGroup): boolean => {
+    // Admin-only groups are hidden from non-admin users
+    if (group.adminOnly && !isAdmin) return false;
     // Agency role filter for groups: admins bypass
     if (group.agencyRoles && !isAdmin && currentAgencyRole) {
       if (!group.agencyRoles.includes(currentAgencyRole)) return false;

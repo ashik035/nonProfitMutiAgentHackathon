@@ -49,6 +49,8 @@ export interface NavGroup {
   items: NavItem[];
   /** When set, only these organization roles see the group. Admins always see everything. */
   agencyRoles?: AgencyRole[];
+  /** When true, group is only visible to admin users */
+  adminOnly?: boolean;
 }
 
 /**
@@ -74,15 +76,14 @@ export const navigationGroups: NavGroup[] = [
       { title: "Events", href: "/events", icon: "CalendarDays" },
       { title: "Grants", href: "/grants", icon: "BookOpen" },
       { title: "Board Reports", href: "/board-reports", icon: "FileText" },
-      { title: "AI Agents", href: "/agents", icon: "Sparkles", isAI: true },
-      { title: "AI Agent Center", href: "/ai-agents", icon: "Bot" },
-      { title: "Integration Center", href: "/integration-center", icon: "Plug" },
+      { title: "Browse Agents", href: "/agents", icon: "Sparkles", isAI: true },
     ],
   },
   {
     id: "business-dev",
     title: "Donor & Grants Pipeline",
     icon: "Heart",
+    adminOnly: true,
     module: "business-dev",
     items: [
       {
@@ -127,6 +128,7 @@ export const navigationGroups: NavGroup[] = [
     id: "work-management",
     title: "Work Management",
     icon: "ListTodo",
+    adminOnly: true,
     items: [
       {
         title: "Tasks",
@@ -219,6 +221,7 @@ export const navigationGroups: NavGroup[] = [
     id: "ai",
     title: "AI",
     icon: "Bot",
+    adminOnly: true,
     items: [
       {
         title: "AI Agents",
@@ -226,19 +229,13 @@ export const navigationGroups: NavGroup[] = [
         icon: "Bot",
         featureFlag: "enableAIAgents",
       },
-      {
-        title: "AI Chat",
-        href: "/ai-chat",
-        icon: "MessageSquare",
-        featureFlag: "enableAIAgents",
-        isAI: true,
-      },
     ],
   },
   {
     id: "operations",
     title: "Operations",
     icon: "Settings2",
+    adminOnly: true,
     agencyRoles: ["executive_director", "development_director"], // Only leadership roles see operations
     items: [
       {
@@ -253,6 +250,7 @@ export const navigationGroups: NavGroup[] = [
     id: "system-tools",
     title: "System & Tools",
     icon: "Wrench",
+    adminOnly: true,
     items: [
       {
         title: "Sessions",
