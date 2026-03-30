@@ -11,7 +11,7 @@ import { ModuleRoute } from "@/components/routing/ModuleRoute";
 // V2 module-owned pages
 import MeetingsSchedulePage from "./pages/MeetingsSchedulePage";
 import MeetingDetailV2Page from "./pages/MeetingDetailV2Page";
-import MeetingSeriesPage from "./pages/MeetingSeriesPage";
+
 import MeetingTranscriptsPage from "./pages/MeetingTranscriptsPage";
 import TranscriptDetailPage from "./pages/TranscriptDetailPage";
 import MeetingAiMatchResultsPage from "./pages/MeetingAiMatchResultsPage";
