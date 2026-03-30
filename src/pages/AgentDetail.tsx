@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/accordion";
 import { findAgentBySlug, CATEGORY_COLORS } from "@/components/ai/agentTeamConfig";
 import { cn } from "@/lib/utils";
+import MidDonorUpgradeDetail from "@/components/ai/agents/MidDonorUpgradeDetail";
+import DonorLapseDetectionDetail from "@/components/ai/agents/DonorLapseDetectionDetail";
 
 function getIcon(name: string) {
   return (icons as Record<string, React.ComponentType<{ className?: string }>>)[name] ?? Bot;
