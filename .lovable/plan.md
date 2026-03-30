@@ -1,45 +1,35 @@
 
 
-# Sidebar Cleanup — Role-Tailored Navigation
+# Diagnosis: Browse Agents & Donor Pipeline Visibility
 
-## Problem
-All demo roles (Executive Director, Development Director, Finance Manager, Operations Manager) see the same sidebar with all 6 nonprofit-ops items plus any module-gated groups. Shahed wants a clean, role-appropriate sidebar — not everything for everyone.
+## Finding
 
-## Proposed Sidebar Per Role
+The code is **correctly wired** — both pages and sidebar items exist:
+- `/agents` route → `AgentsBrowse` component (line 105 in routes)
+- `/donor-pipeline` route → `DonorPipelinePage` (line 93 in routes)
+- Both items in `navigationStructure.ts` under `nonprofit-ops` group (lines 79-80)
 
-| Item | Exec. Director | Dev. Director | Finance Mgr | Ops Manager |
-|------|:-:|:-:|:-:|:-:|
-| Dashboard | ✓ | ✓ | ✓ | ✓ |
-| Grants | ✓ | ✓ | ✓ | — |
-| Events | ✓ | ✓ | — | — |
-| Board Reports | ✓ | — | — | — |
-| Data Health | ✓ | — | ✓ | ✓ |
-| Reconciliation | — | — | ✓ | ✓ |
-| Browse Agents | ✓ | ✓ | ✓ | ✓ |
+The session replay confirms the agents page IS rendering with the activity banner cycling.
 
-**Rationale**: ED sees everything (7 items). DD focuses on donor-facing work (Grants, Events, Agents = 4). FM focuses on financial accuracy (Grants, Data Health, Reconciliation, Agents = 5). OM focuses on operational data (Data Health, Reconciliation, Agents = 4). Admins always see all.
+## Likely Cause
 
-## Items to Remove/Move
-- **Meetings group** — already module-gated, but add `adminOnly: true` so it only shows for admins
-- **Knowledge group** — add `adminOnly: true` so it only shows for admins
-- **"My Chat" / AI Chat** — not present in current nav (already clean)
-- **Integration Center** — check if it exists in nav and remove if so (admin-only feature)
+**Stale localStorage** — the sidebar stores expanded/collapsed state in `localStorage` under a key. If the `nonprofit-ops` group was collapsed in a previous session, it stays collapsed and the items are hidden from view. The user needs to click the "Nonprofit Operations" group header to expand it.
 
-## Changes
+Alternatively, the preview may need a hard refresh (Ctrl+Shift+R).
 
-### 1. `src/shared/data/navigationStructure.ts`
-- Add `agencyRoles` to each item in the `nonprofit-ops` group per the table above
-- Add `adminOnly: true` to the `meetings` group
-- Add `adminOnly: true` to the `knowledge` group
-- Remove the `nonprofit-ops` group-level collapsible wrapper — render its items as flat top-level links (no group header needed since it's the only visible group for regular users)
+## Fix (small)
 
-### 2. `src/components/layout/AppSidebar.tsx`
-- Change default `expandedGroups` initialization: default all groups to **collapsed** (`false`) instead of expanded (`true`), except `nonprofit-ops` which stays open
-- This prevents information overload for admin users who do see multiple groups
+To make this more robust, I'll:
 
-### 3. No other files change
-No routing, auth, or page changes needed.
+1. **Force the `nonprofit-ops` group to re-expand** when new items are added — clear the stale localStorage key on load if it doesn't contain the expected items
+2. **Or simpler**: Make `nonprofit-ops` items render as **flat top-level links** (no collapsible group wrapper) since it's the only visible group for regular users — this removes the "hidden because collapsed" problem entirely
 
-## Technical Detail
-The `agencyRoles` filter on `NavItem` already works in `AppSidebar.tsx` — the `isItemVisible` function checks `item.agencyRoles` and hides items whose role list doesn't include the current user's agency role. Admins bypass this check entirely.
+### Recommended: Flatten nonprofit-ops for regular users
+
+- In `AppSidebar.tsx`, if only one group is visible (which is the case for all non-admin roles), render its items as flat sidebar links without a collapsible group header
+- This ensures Donor Pipeline, Browse Agents, and all other items are always visible
+- Admin users who see multiple groups still get the collapsible behavior
+
+### Files Changed
+1. `src/components/layout/AppSidebar.tsx` — Add logic to render single-group items flat (no collapsible wrapper)
 
