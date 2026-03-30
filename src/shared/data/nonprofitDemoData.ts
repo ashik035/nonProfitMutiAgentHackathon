@@ -27,6 +27,30 @@ export const DEMO_DATA_HEALTH = {
   ] satisfies MergeSuggestion[],
 };
 
+// ─── Mid-Donor Upgrade Opportunities ────────────────────────────
+
+export interface UpgradeDonor {
+  name: string;
+  avgGiving: number;
+  years: number;
+  eventsAttended: number;
+  score: number;
+  readiness: "High Readiness" | "Ready" | "Needs Engagement";
+}
+
+export const DEMO_MID_DONOR_UPGRADES = {
+  upgradeReady: 47,
+  highReadiness: 12,
+  newThisMonth: 8,
+  donors: [
+    { name: "Margaret Chen", avgGiving: 420, years: 4, eventsAttended: 3, score: 94, readiness: "High Readiness" as const },
+    { name: "Robert Okafor", avgGiving: 310, years: 5, eventsAttended: 1, score: 78, readiness: "Ready" as const },
+    { name: "Susan Park", avgGiving: 275, years: 3, eventsAttended: 2, score: 71, readiness: "Ready" as const },
+    { name: "David Kim", avgGiving: 480, years: 6, eventsAttended: 0, score: 55, readiness: "Needs Engagement" as const },
+    { name: "Linda Torres", avgGiving: 390, years: 4, eventsAttended: 4, score: 89, readiness: "High Readiness" as const },
+  ] satisfies UpgradeDonor[],
+};
+
 // ─── Reconciliation ─────────────────────────────────────────────
 
 export interface ReconciliationTransaction {

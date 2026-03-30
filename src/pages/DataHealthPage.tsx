@@ -10,12 +10,17 @@ import {
   Eye,
   X,
   FileWarning,
+  TrendingUp,
+  Sparkles,
+  UserPlus,
+  Send,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DEMO_DATA_HEALTH } from "@/shared/data/nonprofitDemoData";
+import { DEMO_DATA_HEALTH, DEMO_MID_DONOR_UPGRADES } from "@/shared/data/nonprofitDemoData";
+import { toastSuccess } from "@/lib/toast-helpers";
 
 function HealthScoreCard({ score }: { score: number }) {
   const color =
