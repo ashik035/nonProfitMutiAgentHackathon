@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/accordion";
 import { findAgentBySlug, CATEGORY_COLORS } from "@/components/ai/agentTeamConfig";
 import { cn } from "@/lib/utils";
+import MidDonorUpgradeDetail from "@/components/ai/agents/MidDonorUpgradeDetail";
+import DonorLapseDetectionDetail from "@/components/ai/agents/DonorLapseDetectionDetail";
 
 function getIcon(name: string) {
   return (icons as Record<string, React.ComponentType<{ className?: string }>>)[name] ?? Bot;
@@ -125,160 +127,167 @@ export default function AgentDetail() {
         </div>
       </Card>
 
-      {/* Content grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main column */}
-        <div className="lg:col-span-2 space-y-4">
-          <Accordion type="multiple" defaultValue={["capabilities", "how-to-use", "where"]}>
-            {/* Capabilities */}
-            {agent.capabilities && agent.capabilities.length > 0 && (
-              <AccordionItem value="capabilities" className="border rounded-xl px-5 bg-card shadow-sm">
-                <AccordionTrigger className="hover:no-underline">
-                  <div className="flex items-center gap-2">
-                    <Zap className="h-4 w-4 text-primary" />
-                    <span className="font-semibold">What this agent does</span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent>
-                  <ol className="space-y-3">
-                    {agent.capabilities.map((cap, i) => (
-                      <li key={i} className="flex items-start gap-3">
-                        <span
-                          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-                          style={{
-                            background: `linear-gradient(135deg, hsl(${team.gradientFrom}), hsl(${team.gradientTo}))`,
-                          }}
-                        >
-                          {i + 1}
-                        </span>
-                        <span className="text-sm text-foreground leading-relaxed">{cap}</span>
-                      </li>
-                    ))}
-                  </ol>
-                </AccordionContent>
-              </AccordionItem>
-            )}
+      {/* Custom detail pages for specific agents */}
+      {slug === "mid-donor-upgrade" ? (
+        <MidDonorUpgradeDetail />
+      ) : slug === "donor-lapse-detection" ? (
+        <DonorLapseDetectionDetail />
+      ) : (
+        /* Content grid — default layout */
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main column */}
+          <div className="lg:col-span-2 space-y-4">
+            <Accordion type="multiple" defaultValue={["capabilities", "how-to-use", "where"]}>
+              {/* Capabilities */}
+              {agent.capabilities && agent.capabilities.length > 0 && (
+                <AccordionItem value="capabilities" className="border rounded-xl px-5 bg-card shadow-sm">
+                  <AccordionTrigger className="hover:no-underline">
+                    <div className="flex items-center gap-2">
+                      <Zap className="h-4 w-4 text-primary" />
+                      <span className="font-semibold">What this agent does</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <ol className="space-y-3">
+                      {agent.capabilities.map((cap, i) => (
+                        <li key={i} className="flex items-start gap-3">
+                          <span
+                            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+                            style={{
+                              background: `linear-gradient(135deg, hsl(${team.gradientFrom}), hsl(${team.gradientTo}))`,
+                            }}
+                          >
+                            {i + 1}
+                          </span>
+                          <span className="text-sm text-foreground leading-relaxed">{cap}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
 
-            {/* How to use */}
-            {agent.howToUse && agent.howToUse.length > 0 && (
-              <AccordionItem value="how-to-use" className="border rounded-xl px-5 bg-card shadow-sm mt-4">
-                <AccordionTrigger className="hover:no-underline">
-                  <div className="flex items-center gap-2">
-                    <BookOpen className="h-4 w-4 text-primary" />
-                    <span className="font-semibold">How to use it</span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent>
-                  <ol className="space-y-3">
-                    {agent.howToUse.map((step, i) => (
-                      <li key={i} className="flex items-start gap-3">
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold bg-muted text-muted-foreground">
-                          {i + 1}
-                        </span>
-                        <span className="text-sm text-foreground leading-relaxed">{step}</span>
-                      </li>
-                    ))}
-                  </ol>
-                </AccordionContent>
-              </AccordionItem>
-            )}
+              {/* How to use */}
+              {agent.howToUse && agent.howToUse.length > 0 && (
+                <AccordionItem value="how-to-use" className="border rounded-xl px-5 bg-card shadow-sm mt-4">
+                  <AccordionTrigger className="hover:no-underline">
+                    <div className="flex items-center gap-2">
+                      <BookOpen className="h-4 w-4 text-primary" />
+                      <span className="font-semibold">How to use it</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <ol className="space-y-3">
+                      {agent.howToUse.map((step, i) => (
+                        <li key={i} className="flex items-start gap-3">
+                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold bg-muted text-muted-foreground">
+                            {i + 1}
+                          </span>
+                          <span className="text-sm text-foreground leading-relaxed">{step}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
 
-            {/* Where to find */}
-            {agent.whereToFind && (
-              <AccordionItem value="where" className="border rounded-xl px-5 bg-card shadow-sm mt-4">
-                <AccordionTrigger className="hover:no-underline">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-primary" />
-                    <span className="font-semibold">Where to find it</span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    This agent is available in the{" "}
-                    <Link to={agent.whereToFind.path} className="text-primary font-medium hover:underline">
-                      {agent.whereToFind.label}
-                    </Link>{" "}
-                    section.
-                  </p>
-                  <Button size="sm" variant="outline" onClick={() => navigate(agent.whereToFind!.path)}>
-                    Go to {agent.whereToFind.label}
-                    <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
-                  </Button>
-                </AccordionContent>
-              </AccordionItem>
-            )}
-          </Accordion>
-        </div>
+              {/* Where to find */}
+              {agent.whereToFind && (
+                <AccordionItem value="where" className="border rounded-xl px-5 bg-card shadow-sm mt-4">
+                  <AccordionTrigger className="hover:no-underline">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-primary" />
+                      <span className="font-semibold">Where to find it</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      This agent is available in the{" "}
+                      <Link to={agent.whereToFind.path} className="text-primary font-medium hover:underline">
+                        {agent.whereToFind.label}
+                      </Link>{" "}
+                      section.
+                    </p>
+                    <Button size="sm" variant="outline" onClick={() => navigate(agent.whereToFind!.path)}>
+                      Go to {agent.whereToFind.label}
+                      <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
+                    </Button>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
+            </Accordion>
+          </div>
 
-        {/* Sidebar */}
-        <div className="space-y-4">
-          {/* Info card */}
-          <Card className="rounded-2xl">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Agent Info</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 text-sm">
-              <div>
-                <p className="text-xs text-muted-foreground">Built by</p>
-                <p className="font-medium text-foreground">Nonprofit AI</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Team</p>
-                <Link to="/agents" className="flex items-center gap-2 mt-1 group">
-                  <div
-                    className="w-6 h-6 rounded flex items-center justify-center"
-                    style={{
-                      background: `linear-gradient(135deg, hsl(${team.gradientFrom}), hsl(${team.gradientTo}))`,
-                    }}
-                  >
-                    <Sparkles className="h-3 w-3 text-white" />
-                  </div>
-                  <span className="font-medium text-foreground group-hover:text-primary transition-colors">
-                    {team.name}
-                  </span>
-                </Link>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Category</p>
-                <Badge className={cn("mt-1 border-0", cat.badge)}>{team.id}</Badge>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Related agents */}
-          {siblings.length > 0 && (
+          {/* Sidebar */}
+          <div className="space-y-4">
+            {/* Info card */}
             <Card className="rounded-2xl">
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Other agents in this team
-                </CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">Agent Info</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
-                {siblings.map((sib) => {
-                  const SibIcon = getIcon(sib.icon);
-                  return (
-                    <Link
-                      key={sib.slug}
-                      to={`/agents/${sib.slug}`}
-                      className="flex items-center gap-3 rounded-lg p-2 hover:bg-muted transition-colors"
+              <CardContent className="space-y-4 text-sm">
+                <div>
+                  <p className="text-xs text-muted-foreground">Built by</p>
+                  <p className="font-medium text-foreground">Nonprofit AI</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Team</p>
+                  <Link to="/agents" className="flex items-center gap-2 mt-1 group">
+                    <div
+                      className="w-6 h-6 rounded flex items-center justify-center"
+                      style={{
+                        background: `linear-gradient(135deg, hsl(${team.gradientFrom}), hsl(${team.gradientTo}))`,
+                      }}
                     >
-                      <div
-                        className="w-8 h-8 rounded-lg flex items-center justify-center"
-                        style={{
-                          background: `linear-gradient(135deg, hsl(${team.gradientFrom} / 0.15), hsl(${team.gradientTo} / 0.15))`,
-                        }}
-                      >
-                        <SibIcon className="h-4 w-4 text-foreground" />
-                      </div>
-                      <span className="text-sm font-medium text-foreground">{sib.name}</span>
-                    </Link>
-                  );
-                })}
+                      <Sparkles className="h-3 w-3 text-white" />
+                    </div>
+                    <span className="font-medium text-foreground group-hover:text-primary transition-colors">
+                      {team.name}
+                    </span>
+                  </Link>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Category</p>
+                  <Badge className={cn("mt-1 border-0", cat.badge)}>{team.id}</Badge>
+                </div>
               </CardContent>
             </Card>
-          )}
+
+            {/* Related agents */}
+            {siblings.length > 0 && (
+              <Card className="rounded-2xl">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Other agents in this team
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {siblings.map((sib) => {
+                    const SibIcon = getIcon(sib.icon);
+                    return (
+                      <Link
+                        key={sib.slug}
+                        to={`/agents/${sib.slug}`}
+                        className="flex items-center gap-3 rounded-lg p-2 hover:bg-muted transition-colors"
+                      >
+                        <div
+                          className="w-8 h-8 rounded-lg flex items-center justify-center"
+                          style={{
+                            background: `linear-gradient(135deg, hsl(${team.gradientFrom} / 0.15), hsl(${team.gradientTo} / 0.15))`,
+                          }}
+                        >
+                          <SibIcon className="h-4 w-4 text-foreground" />
+                        </div>
+                        <span className="text-sm font-medium text-foreground">{sib.name}</span>
+                      </Link>
+                    );
+                  })}
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
