@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { icons, Sparkles, ArrowLeft, ArrowRight, Zap, BookOpen, MapPin, Bot } from "lucide-react";
+import { icons, Sparkles, ArrowLeft, ArrowRight, Zap, BookOpen, MapPin, Bot, Clock } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
