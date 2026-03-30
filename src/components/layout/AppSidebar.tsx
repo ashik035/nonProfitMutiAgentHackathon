@@ -132,9 +132,9 @@ export function AppSidebar({ open = true, onToggleSidebar }: AppSidebarProps) {
       const stored = localStorage.getItem(EXPANDED_GROUPS_KEY);
       if (stored) return JSON.parse(stored);
     } catch {}
-    // Default: all groups expanded
+    // Default: only nonprofit-ops expanded, all others collapsed
     return navigationGroups.reduce((acc, group) => {
-      acc[group.id] = true;
+      acc[group.id] = group.id === "nonprofit-ops";
       return acc;
     }, {} as Record<string, boolean>);
   });

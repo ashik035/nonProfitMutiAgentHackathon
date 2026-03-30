@@ -71,11 +71,11 @@ export const navigationGroups: NavGroup[] = [
     title: "Nonprofit Operations",
     icon: "ShieldCheck",
     items: [
-      { title: "Data Health", href: "/data-health", icon: "ShieldCheck" },
-      { title: "Reconciliation", href: "/reconciliation", icon: "ArrowLeftRight" },
-      { title: "Events", href: "/events", icon: "CalendarDays" },
-      { title: "Grants", href: "/grants", icon: "BookOpen" },
-      { title: "Board Reports", href: "/board-reports", icon: "FileText" },
+      { title: "Data Health", href: "/data-health", icon: "ShieldCheck", agencyRoles: ["executive_director", "finance_manager", "operations_manager"] },
+      { title: "Reconciliation", href: "/reconciliation", icon: "ArrowLeftRight", agencyRoles: ["finance_manager", "operations_manager"] },
+      { title: "Events", href: "/events", icon: "CalendarDays", agencyRoles: ["executive_director", "development_director"] },
+      { title: "Grants", href: "/grants", icon: "BookOpen", agencyRoles: ["executive_director", "development_director", "finance_manager"] },
+      { title: "Board Reports", href: "/board-reports", icon: "FileText", agencyRoles: ["executive_director"] },
       { title: "Browse Agents", href: "/agents", icon: "Sparkles", isAI: true },
     ],
   },
@@ -150,6 +150,7 @@ export const navigationGroups: NavGroup[] = [
     title: "Meetings",
     icon: "Calendar",
     module: "meetings",
+    adminOnly: true,
     items: [
       {
         title: "All Meetings",
@@ -193,6 +194,7 @@ export const navigationGroups: NavGroup[] = [
     title: "Knowledge",
     icon: "BookOpen",
     module: "knowledge",
+    adminOnly: true,
     items: [
       {
         title: "Knowledge Base",
