@@ -429,6 +429,8 @@ export const AGENT_ICON_MAP: Record<string, string> = {
   "deal-daily-briefing": "Newspaper",
   "quick-deal-email": "Mail",
   "deal-ai-chat": "MessageSquare",
+  "mid-donor-upgrade": "TrendingUp",
+  "donor-lapse-detection": "AlertTriangle",
   "meeting-summarizer": "FileText",
   "action-item-extractor": "ListChecks",
   "meeting-efficiency-analyzer": "Gauge",
