@@ -150,7 +150,7 @@ export const navigationGroups: NavGroup[] = [
     title: "Meetings",
     icon: "Calendar",
     module: "meetings",
-    items: [
+    adminOnly: true,
       {
         title: "All Meetings",
         href: "/meetings/schedule",
