@@ -279,9 +279,9 @@ export function AppSidebar({ open = true, onToggleSidebar }: AppSidebarProps) {
                 </div>
                 <div className="min-w-0 flex flex-col">
                   <span className="text-sm font-semibold text-sidebar-foreground truncate">
-                    Nonprofit Control Tower
+                    Brightside Foundation
                   </span>
-                  <span className="text-xs text-muted-foreground truncate">Operational Intelligence Layer</span>
+                  <span className="text-xs text-muted-foreground truncate">NonprofitAI.software</span>
                 </div>
               </Link>
               {onToggleSidebar && (

@@ -15,8 +15,8 @@ export function BrandingProvider({ children }: { children: ReactNode }) {
   const { data: config, isLoading } = useAppConfig();
 
   const value: BrandingContextType = {
-    companyName: config?.branding?.companyName || "Nonprofit Control Tower",
-    tagline: config?.branding?.tagline || "Operational Intelligence Layer for Modern Nonprofits",
+    companyName: config?.branding?.companyName || "Brightside Foundation",
+    tagline: config?.branding?.tagline || "Operational Intelligence Layer",
     supportEmail: config?.branding?.supportEmail || "support@nonprofitai.software",
     logoUrl: (config?.branding as any)?.logoUrl,
     isLoading,

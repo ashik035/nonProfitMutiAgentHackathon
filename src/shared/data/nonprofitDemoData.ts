@@ -1,10 +1,61 @@
 /**
- * Nonprofit Demo Data
+ * Nonprofit Demo Data — Brightside Foundation
  *
- * Static demo data for the nonprofit-specific pages.
+ * All dates are computed at runtime relative to `new Date()`.
  * No Supabase queries — these constants are used for UI rendering only.
  * Single source of truth for all demo content across the app.
+ *
+ * Org: Brightside Foundation
+ * CRM: Salesforce (connected) | Payment: Stripe (connected)
+ * Annual budget: $2.4M | Active donors: 1,847 | Staff: 23
  */
+
+import { format, subHours, subDays, subMinutes, addDays } from "date-fns";
+
+// ─── Date Helpers ───────────────────────────────────────────────
+
+const NOW = new Date();
+
+/** Random hours ago between min and max */
+function hoursAgo(min: number, max: number): string {
+  const h = Math.floor(min + Math.random() * (max - min));
+  if (h < 1) return "just now";
+  if (h === 1) return "1 hour ago";
+  return `${h} hours ago`;
+}
+
+/** Format a date relative to now */
+function formatRelativeDate(date: Date): string {
+  return format(date, "MMM d, yyyy");
+}
+
+function formatShortDate(date: Date): string {
+  return format(date, "MMM d");
+}
+
+function formatTime(date: Date): string {
+  return format(date, "h:mm a");
+}
+
+/** "Today 9:15 AM" style */
+function todayAt(hours: number, minutes: number): string {
+  const d = new Date(NOW);
+  d.setHours(hours, minutes, 0, 0);
+  return `Today ${formatTime(d)}`;
+}
+
+// Pre-compute some stable "ago" strings so they don't change on re-render
+const LAST_SYNC_SALESFORCE = hoursAgo(1, 3);
+const LAST_SYNC_QBO = hoursAgo(3, 5);
+const LAST_SYNC_STRIPE = hoursAgo(1, 2);
+const LAST_SYNC_EVENTBRITE = hoursAgo(1, 2);
+const LAST_SYNC_SLACK = `${Math.floor(15 + Math.random() * 30)} minutes ago`;
+
+const AGENT_RUN_CRM = hoursAgo(1, 3);
+const AGENT_RUN_RECON = hoursAgo(3, 5);
+const AGENT_RUN_EVENT = hoursAgo(1, 2);
+const AGENT_RUN_BOARD = todayAt(9, 0);
+const AGENT_RUN_GRANT = hoursAgo(2, 4);
 
 // ─── Data Health ────────────────────────────────────────────────
 
@@ -16,8 +67,8 @@ export interface MergeSuggestion {
 export const DEMO_DATA_HEALTH = {
   score: 82,
   duplicates: 12,
-  incompleteProfiles: 34,
-  householdInconsistencies: 7,
+  incompleteProfiles: 8,
+  householdInconsistencies: 3,
   softCreditAlerts: 3,
   mergeSuggestions: [
     { pair: ["John Smith (ID: 1042)", "John D. Smith (ID: 2318)"] as [string, string], confidence: 94 },
@@ -71,14 +122,14 @@ export const DEMO_RECONCILIATION = {
   matchedCount: 142,
   totalCount: 147,
   matchPercentage: 96.6,
-  month: "February 2026",
+  month: format(NOW, "MMMM yyyy"),
   transactions: [
     {
       id: "TXN-4821",
       description: "Online donation",
       amount: 250.0,
       source: "Stripe",
-      date: "Feb 28, 2026",
+      date: formatRelativeDate(subDays(NOW, 3)),
       status: "unmatched" as const,
       issue: "No matching entry in QuickBooks",
     },
@@ -87,7 +138,7 @@ export const DEMO_RECONCILIATION = {
       description: "Event ticket sale",
       amount: 150.0,
       source: "Stripe",
-      date: "Mar 1, 2026",
+      date: formatRelativeDate(subDays(NOW, 2)),
       status: "fee_variance" as const,
       issue: "Fee variance of $3.50 detected",
     },
@@ -96,7 +147,7 @@ export const DEMO_RECONCILIATION = {
       description: "Grant disbursement",
       amount: 10000.0,
       source: "QuickBooks",
-      date: "Mar 2, 2026",
+      date: formatRelativeDate(subDays(NOW, 2)),
       status: "fund_mismatch" as const,
       issue: "Restricted fund code mismatch",
     },
@@ -105,7 +156,7 @@ export const DEMO_RECONCILIATION = {
       description: "Monthly recurring gift",
       amount: 75.0,
       source: "Stripe",
-      date: "Mar 3, 2026",
+      date: formatRelativeDate(subDays(NOW, 1)),
       status: "unmatched" as const,
       issue: "Donor record not linked in CRM",
     },
@@ -114,7 +165,7 @@ export const DEMO_RECONCILIATION = {
       description: "Corporate sponsorship",
       amount: 5000.0,
       source: "PayPal",
-      date: "Mar 4, 2026",
+      date: formatRelativeDate(NOW),
       status: "fee_variance" as const,
       issue: "Fee variance of $12.80 detected",
     },
@@ -130,11 +181,16 @@ export interface FollowUpSuggestion {
 }
 
 export const DEMO_EVENTS = {
-  recentEventName: "Annual Gala 2026",
+  recentEventName: "Annual Spring Gala",
   attendance: 120,
   untaggedAttendees: 15,
   volunteerInterestFlags: 8,
-  eventDate: "March 1, 2026",
+  eventDate: formatRelativeDate(subDays(NOW, 5)),
+  secondEvent: {
+    name: "Community Open House",
+    attendance: 85,
+    date: formatRelativeDate(subDays(NOW, 12)),
+  },
   followUpSuggestions: [
     {
       attendee: "Sarah Chen",
@@ -172,12 +228,13 @@ export interface Grant {
   amount: number;
   utilized: number;
   daysUntilDeadline: number;
+  deadlineDate: string;
   status: "active" | "pending" | "completed";
   nextMilestone?: string;
 }
 
 export const DEMO_GRANTS = {
-  activeGrants: 6,
+  activeGrants: 4,
   upcomingDeadlines: 2,
   deadlineDaysThreshold: 14,
   grants: [
@@ -187,6 +244,7 @@ export const DEMO_GRANTS = {
       amount: 50000,
       utilized: 72,
       daysUntilDeadline: 8,
+      deadlineDate: formatRelativeDate(addDays(NOW, 8)),
       status: "active" as const,
       nextMilestone: "Q1 progress report due",
     },
@@ -196,6 +254,7 @@ export const DEMO_GRANTS = {
       amount: 25000,
       utilized: 45,
       daysUntilDeadline: 12,
+      deadlineDate: formatRelativeDate(addDays(NOW, 12)),
       status: "active" as const,
       nextMilestone: "Mid-term evaluation",
     },
@@ -205,6 +264,7 @@ export const DEMO_GRANTS = {
       amount: 75000,
       utilized: 91,
       daysUntilDeadline: 34,
+      deadlineDate: formatRelativeDate(addDays(NOW, 34)),
       status: "active" as const,
       nextMilestone: "Final expenditure review",
     },
@@ -214,26 +274,9 @@ export const DEMO_GRANTS = {
       amount: 40000,
       utilized: 35,
       daysUntilDeadline: 60,
+      deadlineDate: formatRelativeDate(addDays(NOW, 60)),
       status: "active" as const,
       nextMilestone: "Site visit scheduled",
-    },
-    {
-      name: "Digital Literacy Initiative",
-      funder: "Google.org",
-      amount: 30000,
-      utilized: 60,
-      daysUntilDeadline: 45,
-      status: "active" as const,
-      nextMilestone: "Participant survey due",
-    },
-    {
-      name: "Food Security Partnership",
-      funder: "USDA",
-      amount: 100000,
-      utilized: 22,
-      daysUntilDeadline: 90,
-      status: "active" as const,
-      nextMilestone: "Quarterly financial report",
     },
   ] satisfies Grant[],
 };
@@ -246,11 +289,13 @@ export interface FinancialSnapshotItem {
   change: number;
 }
 
+const currentQuarter = `Q${Math.ceil((NOW.getMonth() + 1) / 3)} ${NOW.getFullYear()}`;
+
 export const DEMO_BOARD_REPORT = {
   status: "Draft Ready",
-  generatedDate: "March 9, 2026",
-  quarter: "Q1 2026",
-  totalDonors: 1240,
+  generatedDate: formatRelativeDate(NOW),
+  quarter: currentQuarter,
+  totalDonors: 1847,
   donorGrowth: 8,
   totalRevenue: 284000,
   revenueGoal: 300000,
@@ -296,15 +341,15 @@ export const DEMO_AGENTS: DemoAgent[] = [
     id: "crm-data-integrity",
     name: "CRM Data Integrity Agent",
     status: "Active",
-    lastRun: "2 hours ago",
+    lastRun: AGENT_RUN_CRM,
     alertCount: 12,
     description:
       "Continuously scans your CRM for duplicate records, missing required fields, and stale donor profiles. Surfaces merge suggestions and data quality issues for review.",
     integrations: ["Salesforce", "Bloomerang"],
     findings: [
-      { text: "12 duplicate donor records detected", severity: "amber", time: "2 hours ago" },
-      { text: "34 profiles missing phone or email", severity: "amber", time: "2 hours ago" },
-      { text: "7 household records with inconsistent addresses", severity: "blue", time: "3 hours ago" },
+      { text: "12 duplicate donor records detected", severity: "amber", time: AGENT_RUN_CRM },
+      { text: "8 profiles missing phone or email", severity: "amber", time: AGENT_RUN_CRM },
+      { text: "3 household records with inconsistent addresses", severity: "blue", time: hoursAgo(2, 4) },
     ],
     actions: [
       { text: "Review and approve 12 merge suggestions" },
@@ -315,15 +360,15 @@ export const DEMO_AGENTS: DemoAgent[] = [
     id: "reconciliation-fund-accounting",
     name: "Reconciliation & Fund Accounting Agent",
     status: "Active",
-    lastRun: "4 hours ago",
+    lastRun: AGENT_RUN_RECON,
     alertCount: 3,
     description:
       "Matches incoming transactions from payment processors against your finance system. Flags unmatched payments, fee variances, and restricted fund mismatches.",
     integrations: ["Stripe", "PayPal", "QuickBooks Online"],
     findings: [
-      { text: "5 Stripe transactions unmatched in QuickBooks", severity: "amber", time: "4 hours ago" },
-      { text: "2 fee variance alerts exceeding threshold", severity: "amber", time: "4 hours ago" },
-      { text: "1 restricted fund deposit miscategorized", severity: "red", time: "5 hours ago" },
+      { text: "5 Stripe transactions unmatched in QuickBooks", severity: "amber", time: AGENT_RUN_RECON },
+      { text: "2 fee variance alerts exceeding threshold", severity: "amber", time: AGENT_RUN_RECON },
+      { text: "1 restricted fund deposit miscategorized", severity: "red", time: hoursAgo(4, 6) },
     ],
     actions: [
       { text: "Review 5 unmatched transactions" },
@@ -334,15 +379,15 @@ export const DEMO_AGENTS: DemoAgent[] = [
     id: "event-intelligence",
     name: "Event Intelligence Agent",
     status: "Active",
-    lastRun: "1 hour ago",
+    lastRun: AGENT_RUN_EVENT,
     alertCount: 15,
     description:
       "Analyzes post-event attendance data and suggests engagement tags, volunteer interest flags, and follow-up tasks for attendees not yet connected to your donor pipeline.",
     integrations: ["Eventbrite", "Salesforce"],
     findings: [
-      { text: "15 Annual Gala attendees not tagged in CRM", severity: "amber", time: "1 hour ago" },
-      { text: "8 attendees flagged potential volunteer interest", severity: "blue", time: "1 hour ago" },
-      { text: "3 attendees match existing major donor profiles", severity: "green", time: "1 hour ago" },
+      { text: "15 Annual Gala attendees not tagged in CRM", severity: "amber", time: AGENT_RUN_EVENT },
+      { text: "8 attendees flagged potential volunteer interest", severity: "blue", time: AGENT_RUN_EVENT },
+      { text: "3 attendees match existing major donor profiles", severity: "green", time: AGENT_RUN_EVENT },
     ],
     actions: [
       { text: "Create follow-up tasks for 15 untagged attendees" },
@@ -353,31 +398,31 @@ export const DEMO_AGENTS: DemoAgent[] = [
     id: "board-reporting",
     name: "Board Reporting Agent",
     status: "Active",
-    lastRun: "Today 9am",
+    lastRun: AGENT_RUN_BOARD,
     alertCount: 0,
     description:
       "Aggregates KPIs, financial snapshots, and engagement metrics from connected systems to generate draft board reports on a scheduled basis.",
     integrations: ["Salesforce", "QuickBooks Online"],
     findings: [
-      { text: "Q1 2026 board report draft generated", severity: "green", time: "Today 9am" },
-      { text: "All KPI data sources synced successfully", severity: "green", time: "Today 9am" },
-      { text: "Financial snapshot reconciled with QuickBooks", severity: "green", time: "Today 9am" },
+      { text: `${currentQuarter} board report draft generated`, severity: "green", time: AGENT_RUN_BOARD },
+      { text: "All KPI data sources synced successfully", severity: "green", time: AGENT_RUN_BOARD },
+      { text: "Financial snapshot reconciled with QuickBooks", severity: "green", time: AGENT_RUN_BOARD },
     ],
-    actions: [{ text: "Review and approve Q1 2026 board report draft" }],
+    actions: [{ text: `Review and approve ${currentQuarter} board report draft` }],
   },
   {
     id: "grant-compliance",
     name: "Grant Compliance Agent",
     status: "Active",
-    lastRun: "3 hours ago",
+    lastRun: AGENT_RUN_GRANT,
     alertCount: 2,
     description:
       "Tracks active grant deadlines, monitors fund utilization against approved budgets, and flags spending anomalies or upcoming reporting requirements.",
     integrations: ["Salesforce", "QuickBooks Online"],
     findings: [
-      { text: "Community Impact Fund deadline in 8 days", severity: "red", time: "3 hours ago" },
-      { text: "Health Equity Initiative 91% utilized", severity: "amber", time: "3 hours ago" },
-      { text: "Youth Education Grant reporting due in 12 days", severity: "amber", time: "3 hours ago" },
+      { text: "Community Impact Fund deadline in 8 days", severity: "red", time: AGENT_RUN_GRANT },
+      { text: "Health Equity Initiative 91% utilized", severity: "amber", time: AGENT_RUN_GRANT },
+      { text: "Youth Education Grant reporting due in 12 days", severity: "amber", time: AGENT_RUN_GRANT },
     ],
     actions: [
       { text: "Generate compliance summary for Community Impact Fund" },
@@ -408,37 +453,37 @@ export const DEMO_AI_RECOMMENDATIONS: AIRecommendation[] = [
     severity: "warning",
     action1: { label: "Review Duplicates", href: "/data-health" },
     action2: { label: "Dismiss" },
-    timestamp: "2 hours ago",
+    timestamp: AGENT_RUN_CRM,
   },
   {
     id: "rec-002",
     title: "Community Impact Fund deadline in 8 days",
-    description: "The Q1 progress report for the Ford Foundation's Community Impact Fund is due March 17. Fund utilization is at 72%.",
+    description: `The Q1 progress report for the Ford Foundation's Community Impact Fund is due ${formatShortDate(addDays(NOW, 8))}. Fund utilization is at 72%.`,
     source: "Grant Compliance Agent",
     severity: "critical",
     action1: { label: "View Grant Details", href: "/grants" },
     action2: { label: "Dismiss" },
-    timestamp: "3 hours ago",
+    timestamp: AGENT_RUN_GRANT,
   },
   {
     id: "rec-003",
     title: "15 gala attendees need CRM tagging",
-    description: "Annual Gala 2026 attendees have not been tagged in your CRM. Creating follow-up tasks will help convert event interest into donor engagement.",
+    description: "Annual Spring Gala attendees have not been tagged in your CRM. Creating follow-up tasks will help convert event interest into donor engagement.",
     source: "Event Intelligence Agent",
     severity: "warning",
     action1: { label: "View Attendees", href: "/events" },
     action2: { label: "Dismiss" },
-    timestamp: "1 hour ago",
+    timestamp: AGENT_RUN_EVENT,
   },
   {
     id: "rec-004",
-    title: "Q1 board report draft is ready",
-    description: "All KPI data sources have been synced and the Q1 2026 board report has been generated. Review the draft before your next board meeting.",
+    title: `${currentQuarter} board report draft is ready`,
+    description: `All KPI data sources have been synced and the ${currentQuarter} board report has been generated. Review the draft before your next board meeting.`,
     source: "Board Reporting Agent",
     severity: "success",
     action1: { label: "Review Report", href: "/board-reports" },
     action2: { label: "Dismiss" },
-    timestamp: "Today 9am",
+    timestamp: AGENT_RUN_BOARD,
   },
   {
     id: "rec-005",
@@ -448,7 +493,7 @@ export const DEMO_AI_RECOMMENDATIONS: AIRecommendation[] = [
     severity: "warning",
     action1: { label: "Review Transactions", href: "/reconciliation" },
     action2: { label: "Dismiss" },
-    timestamp: "4 hours ago",
+    timestamp: AGENT_RUN_RECON,
   },
   {
     id: "rec-006",
@@ -458,7 +503,7 @@ export const DEMO_AI_RECOMMENDATIONS: AIRecommendation[] = [
     severity: "critical",
     action1: { label: "View Grant", href: "/grants" },
     action2: { label: "Approve" },
-    timestamp: "3 hours ago",
+    timestamp: AGENT_RUN_GRANT,
   },
 ];
 
@@ -484,9 +529,9 @@ export const DEMO_INTEGRATIONS: DemoIntegration[] = [
     description: "Sync donor records, contacts, and engagement data from your Salesforce NPSP instance.",
     logo: "☁️",
     connected: true,
-    lastSync: "2 hours ago",
+    lastSync: LAST_SYNC_SALESFORCE,
     status: "healthy",
-    syncedRecords: 1240,
+    syncedRecords: 1847,
   },
   {
     id: "bloomerang",
@@ -503,7 +548,7 @@ export const DEMO_INTEGRATIONS: DemoIntegration[] = [
     description: "Reconcile transactions, track fund accounting, and generate financial snapshots for board reports.",
     logo: "📗",
     connected: true,
-    lastSync: "4 hours ago",
+    lastSync: LAST_SYNC_QBO,
     status: "healthy",
     syncedRecords: 847,
   },
@@ -514,8 +559,8 @@ export const DEMO_INTEGRATIONS: DemoIntegration[] = [
     description: "Process online donations and event payments. Auto-match transactions against your finance system.",
     logo: "💳",
     connected: true,
-    lastSync: "1 hour ago",
-    status: "warning",
+    lastSync: LAST_SYNC_STRIPE,
+    status: "healthy",
     syncedRecords: 312,
   },
   {
@@ -533,7 +578,7 @@ export const DEMO_INTEGRATIONS: DemoIntegration[] = [
     description: "Import event attendance data, track engagement tags, and surface volunteer interest flags.",
     logo: "🎫",
     connected: true,
-    lastSync: "1 hour ago",
+    lastSync: LAST_SYNC_EVENTBRITE,
     status: "healthy",
     syncedRecords: 120,
   },
@@ -560,7 +605,37 @@ export const DEMO_INTEGRATIONS: DemoIntegration[] = [
     description: "Receive AI agent alerts and action notifications directly in your Slack workspace.",
     logo: "💬",
     connected: true,
-    lastSync: "30 minutes ago",
+    lastSync: LAST_SYNC_SLACK,
     status: "healthy",
   },
 ];
+
+// ─── Dashboard Activity Feed ────────────────────────────────────
+
+export interface ActivityFeedItem {
+  id: string;
+  action: string;
+  timestamp: string;
+  icon: "agent" | "sync" | "user" | "alert";
+}
+
+export const DEMO_ACTIVITY_FEED: ActivityFeedItem[] = [
+  { id: "af-1", action: "CRM Data Integrity Agent completed scan — 12 issues found", timestamp: AGENT_RUN_CRM, icon: "agent" },
+  { id: "af-2", action: "Salesforce sync completed — 1,847 records updated", timestamp: LAST_SYNC_SALESFORCE, icon: "sync" },
+  { id: "af-3", action: "Board Reporting Agent generated draft report", timestamp: AGENT_RUN_BOARD, icon: "agent" },
+  { id: "af-4", action: "Grant Compliance Agent flagged 2 upcoming deadlines", timestamp: AGENT_RUN_GRANT, icon: "alert" },
+  { id: "af-5", action: "Lisa Patel logged in", timestamp: `${Math.floor(1 + Math.random() * 2)} days ago`, icon: "user" },
+  { id: "af-6", action: "Stripe sync completed — 312 transactions matched", timestamp: LAST_SYNC_STRIPE, icon: "sync" },
+];
+
+// ─── Org Constants ──────────────────────────────────────────────
+
+export const DEMO_ORG = {
+  name: "Brightside Foundation",
+  crm: "Salesforce",
+  paymentProcessor: "Stripe",
+  annualBudget: 2400000,
+  activeDonors: 1847,
+  staff: 23,
+  lastSyncLabel: `Data sourced from Salesforce — Last synced: ${todayAt(9, 15)}`,
+};

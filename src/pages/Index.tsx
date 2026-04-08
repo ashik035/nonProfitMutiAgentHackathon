@@ -38,6 +38,7 @@ export default function Index() {
             )}
             <div className="flex items-baseline gap-1.5">
               <span className="text-xl font-bold text-foreground">Nonprofit Control Tower</span>
+              <span className="text-xs text-muted-foreground hidden sm:inline">by NonprofitAI.software</span>
             </div>
           </Link>
 

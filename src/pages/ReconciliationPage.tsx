@@ -80,7 +80,7 @@ export default function ReconciliationPage() {
           Match transactions across your payment processors and finance systems
         </p>
         <Badge variant="secondary" className="mt-2">
-          Connected to Stripe &middot; QuickBooks Online &middot; Last synced 4 hours ago
+          Connected to Stripe &middot; QuickBooks Online &middot; Last synced {DEMO_RECONCILIATION.month}
         </Badge>
       </div>
 
