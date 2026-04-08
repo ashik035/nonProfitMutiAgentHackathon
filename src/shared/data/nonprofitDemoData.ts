@@ -17,7 +17,7 @@ import { format, subHours, subDays, subMinutes, addDays } from "date-fns";
 const NOW = new Date();
 
 /** Random hours ago between min and max */
-function hoursAgo(min: number, max: number): string {
+export function hoursAgo(min: number, max: number): string {
   const h = Math.floor(min + Math.random() * (max - min));
   if (h < 1) return "just now";
   if (h === 1) return "1 hour ago";
