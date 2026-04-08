@@ -15,6 +15,11 @@ import { findAgentBySlug, CATEGORY_COLORS } from "@/components/ai/agentTeamConfi
 import { cn } from "@/lib/utils";
 import MidDonorUpgradeDetail from "@/components/ai/agents/MidDonorUpgradeDetail";
 import DonorLapseDetectionDetail from "@/components/ai/agents/DonorLapseDetectionDetail";
+import CRMDataIntegrityDetail from "@/components/ai/agents/CRMDataIntegrityDetail";
+import ReconciliationDetail from "@/components/ai/agents/ReconciliationDetail";
+import GrantComplianceDetail from "@/components/ai/agents/GrantComplianceDetail";
+import EventIntelligenceDetail from "@/components/ai/agents/EventIntelligenceDetail";
+import BoardReportingDetail from "@/components/ai/agents/BoardReportingDetail";
 
 function getIcon(name: string) {
   return (icons as Record<string, React.ComponentType<{ className?: string }>>)[name] ?? Bot;
@@ -128,7 +133,17 @@ export default function AgentDetail() {
       </Card>
 
       {/* Custom detail pages for specific agents */}
-      {slug === "mid-donor-upgrade" ? (
+      {slug === "crm-data-integrity" ? (
+        <CRMDataIntegrityDetail />
+      ) : slug === "reconciliation-fund-accounting" ? (
+        <ReconciliationDetail />
+      ) : slug === "grant-compliance" ? (
+        <GrantComplianceDetail />
+      ) : slug === "event-intelligence" ? (
+        <EventIntelligenceDetail />
+      ) : slug === "board-reporting" ? (
+        <BoardReportingDetail />
+      ) : slug === "mid-donor-upgrade" ? (
         <MidDonorUpgradeDetail />
       ) : slug === "donor-lapse-detection" ? (
         <DonorLapseDetectionDetail />
