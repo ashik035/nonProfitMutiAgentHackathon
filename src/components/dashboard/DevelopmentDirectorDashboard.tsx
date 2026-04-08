@@ -7,38 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Users, Target, CheckSquare, Sparkles, X } from "lucide-react";
 import AITeamsDashboardCard from "@/components/dashboards/AITeamsDashboardCard";
+import OrgHealthScore from "@/components/dashboard/OrgHealthScore";
+import SinceYouWereAway from "@/components/dashboard/SinceYouWereAway";
+import QuickStatsRow from "@/components/dashboard/QuickStatsRow";
 import {
   DEMO_EVENTS,
   DEMO_AI_RECOMMENDATIONS,
   type AIRecommendation,
 } from "@/shared/data/nonprofitDemoData";
-
-const cards = [
-  {
-    title: "Untagged Event Attendees",
-    value: `${DEMO_EVENTS.untaggedAttendees}`,
-    icon: Users,
-    color: "text-amber-600",
-    bg: "bg-amber-500/10",
-    href: "/events",
-  },
-  {
-    title: "Pipeline Prospects",
-    value: "6 active",
-    icon: Target,
-    color: "text-green-600",
-    bg: "bg-green-500/10",
-    href: "/events",
-  },
-  {
-    title: "Follow-Up Tasks Due",
-    value: "3",
-    icon: CheckSquare,
-    color: "text-blue-600",
-    bg: "bg-blue-500/10",
-    href: "/events",
-  },
-];
 
 const SEVERITY_STYLES: Record<AIRecommendation["severity"], string> = {
   info: "border-blue-200 bg-blue-50",
@@ -47,7 +23,6 @@ const SEVERITY_STYLES: Record<AIRecommendation["severity"], string> = {
   success: "border-green-200 bg-green-50",
 };
 
-// Filter to dev-relevant recommendations
 const DEV_RECS = DEMO_AI_RECOMMENDATIONS.filter((r) =>
   ["rec-001", "rec-003", "rec-004"].includes(r.id)
 );
@@ -59,12 +34,13 @@ function DashboardSkeleton() {
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-4 w-48" />
       </div>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {[1, 2, 3].map((i) => (
-          <Skeleton key={i} className="h-28 rounded-xl" />
+      <Skeleton className="h-36 w-full rounded-xl" />
+      <Skeleton className="h-28 w-full rounded-xl" />
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {[1, 2, 3, 4].map((i) => (
+          <Skeleton key={i} className="h-24 rounded-xl" />
         ))}
       </div>
-      <Skeleton className="h-48 w-full rounded-xl" />
     </div>
   );
 }
@@ -75,7 +51,7 @@ export default function DevelopmentDirectorDashboard() {
   const [dismissedRecs, setDismissedRecs] = useState<string[]>([]);
 
   useEffect(() => {
-    document.title = "Dashboard | Nonprofit AI";
+    document.title = "Dashboard | Brightside Foundation";
     const timer = setTimeout(() => setIsLoading(false), 600);
     return () => clearTimeout(timer);
   }, []);
@@ -93,27 +69,39 @@ export default function DevelopmentDirectorDashboard() {
         <p className="text-muted-foreground mt-1">Development Director Dashboard</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {cards.map((card) => (
-          <Card
-            key={card.title}
-            className="cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => navigate(card.href)}
-          >
-            <CardContent className="p-5">
-              <div className="flex items-start justify-between">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${card.bg}`}>
-                  <card.icon className={`h-5 w-5 ${card.color}`} />
-                </div>
-              </div>
-              <div className="mt-4">
-                <p className="text-2xl font-semibold">{card.value}</p>
-                <p className="text-sm text-muted-foreground">{card.title}</p>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {/* Org Health Score — donor-focused */}
+      <OrgHealthScore
+        score={76}
+        scoreColor="amber"
+        breakdown={[
+          { label: "Data Quality", value: "82%", percent: 82, color: "green" },
+          { label: "Donor Engagement", value: "78%", percent: 78, color: "amber" },
+          { label: "Reconciliation", value: "90%", percent: 90, color: "green" },
+          { label: "Agent Activity", value: "5/5 active", percent: 100, color: "green" },
+        ]}
+        insight="Donor engagement below target — 47 upgrade-ready donors identified. Pipeline review recommended."
+      />
+
+      {/* Since You Were Away — donor-focused */}
+      <SinceYouWereAway
+        lastLoginAgo="2 days ago"
+        summary="Your AI agents ran 14 times while you were away. The Mid-Donor Upgrade Agent identified 47 donors giving $250–$999/yr who are ready for upgrade conversations. 12 have been scored as high-readiness. The Event Intelligence Agent flagged 47 Spring Gala attendees not yet tagged in Salesforce."
+        actions={[
+          { label: "Review upgrade pipeline →", href: "/donor-pipeline" },
+          { label: "Tag event attendees →", href: "/agents/event-intelligence" },
+          { label: "View all agents →", href: "/agents" },
+        ]}
+      />
+
+      {/* Quick Stats */}
+      <QuickStatsRow
+        stats={[
+          { label: "Active Donors", value: "1,847", change: "↑ 23 this month", positive: true },
+          { label: "Upgrade Candidates", value: "47", change: "12 high-readiness" },
+          { label: "Events This Quarter", value: "3", change: "Spring Gala latest" },
+          { label: "Follow-Up Tasks", value: "3" },
+        ]}
+      />
 
       {/* AI Recommendations */}
       <Card>
@@ -154,7 +142,7 @@ export default function DevelopmentDirectorDashboard() {
           )}
         </CardContent>
       </Card>
-      {/* AI Teams */}
+
       <AITeamsDashboardCard />
     </div>
   );
