@@ -24,7 +24,7 @@ import { getInitials } from "@/lib/utils";
 import { useState } from "react";
 import { useUnreadCount, useNotifications } from "@/hooks/useNotifications";
 import { useSemanticSearch } from "@/hooks/useSemanticSearch";
-import { DemoRoleSwitcher } from "@/components/dashboard/DemoRoleSwitcher";
+
 
 interface TopNavProps {
   sidebarOpen?: boolean;
@@ -172,9 +172,6 @@ export function TopNav({ sidebarOpen = true, onToggleSidebar }: TopNavProps) {
 
         {/* Right side */}
         <div className="flex items-center gap-2">
-          {/* Demo Role Switcher */}
-          <DemoRoleSwitcher />
-
           {/* Notifications */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
