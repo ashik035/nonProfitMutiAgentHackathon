@@ -565,6 +565,11 @@ export function findAgentBySlug(
 
 /** Icon slug → Lucide icon name mapping */
 export const AGENT_ICON_MAP: Record<string, string> = {
+  "crm-data-integrity": "Database",
+  "reconciliation-fund-accounting": "DollarSign",
+  "grant-compliance": "FileText",
+  "event-intelligence": "Calendar",
+  "board-reporting": "BarChart3",
   "deal-coach": "Trophy",
   "deal-daily-briefing": "Newspaper",
   "quick-deal-email": "Mail",
@@ -588,6 +593,11 @@ export const AGENT_ICON_MAP: Record<string, string> = {
 
 /** Category color map keyed by team id */
 export const CATEGORY_COLORS: Record<string, { from: string; to: string; badge: string }> = {
+  "nonprofit-ops": {
+    from: "199 89% 48%",
+    to: "187 100% 42%",
+    badge: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300",
+  },
   sales: {
     from: "280 70% 50%",
     to: "330 80% 55%",
