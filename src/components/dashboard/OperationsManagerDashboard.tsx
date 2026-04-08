@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ShieldCheck, Bot, Zap, Clock, Sparkles, X } from "lucide-react";
 import AITeamsDashboardCard from "@/components/dashboards/AITeamsDashboardCard";
+import OrgHealthScore from "@/components/dashboard/OrgHealthScore";
+import SinceYouWereAway from "@/components/dashboard/SinceYouWereAway";
+import QuickStatsRow from "@/components/dashboard/QuickStatsRow";
 import {
   DEMO_DATA_HEALTH,
   DEMO_AGENTS,
@@ -14,51 +17,15 @@ import {
   type AIRecommendation,
 } from "@/shared/data/nonprofitDemoData";
 
-const activeAgents = DEMO_AGENTS.filter((a) => a.status === "Active").length;
-const pendingActions = DEMO_AGENTS.reduce((sum, a) => sum + a.actions.length, 0);
-const connectedIntegrations = DEMO_INTEGRATIONS.filter((i) => i.connected).length;
-
-const cards = [
-  {
-    title: "Data Health Score",
-    value: `${DEMO_DATA_HEALTH.score}%`,
-    icon: ShieldCheck,
-    color: "text-blue-600",
-    bg: "bg-blue-500/10",
-    href: "/data-health",
-  },
-  {
-    title: "Active AI Agents",
-    value: `${activeAgents}`,
-    icon: Bot,
-    color: "text-purple-600",
-    bg: "bg-purple-500/10",
-    href: "/ai-agents",
-  },
-  {
-    title: "Integrations Connected",
-    value: `${connectedIntegrations}`,
-    icon: Zap,
-    color: "text-teal-600",
-    bg: "bg-teal-500/10",
-    href: "/integration-center",
-  },
-  {
-    title: "Pending AI Actions",
-    value: `${pendingActions}`,
-    icon: Clock,
-    color: "text-amber-600",
-    bg: "bg-amber-500/10",
-    href: "/ai-agents",
-  },
-];
-
 const SEVERITY_STYLES: Record<AIRecommendation["severity"], string> = {
   info: "border-blue-200 bg-blue-50",
   warning: "border-amber-200 bg-amber-50",
   critical: "border-red-200 bg-red-50",
   success: "border-green-200 bg-green-50",
 };
+
+const activeAgents = DEMO_AGENTS.filter((a) => a.status === "Active").length;
+const connectedIntegrations = DEMO_INTEGRATIONS.filter((i) => i.connected).length;
 
 function DashboardSkeleton() {
   return (
@@ -67,12 +34,13 @@ function DashboardSkeleton() {
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-4 w-48" />
       </div>
+      <Skeleton className="h-36 w-full rounded-xl" />
+      <Skeleton className="h-28 w-full rounded-xl" />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[1, 2, 3, 4].map((i) => (
-          <Skeleton key={i} className="h-28 rounded-xl" />
+          <Skeleton key={i} className="h-24 rounded-xl" />
         ))}
       </div>
-      <Skeleton className="h-48 w-full rounded-xl" />
     </div>
   );
 }
@@ -83,7 +51,7 @@ export default function OperationsManagerDashboard() {
   const [dismissedRecs, setDismissedRecs] = useState<string[]>([]);
 
   useEffect(() => {
-    document.title = "Dashboard | Nonprofit AI";
+    document.title = "Dashboard | Brightside Foundation";
     const timer = setTimeout(() => setIsLoading(false), 600);
     return () => clearTimeout(timer);
   }, []);
@@ -103,27 +71,39 @@ export default function OperationsManagerDashboard() {
         <p className="text-muted-foreground mt-1">Operations Manager Dashboard</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {cards.map((card) => (
-          <Card
-            key={card.title}
-            className="cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => navigate(card.href)}
-          >
-            <CardContent className="p-5">
-              <div className="flex items-start justify-between">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${card.bg}`}>
-                  <card.icon className={`h-5 w-5 ${card.color}`} />
-                </div>
-              </div>
-              <div className="mt-4">
-                <p className="text-2xl font-semibold">{card.value}</p>
-                <p className="text-sm text-muted-foreground">{card.title}</p>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {/* Org Health Score — ops-focused */}
+      <OrgHealthScore
+        score={80}
+        scoreColor="amber"
+        breakdown={[
+          { label: "Data Quality", value: "82%", percent: 82, color: "green" },
+          { label: "Agent Activity", value: "5/5 active", percent: 100, color: "green" },
+          { label: "Integration Health", value: `${connectedIntegrations} connected`, percent: 85, color: "green" },
+          { label: "Grant Health", value: "61%", percent: 61, color: "amber" },
+        ]}
+        insight="All 5 AI agents active. CRM Data Integrity Agent flagged 3 duplicate records requiring merge review."
+      />
+
+      {/* Since You Were Away — ops-focused */}
+      <SinceYouWereAway
+        lastLoginAgo="2 days ago"
+        summary="Your AI agents ran 14 times while you were away. The CRM Data Integrity Agent found 3 potential duplicate records — Sarah Chen and Michael Torres flagged for merge review. All 5 agents remain active with no errors. Salesforce and Stripe integrations synced successfully."
+        actions={[
+          { label: "Review 3 duplicates →", href: "/agents/crm-data-integrity" },
+          { label: "View agent status →", href: "/agents" },
+          { label: "Check data health →", href: "/data-health" },
+        ]}
+      />
+
+      {/* Quick Stats */}
+      <QuickStatsRow
+        stats={[
+          { label: "Data Health", value: `${DEMO_DATA_HEALTH.score}%`, change: "↑ 3% vs last month", positive: true },
+          { label: "Active Agents", value: `${activeAgents}`, change: "All running" },
+          { label: "Integrations", value: `${connectedIntegrations}`, change: "Salesforce + Stripe" },
+          { label: "Pending Actions", value: "5" },
+        ]}
+      />
 
       {/* AI Recommendations */}
       <Card>
@@ -164,7 +144,7 @@ export default function OperationsManagerDashboard() {
           )}
         </CardContent>
       </Card>
-      {/* AI Teams */}
+
       <AITeamsDashboardCard />
     </div>
   );
