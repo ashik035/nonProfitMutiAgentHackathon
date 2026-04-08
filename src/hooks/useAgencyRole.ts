@@ -22,23 +22,32 @@ const LEGACY_ROLE_MAP: Record<string, AgencyRole> = {
   ic: "operations_manager",
 };
 
+const DEMO_ROLE_KEY = "demo-role-override";
+
+function getDemoRoleOverride(): AgencyRole | null {
+  try {
+    const stored = localStorage.getItem(DEMO_ROLE_KEY);
+    if (stored && ["executive_director", "development_director", "finance_manager", "operations_manager"].includes(stored)) {
+      return stored as AgencyRole;
+    }
+  } catch {}
+  return null;
+}
+
 /**
  * Returns the current user's agency role.
  *
- * Agency roles are separate from the DB auth roles (admin / moderator / user)
- * and are stored in user_role_preferences.
- *
- * - agencyRole: null means no preference row exists → shows role-selection modal
- * - isAdmin: true for admin/moderator DB roles (existing behaviour)
+ * Checks localStorage for a demo role override first (set by the DemoRoleSwitcher).
+ * Falls back to the profile's agencyRole.
  */
 export function useAgencyRole() {
   const { profile } = useAuth();
 
+  const demoOverride = getDemoRoleOverride();
   const raw = profile?.agencyRole ?? null;
-  // Resolve legacy values to the new nonprofit roles
-  const agencyRole: AgencyRole | null = raw
-    ? (LEGACY_ROLE_MAP[raw] ?? (raw as AgencyRole))
-    : null;
+  // Demo override takes priority, then resolve legacy values
+  const agencyRole: AgencyRole | null = demoOverride
+    ?? (raw ? (LEGACY_ROLE_MAP[raw] ?? (raw as AgencyRole)) : null);
 
   const isAdmin = profile?.role === "admin" || profile?.role === "moderator";
 
