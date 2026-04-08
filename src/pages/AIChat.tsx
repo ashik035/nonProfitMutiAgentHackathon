@@ -1,251 +1,202 @@
-import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { useState, useRef, useEffect, FormEvent } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Brain, MessageSquare, Plus } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
-import { AgentConversationView } from "@/components/ai/AgentConversationView";
-import { AgentConversationList } from "@/components/ai/AgentConversationList";
-import {
-  useAgentConversations,
-  useCreateConversation,
-} from "@/hooks/useAgentConversations";
-import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Bot, Send, Loader2, User } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { cn } from "@/lib/utils";
 
-interface AIAgent {
+interface ChatMessage {
   id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  is_enabled: boolean;
-  memory_enabled: boolean;
+  role: "user" | "assistant";
+  content: string;
 }
 
+const SYSTEM_PROMPT = `You are the AI assistant for Brightside Foundation, a nonprofit organization using Nonprofit Control Tower. You have access to their operational data: 1,847 active donors, 4 active grants totaling $497,000, Q1 revenue of $487,000 (95% of $510K target), 82% data health score, 5 active AI agents. The organization uses Salesforce as their CRM and Stripe for payments. Answer questions about their nonprofit operations concisely and helpfully. Reference specific data when relevant. If asked about tasks the system can do, offer to navigate to the relevant page.`;
+
+const INITIAL_MESSAGES: ChatMessage[] = [
+  {
+    id: "1",
+    role: "user",
+    content: "How many duplicate records do we have right now?",
+  },
+  {
+    id: "2",
+    role: "assistant",
+    content:
+      "The CRM Data Integrity Agent has flagged **12 potential duplicate records** in Brightside Foundation's Salesforce. The 3 highest-confidence matches are:\n\n1. **Sarah Chen** (94% match)\n2. **Jennifer Walsh** (99% match — likely a same-day double entry)\n3. **Michael Torres** (87% match)\n\nWould you like me to take you to the **Data Health** page to review and approve merges?",
+  },
+  {
+    id: "3",
+    role: "user",
+    content: "What grants are at risk?",
+  },
+  {
+    id: "4",
+    role: "assistant",
+    content:
+      "One grant is currently flagged **at risk**: the **Kresge Foundation Community Health Initiative** ($185,000). The compliance report is due in **8 days** and fund utilization is at **61%** — below the expected pace. The narrative draft has not been started.\n\nI'd recommend assigning this to **Kevin Park** immediately. Want me to open the grant details?",
+  },
+];
+
 export default function AIChat() {
-  const { user } = useAuth();
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  const [agents, setAgents] = useState<AIAgent[]>([]);
-  const [loadingAgents, setLoadingAgents] = useState(true);
-
-  const selectedAgentId = searchParams.get("agent") || "";
-  const selectedConversationId = searchParams.get("conversation") || null;
+  const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES);
+  const [input, setInput] = useState("");
+  const [isStreaming, setIsStreaming] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    fetchAgents();
+    document.title = "AI Chat | Brightside Foundation";
   }, []);
 
   useEffect(() => {
-    if (!selectedAgentId && agents.length > 0) {
-      setSearchParams((prev) => {
-        const next = new URLSearchParams(prev);
-        next.set("agent", agents[0].id);
-        next.delete("conversation");
-        return next;
-      });
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [agents, selectedAgentId, setSearchParams]);
+  }, [messages, isStreaming]);
 
-  const fetchAgents = async () => {
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    const text = input.trim();
+    if (!text || isStreaming) return;
+
+    const userMsg: ChatMessage = { id: crypto.randomUUID(), role: "user", content: text };
+    setMessages((prev) => [...prev, userMsg]);
+    setInput("");
+    setIsStreaming(true);
+
     try {
-      const { data, error } = await supabase
-        .from("ai_agents")
-        .select("id, name, slug, description, is_enabled, memory_enabled")
-        .eq("is_enabled", true)
-        .order("name");
+      const allMessages = [...messages, userMsg];
+      const apiMessages = [
+        { role: "system" as const, content: SYSTEM_PROMPT },
+        ...allMessages.map((m) => ({ role: m.role as "user" | "assistant", content: m.content })),
+      ];
 
-      if (error) throw error;
-      setAgents((data || []) as AIAgent[]);
-    } catch (error: unknown) {
-      console.error("Fetch agents error:", error);
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          messages: apiMessages,
+          max_completion_tokens: 500,
+        }),
+      });
+
+      if (!response.ok) throw new Error("AI request failed");
+      const data = await response.json();
+      const assistantContent = data.choices?.[0]?.message?.content || "I wasn't able to process that request. Please try again.";
+
+      setMessages((prev) => [
+        ...prev,
+        { id: crypto.randomUUID(), role: "assistant", content: assistantContent },
+      ]);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content: "I'm having trouble connecting right now. Please try again in a moment.",
+        },
+      ]);
     } finally {
-      setLoadingAgents(false);
-    }
-  };
-
-  const handleAgentChange = (agentId: string) => {
-    setSearchParams({ agent: agentId });
-  };
-
-  const selectedAgent = agents.find((a) => a.id === selectedAgentId);
-
-  const { data: conversations } = useAgentConversations(selectedAgentId || undefined);
-  const createConversation = useCreateConversation();
-
-  const handleSelectConversation = (conversationId: string | null) => {
-    if (!selectedAgentId) return;
-    if (conversationId) {
-      setSearchParams({ agent: selectedAgentId, conversation: conversationId });
-    } else {
-      setSearchParams({ agent: selectedAgentId });
-    }
-  };
-
-  const handleNewConversation = async () => {
-    if (!selectedAgentId) return;
-    try {
-      const conversation = await createConversation.mutateAsync({
-        agent_id: selectedAgentId,
-      });
-      if (conversation?.id) {
-        setSearchParams({ agent: selectedAgentId, conversation: conversation.id });
-      }
-    } catch (err: unknown) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : typeof (err as { message?: string })?.message === "string"
-            ? (err as { message: string }).message
-            : "Failed to start conversation";
-      console.error("Create conversation error:", err);
-      toast.error(message);
+      setIsStreaming(false);
+      inputRef.current?.focus();
     }
   };
 
   return (
     <div className="h-[calc(100vh-120px)] flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">AI Chat</h1>
-          <p className="text-muted-foreground">
-            Chat with AI agents to get insights and assistance
-          </p>
-        </div>
-        {agents.length > 0 && (
-          <Badge variant="outline" className="flex items-center gap-1">
-            <Brain className="h-3 w-3" />
-            {agents.length} agents available
-          </Badge>
-        )}
+      <div className="mb-4">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">AI Chat</h1>
+        <p className="text-sm text-muted-foreground">
+          Brightside Foundation · Ask questions about your nonprofit operations
+        </p>
       </div>
 
-      {/* Agent Selector */}
-      {agents.length > 0 && (
-        <Card className="mb-4">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Select AI Agent</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Select value={selectedAgentId} onValueChange={handleAgentChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select an agent" />
-              </SelectTrigger>
-              <SelectContent>
-                {agents.map((agent) => (
-                  <SelectItem key={agent.id} value={agent.id}>
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">🤖</span>
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-2">
-                          <span>{agent.name}</span>
-                          {agent.memory_enabled && (
-                            <Badge variant="secondary" className="text-xs px-1.5 py-0 h-4">
-                              <Brain className="h-2.5 w-2.5 mr-1" />
-                              Memory
-                            </Badge>
-                          )}
-                        </div>
-                        {agent.description && (
-                          <span className="text-xs text-muted-foreground">
-                            {agent.description}
-                          </span>
-                        )}
-                      </div>
+      {/* Chat area */}
+      <Card className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+          <div className="space-y-4 max-w-3xl mx-auto">
+            {messages.map((msg) => (
+              <div
+                key={msg.id}
+                className={cn(
+                  "flex gap-3",
+                  msg.role === "user" ? "justify-end" : "justify-start"
+                )}
+              >
+                {msg.role === "assistant" && (
+                  <Avatar className="h-8 w-8 shrink-0 mt-0.5">
+                    <AvatarFallback className="bg-primary/10 text-primary">
+                      <Bot className="h-4 w-4" />
+                    </AvatarFallback>
+                  </Avatar>
+                )}
+                <div
+                  className={cn(
+                    "rounded-lg px-4 py-3 max-w-[80%] text-sm",
+                    msg.role === "user"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted/50 border text-foreground"
+                  )}
+                >
+                  {msg.role === "assistant" ? (
+                    <div className="prose prose-sm dark:prose-invert max-w-none [&>p]:mb-2 [&>p:last-child]:mb-0 [&>ol]:mb-2 [&>ul]:mb-2">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {msg.content}
+                      </ReactMarkdown>
                     </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Chat area: only when an agent is selected */}
-      {!selectedAgentId && agents.length > 0 && (
-        <Card className="flex-1 flex items-center justify-center">
-          <div className="text-center p-8 text-muted-foreground">
-            <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-50" />
-            <p>Select an agent above to start chatting.</p>
-          </div>
-        </Card>
-      )}
-
-      {!selectedAgentId && loadingAgents && (
-        <Card className="flex-1 flex items-center justify-center">
-          <div className="text-center p-8 text-muted-foreground">
-            Loading agents…
-          </div>
-        </Card>
-      )}
-
-      {selectedAgentId && selectedAgent && (
-        <div className="flex-1 flex gap-4 min-h-0">
-          {/* Conversation list sidebar */}
-          <div className="w-64 flex-shrink-0 hidden sm:block">
-            <AgentConversationList
-              agentId={selectedAgentId}
-              agentName={selectedAgent.name}
-              selectedConversationId={selectedConversationId}
-              onSelectConversation={handleSelectConversation}
-              onNewConversation={handleNewConversation}
-            />
-          </div>
-
-          {/* Main chat area */}
-          <Card className="flex-1 flex flex-col min-h-0 overflow-hidden">
-            {selectedConversationId ? (
-              <AgentConversationView
-                conversationId={selectedConversationId}
-                agentId={selectedAgentId}
-              />
-            ) : (
-              <div className="flex-1 flex flex-col items-center justify-center p-8">
-                <MessageSquare className="h-14 w-14 text-muted-foreground/50 mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Start a conversation</h3>
-                <p className="text-muted-foreground text-center max-w-sm mb-6">
-                  Start a new chat with {selectedAgent.name} or pick an existing
-                  conversation from the list.
-                </p>
-                <Button onClick={handleNewConversation} disabled={createConversation.isPending}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  New conversation
-                </Button>
-                {conversations && conversations.length > 0 && (
-                  <p className="text-xs text-muted-foreground mt-4">
-                    Or select a conversation from the sidebar
-                  </p>
+                  ) : (
+                    <p>{msg.content}</p>
+                  )}
+                </div>
+                {msg.role === "user" && (
+                  <Avatar className="h-8 w-8 shrink-0 mt-0.5">
+                    <AvatarFallback className="bg-secondary text-secondary-foreground">
+                      <User className="h-4 w-4" />
+                    </AvatarFallback>
+                  </Avatar>
                 )}
               </div>
+            ))}
+            {isStreaming && (
+              <div className="flex gap-3 justify-start">
+                <Avatar className="h-8 w-8 shrink-0 mt-0.5">
+                  <AvatarFallback className="bg-primary/10 text-primary">
+                    <Bot className="h-4 w-4" />
+                  </AvatarFallback>
+                </Avatar>
+                <div className="rounded-lg px-4 py-3 bg-muted/50 border">
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                </div>
+              </div>
             )}
-          </Card>
+          </div>
+        </ScrollArea>
+
+        {/* Input */}
+        <div className="border-t p-4">
+          <form onSubmit={handleSubmit} className="flex gap-2 max-w-3xl mx-auto">
+            <Input
+              ref={inputRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask about donors, grants, events, or data health…"
+              disabled={isStreaming}
+              className="flex-1"
+            />
+            <Button type="submit" size="icon" disabled={isStreaming || !input.trim()}>
+              <Send className="h-4 w-4" />
+            </Button>
+          </form>
         </div>
-      )}
-
-      {selectedAgentId && !selectedAgent && agents.length > 0 && (
-        <Card className="flex-1 flex items-center justify-center">
-          <div className="text-center p-8 text-muted-foreground">
-            Selected agent not found. Choose another from the list above.
-          </div>
-        </Card>
-      )}
-
-      {agents.length === 0 && !loadingAgents && (
-        <Card className="flex-1 flex items-center justify-center">
-          <div className="text-center p-8 text-muted-foreground">
-            No AI agents are available. Contact your administrator to enable agents.
-          </div>
-        </Card>
-      )}
+      </Card>
     </div>
   );
 }

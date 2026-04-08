@@ -281,7 +281,11 @@ export function AppSidebar({ open = true, onToggleSidebar }: AppSidebarProps) {
                   <span className="text-sm font-semibold text-sidebar-foreground truncate">
                     Brightside Foundation
                   </span>
-                  <span className="text-xs text-muted-foreground truncate">NonprofitAI.software</span>
+                  <span className="text-[10px] text-muted-foreground truncate">Powered by NonprofitAI.software</span>
+                  <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                    <span className="h-1.5 w-1.5 rounded-full bg-green-500 shrink-0 animate-pulse" />
+                    Salesforce Connected
+                  </span>
                 </div>
               </Link>
               {onToggleSidebar && (
