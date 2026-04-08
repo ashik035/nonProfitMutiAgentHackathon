@@ -80,11 +80,9 @@ export const coreProtectedRoutes = (
       <Route path="/notifications" element={<Notifications />} />
     </Route>
 
-    {/* AI features (legacy admin agents) */}
-    <Route element={<ModuleRoute requiresFeatureFlag="enableAIAgents" />}>
-      <Route path="/ai-agents-legacy" element={<AIAgents />} />
-      <Route path="/ai-chat" element={<AIChat />} />
-    </Route>
+    {/* AI features */}
+    <Route path="/ai-agents-legacy" element={<AIAgents />} />
+    <Route path="/ai-chat" element={<AIChat />} />
 
     {/* Personal knowledge */}
     <Route path="/personal-knowledge" element={<PersonalKnowledge />} />
@@ -100,6 +98,7 @@ export const coreProtectedRoutes = (
     <Route path="/ai-agents/:id" element={<AIAgentDetailPage />} />
     <Route path="/ai-agents/:id/settings" element={<AIAgentSettingsPage />} />
     <Route path="/integration-center" element={<IntegrationCenterPage />} />
+    <Route path="/integrations" element={<IntegrationCenterPage />} />
 
     {/* Agent discovery pages */}
     <Route path="/agents" element={<AgentsBrowse />} />
