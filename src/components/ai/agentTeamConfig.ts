@@ -5,6 +5,14 @@
  * Used by the Browse page, Detail page, Dashboard card, and contextual banners.
  */
 
+import { hoursAgo } from "@/shared/data/nonprofitDemoData";
+
+export interface AgentOperationalMeta {
+  lastFinding: string;
+  itemsToReview: number;
+  timeSavedHrs: number;
+}
+
 export interface AgentTeamAgent {
   name: string;
   slug: string;
@@ -13,6 +21,8 @@ export interface AgentTeamAgent {
   capabilities?: string[];
   howToUse?: string[];
   whereToFind?: { label: string; path: string };
+  /** Operational metadata for the 5 core nonprofit agents */
+  operational?: AgentOperationalMeta;
 }
 
 export interface AgentTeamDef {
