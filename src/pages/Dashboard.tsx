@@ -19,6 +19,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { AIIndicator, AICard } from "@/components/ui/ai-indicator";
 import { AIAgentGuidePopover } from "@/components/dashboard/AIAgentGuidePopover";
+import OrgHealthScore from "@/components/dashboard/OrgHealthScore";
+import SinceYouWereAway from "@/components/dashboard/SinceYouWereAway";
+import QuickStatsRow from "@/components/dashboard/QuickStatsRow";
 import {
   Users,
   Calendar,
@@ -177,6 +180,40 @@ export default function Dashboard() {
           </Button>
         </div>
       </div>
+
+      {/* Org Health Score */}
+      <OrgHealthScore
+        score={74}
+        scoreColor="amber"
+        breakdown={[
+          { label: "Data Quality", value: "82%", percent: 82, color: "green" },
+          { label: "Grant Health", value: "61%", percent: 61, color: "amber" },
+          { label: "Reconciliation", value: "90%", percent: 90, color: "green" },
+          { label: "Agent Activity", value: "5/5 active", percent: 100, color: "green" },
+        ]}
+        insight="Grant health is below target — 2 reports due within 14 days. Review recommended."
+      />
+
+      {/* Since You Were Away */}
+      <SinceYouWereAway
+        lastLoginAgo="2 days ago"
+        summary="Your AI agents ran 14 times while you were away. The CRM Data Integrity Agent flagged 3 new potential duplicate records. The Grant Compliance Agent is tracking the Kresge Foundation report, due in 8 days with 61% fund utilization. One Stripe transaction from Apr 6 ($2,340) remains unmatched in Salesforce."
+        actions={[
+          { label: "Review 3 duplicates →", href: "/agents/crm-data-integrity" },
+          { label: "Open grant report →", href: "/agents/grant-compliance" },
+          { label: "Review transaction →", href: "/agents/reconciliation-fund-accounting" },
+        ]}
+      />
+
+      {/* Quick Stats */}
+      <QuickStatsRow
+        stats={[
+          { label: "Active Donors", value: "1,847", change: "↑ 23 this month", positive: true },
+          { label: "Grants Active", value: "4", change: "$497K total" },
+          { label: "Data Health", value: "82%", change: "↑ 3% vs last month", positive: true },
+          { label: "Tasks Pending", value: "7" },
+        ]}
+      />
 
       {/* Stats Grid */}
       {statsLoading ? (
