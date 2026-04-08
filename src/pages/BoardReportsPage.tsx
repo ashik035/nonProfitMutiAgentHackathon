@@ -1,218 +1,256 @@
 import { useState, useEffect } from "react";
-
-import {
-  Download,
-  RefreshCw,
-  Users,
-  DollarSign,
-  Clock,
-  Briefcase,
-  TrendingUp,
-  TrendingDown,
-  Eye,
-} from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { toast } from "sonner";
+import { Download, RefreshCw, Send, Loader2, FileText } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DEMO_BOARD_REPORT } from "@/shared/data/nonprofitDemoData";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
-interface KpiCardProps {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  detail?: string;
-  detailColor?: string;
-}
+/* ── demo data ── */
 
-function KpiCard({ icon, label, value, detail, detailColor = "text-green-600" }: KpiCardProps) {
-  return (
-    <Card>
-      <CardContent className="flex items-center gap-4 p-5">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-          {icon}
-        </div>
-        <div>
-          <p className="text-2xl font-bold">{value}</p>
-          <p className="text-sm text-muted-foreground">{label}</p>
-          {detail && (
-            <p className={`mt-0.5 text-xs font-medium ${detailColor}`}>{detail}</p>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
+const FINANCIAL_ROWS = [
+  { metric: "Total Revenue", target: "$510,000", actual: "$487,000", variance: -4.5 },
+  { metric: "Major Gifts", target: "$210,000", actual: "$248,000", variance: 18.1 },
+  { metric: "Events Revenue", target: "$160,000", actual: "$142,000", variance: -11.3 },
+  { metric: "Foundation Grants", target: "$140,000", actual: "$97,000", variance: -30.7 },
+];
+
+const GRANT_ROWS = [
+  { grant: "Community Health Initiative", funder: "Kresge Foundation", amount: "$185,000", status: "Report due Apr 16", utilization: 61 },
+  { grant: "Youth Programs", funder: "Robert Wood Johnson", amount: "$95,000", status: "On track", utilization: 88 },
+  { grant: "Technology Access", funder: "Gates Foundation", amount: "$125,000", status: "Active", utilization: 44 },
+  { grant: "Housing Support", funder: "Local Community Foundation", amount: "$92,000", status: "Active", utilization: 71 },
+];
+
+/* ── skeleton ── */
 
 function PageSkeleton() {
   return (
-    <div className="space-y-8 p-6">
+    <div className="space-y-6">
       <div className="space-y-2">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-4 w-72" />
       </div>
-      <Skeleton className="h-20 w-full rounded-xl" />
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {[1, 2, 3, 4].map((i) => (
-          <Skeleton key={i} className="h-24 rounded-xl" />
-        ))}
-      </div>
-      <Skeleton className="h-48 w-full rounded-xl" />
+      <Skeleton className="h-[600px] w-full max-w-[760px] mx-auto rounded-xl" />
     </div>
   );
 }
 
+/* ── main page ── */
+
 export default function BoardReportsPage() {
   const [isLoading, setIsLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
-    document.title = "Board Reports | Nonprofit AI";
+    document.title = "Board Reports | Brightside Foundation";
     const timer = setTimeout(() => setIsLoading(false), 600);
     return () => clearTimeout(timer);
   }, []);
 
+  const handleExport = () => {
+    setExporting(true);
+    setTimeout(() => {
+      setExporting(false);
+      toast.success("Board report exported", {
+        description: "Q1 2026 Board Report is ready to download.",
+      });
+    }, 2000);
+  };
+
   if (isLoading) return <PageSkeleton />;
 
   return (
-    <div className="space-y-8 p-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Board Reports</h1>
-        <p className="text-sm text-muted-foreground">
-          Board-ready reports generated from your organization's data
-        </p>
+    <div className="space-y-6">
+      {/* Page header */}
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+          <FileText className="h-5 w-5 text-primary" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Board Reports</h1>
+          <p className="text-sm text-muted-foreground">
+            Board-ready reports generated from your organization's data
+          </p>
+        </div>
       </div>
 
-      {/* Status Banner */}
-      <Card className="bg-gradient-to-r from-green-50 to-emerald-50 ring-1 ring-green-200 border-0">
-        <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
-              {DEMO_BOARD_REPORT.status}
-            </Badge>
-            <span className="text-sm text-muted-foreground">
-              {DEMO_BOARD_REPORT.quarter} &middot; Generated {DEMO_BOARD_REPORT.generatedDate}
-            </span>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" className="gap-1.5">
-              <Download className="h-4 w-4" />
-              Download PDF
-            </Button>
-            <Button className="gap-1.5">
-              <RefreshCw className="h-4 w-4" />
-              Generate New Draft
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* KPI Row */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <KpiCard
-          icon={<Users className="h-5 w-5 text-primary" />}
-          label="Total Donors"
-          value={DEMO_BOARD_REPORT.totalDonors.toLocaleString()}
-          detail={`↑${DEMO_BOARD_REPORT.donorGrowth}% vs last quarter`}
-        />
-        <KpiCard
-          icon={<DollarSign className="h-5 w-5 text-primary" />}
-          label="Total Revenue"
-          value={`$${DEMO_BOARD_REPORT.totalRevenue.toLocaleString()}`}
-          detail={`${DEMO_BOARD_REPORT.revenueVsGoal}% of $${DEMO_BOARD_REPORT.revenueGoal.toLocaleString()} goal`}
-        />
-        <KpiCard
-          icon={<Clock className="h-5 w-5 text-primary" />}
-          label="Volunteer Hours"
-          value={DEMO_BOARD_REPORT.volunteerHours.toLocaleString()}
-        />
-        <KpiCard
-          icon={<Briefcase className="h-5 w-5 text-primary" />}
-          label="Active Programs"
-          value={String(DEMO_BOARD_REPORT.programsActive)}
-        />
+      {/* Action buttons */}
+      <div className="flex flex-wrap gap-2">
+        <Button className="gap-1.5" onClick={handleExport} disabled={exporting}>
+          {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+          {exporting ? "Preparing PDF…" : "Approve & Export PDF"}
+        </Button>
+        <Button variant="secondary" className="gap-1.5" onClick={() => toast.success("New draft generation started")}>
+          <RefreshCw className="h-4 w-4" />
+          Generate New Draft
+        </Button>
+        <Button variant="outline" className="gap-1.5" onClick={() => toast("Review request sent to Executive Director")}>
+          <Send className="h-4 w-4" />
+          Request ED Review
+        </Button>
       </div>
 
-      {/* Revenue Progress */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Revenue vs Goal</CardTitle>
-          <CardDescription>
-            ${DEMO_BOARD_REPORT.totalRevenue.toLocaleString()} of ${DEMO_BOARD_REPORT.revenueGoal.toLocaleString()} annual goal
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-3">
-            <div className="h-3 flex-1 overflow-hidden rounded-full bg-muted">
-              <div
-                className="h-full rounded-full bg-primary"
-                style={{ width: `${DEMO_BOARD_REPORT.revenueVsGoal}%` }}
-              />
-            </div>
-            <span className="text-sm font-medium text-primary">{DEMO_BOARD_REPORT.revenueVsGoal}%</span>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Additional KPIs */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        <KpiCard
-          icon={<TrendingUp className="h-5 w-5 text-primary" />}
-          label="Donor Retention Rate"
-          value={`${DEMO_BOARD_REPORT.retentionRate}%`}
-        />
-        <KpiCard
-          icon={<Users className="h-5 w-5 text-primary" />}
-          label="New Donors This Quarter"
-          value={DEMO_BOARD_REPORT.newDonors.toString()}
-        />
-        <KpiCard
-          icon={<DollarSign className="h-5 w-5 text-primary" />}
-          label="Avg Gift Size"
-          value={`$${Math.round(DEMO_BOARD_REPORT.totalRevenue / DEMO_BOARD_REPORT.totalDonors)}`}
-        />
-      </div>
-
-      {/* Financial Snapshot */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Financial Snapshot</CardTitle>
-          <CardDescription>
-            Revenue, expenses, and fund balance summary for {DEMO_BOARD_REPORT.quarter}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {DEMO_BOARD_REPORT.financialSnapshot.map((item) => (
-            <div
-              key={item.label}
-              className="flex items-center justify-between rounded-lg border p-4"
-            >
-              <div>
-                <p className="text-sm font-medium text-foreground">{item.label}</p>
-                <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                  {item.change >= 0 ? (
-                    <TrendingUp className="h-3 w-3 text-green-600" />
-                  ) : (
-                    <TrendingDown className="h-3 w-3 text-red-600" />
-                  )}
-                  <span className={item.change >= 0 ? "text-green-600" : "text-red-600"}>
-                    {item.change >= 0 ? "+" : ""}{item.change}% vs last quarter
-                  </span>
-                </p>
+      {/* Document preview */}
+      <div className="mx-auto max-w-[760px]">
+        <Card className="border shadow-sm">
+          <CardContent className="p-8 sm:p-12 space-y-8">
+            {/* ── Header ── */}
+            <div className="space-y-3">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg shrink-0">
+                    BF
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-foreground">Board Report — Q1 2026</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Prepared by Nonprofit Control Tower · April 8, 2026
+                    </p>
+                  </div>
+                </div>
+                <Badge className="bg-amber-100 text-amber-800 border-0 shrink-0 dark:bg-amber-900/30 dark:text-amber-300">
+                  Draft — Pending ED Approval
+                </Badge>
               </div>
-              <p className="text-lg font-semibold">
-                ${item.amount.toLocaleString()}
+              <div className="border-b border-border" />
+            </div>
+
+            {/* ── Section 1: Executive Summary ── */}
+            <section className="space-y-2">
+              <h3 className="text-base font-semibold text-foreground">Executive Summary</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Brightside Foundation closed Q1 2026 with $487,000 in revenue against a $510,000 target (95%).
+                Major gift activity increased 18% year-over-year. Two grant reports are due in the next 30 days.
+              </p>
+            </section>
+
+            {/* ── Section 2: Financial Snapshot ── */}
+            <section className="space-y-3">
+              <h3 className="text-base font-semibold text-foreground">Financial Snapshot</h3>
+              <div className="rounded-lg border overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/50">
+                      <TableHead className="text-xs font-semibold">Metric</TableHead>
+                      <TableHead className="text-xs font-semibold text-right">Q1 Target</TableHead>
+                      <TableHead className="text-xs font-semibold text-right">Q1 Actual</TableHead>
+                      <TableHead className="text-xs font-semibold text-right">Variance</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {FINANCIAL_ROWS.map((row, i) => (
+                      <TableRow key={row.metric} className={i % 2 === 1 ? "bg-muted/30" : ""}>
+                        <TableCell className="text-sm font-medium">{row.metric}</TableCell>
+                        <TableCell className="text-sm text-right text-muted-foreground">{row.target}</TableCell>
+                        <TableCell className="text-sm text-right font-medium">{row.actual}</TableCell>
+                        <TableCell className={`text-sm text-right font-medium ${row.variance >= 0 ? "text-green-600" : "text-red-600"}`}>
+                          {row.variance >= 0 ? "+" : ""}{row.variance}%
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </section>
+
+            {/* ── Section 3: Donor Engagement ── */}
+            <section className="space-y-3">
+              <h3 className="text-base font-semibold text-foreground">Donor Engagement</h3>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: "Active Donors", value: "1,847", detail: "↑ 23 vs Q4" },
+                  { label: "New Donors Acquired", value: "94" },
+                  { label: "Lapsed Donors Recovered", value: "12" },
+                  { label: "Mid-Level Upgrades in Pipeline", value: "8" },
+                ].map((item) => (
+                  <div key={item.label} className="rounded-lg border p-3">
+                    <p className="text-lg font-bold text-foreground">{item.value}</p>
+                    <p className="text-xs text-muted-foreground">{item.label}</p>
+                    {item.detail && (
+                      <p className="text-xs text-green-600 mt-0.5">{item.detail}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* ── Section 4: Grant Status ── */}
+            <section className="space-y-3">
+              <h3 className="text-base font-semibold text-foreground">Grant Status</h3>
+              <div className="rounded-lg border overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/50">
+                      <TableHead className="text-xs font-semibold">Grant</TableHead>
+                      <TableHead className="text-xs font-semibold">Funder</TableHead>
+                      <TableHead className="text-xs font-semibold text-right">Amount</TableHead>
+                      <TableHead className="text-xs font-semibold">Status</TableHead>
+                      <TableHead className="text-xs font-semibold text-right">Utilization</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {GRANT_ROWS.map((row, i) => (
+                      <TableRow key={row.grant} className={i % 2 === 1 ? "bg-muted/30" : ""}>
+                        <TableCell className="text-sm font-medium">{row.grant}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{row.funder}</TableCell>
+                        <TableCell className="text-sm text-right">{row.amount}</TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className={`text-[10px] ${
+                              row.status.includes("due")
+                                ? "border-amber-200 text-amber-700 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-300"
+                                : "border-green-200 text-green-700 bg-green-50 dark:bg-green-900/20 dark:text-green-300"
+                            }`}
+                          >
+                            {row.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className={`text-sm text-right font-medium ${row.utilization < 65 ? "text-amber-600" : "text-foreground"}`}>
+                          {row.utilization}%
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </section>
+
+            {/* ── Section 5: Data Health ── */}
+            <section className="space-y-3">
+              <h3 className="text-base font-semibold text-foreground">Data Health</h3>
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { label: "Data Health Score", value: "82%" },
+                  { label: "Duplicates Resolved (Q1)", value: "7" },
+                  { label: "Records Updated by AI", value: "143" },
+                ].map((item) => (
+                  <div key={item.label} className="rounded-lg border p-3 text-center">
+                    <p className="text-lg font-bold text-foreground">{item.value}</p>
+                    <p className="text-xs text-muted-foreground">{item.label}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Footer */}
+            <div className="border-t border-border pt-4">
+              <p className="text-[11px] text-muted-foreground text-center">
+                Data sourced from Salesforce, Stripe, and QuickBooks · Report generated by Nonprofit Control Tower
               </p>
             </div>
-          ))}
-          <div className="mt-4">
-            <Button variant="outline" className="gap-1.5">
-              <Eye className="h-4 w-4" />
-              View Full Report
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
