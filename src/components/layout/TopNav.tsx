@@ -24,7 +24,7 @@ import { getInitials } from "@/lib/utils";
 import { useState } from "react";
 import { useUnreadCount, useNotifications } from "@/hooks/useNotifications";
 import { useSemanticSearch } from "@/hooks/useSemanticSearch";
-import { DemoRoleSwitcher, useDemoRole } from "@/components/dashboard/DemoRoleSwitcher";
+import { DemoRoleSwitcher } from "@/components/dashboard/DemoRoleSwitcher";
 
 interface TopNavProps {
   sidebarOpen?: boolean;
