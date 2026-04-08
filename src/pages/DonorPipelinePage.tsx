@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toastSuccess } from "@/lib/toast-helpers";
 import { DollarSign, TrendingUp, Clock, Database } from "lucide-react";
+import { DEMO_ORG } from "@/shared/data/nonprofitDemoData";
 
 interface DonorCard {
   name: string;
@@ -99,7 +100,7 @@ const DonorPipelinePage = () => {
         <h1 className="text-3xl font-bold text-foreground">Donor Upgrade Pipeline</h1>
         <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
           <Database className="h-3.5 w-3.5" />
-          Data sourced from Salesforce — Last synced: Today 9:15 AM
+          {DEMO_ORG.lastSyncLabel}
         </div>
       </div>
 
