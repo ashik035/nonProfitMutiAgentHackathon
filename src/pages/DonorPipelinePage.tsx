@@ -11,8 +11,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronDown, Loader2, DollarSign, TrendingUp, Clock, Users, Mic } from "lucide-react";
+import { ChevronDown, Loader2, DollarSign, TrendingUp, Clock, Users, Mic, FileText, Copy, Download, Paperclip, Edit3 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Donor {
   id: string;
@@ -27,6 +28,15 @@ interface Donor {
   pledgeDate?: string;
   upgradeAmount?: string;
   completedDate?: string;
+  // Enriched fields for letter generation
+  email?: string;
+  fundDesignation?: string;
+  totalGiving?: string;
+  lastGiftAmount?: string;
+  lastGiftDate?: string;
+  givingHistory?: string;
+  contactNotes?: string;
+  volunteerHistory?: string;
 }
 
 interface Column {
@@ -46,23 +56,70 @@ const COLUMNS: Column[] = [
 
 const INITIAL_DONORS: Record<string, Donor[]> = {
   identified: [
-    { id: "d1", name: "Margaret Liu", currentGiving: "$2,500/yr", targetGiving: "$5,000/yr", assignedTo: "Maria Santos" },
-    { id: "d2", name: "Robert Kim", currentGiving: "$1,800/yr", targetGiving: "$3,000/yr", assignedTo: "" },
-    { id: "d3", name: "Patricia Osei", currentGiving: "$3,200/yr", targetGiving: "$7,500/yr", assignedTo: "Maria Santos" },
+    { id: "d1", name: "Margaret Liu", currentGiving: "$2,500/yr", targetGiving: "$5,000/yr", assignedTo: "Maria Santos",
+      email: "margaret.liu@email.com", fundDesignation: "Technology Access", totalGiving: "$8,750",
+      lastGiftAmount: "$2,500", lastGiftDate: "January 2026",
+      givingHistory: "$2,500 (Jan 2026), $2,500 (Jan 2025), $2,000 (Jan 2024), $1,750 (Jan 2023)",
+      contactNotes: "Retired software engineer. Passionate about digital literacy for underserved youth. Volunteers as a coding mentor every Saturday.",
+      volunteerHistory: "Weekly coding mentor since 2023, attended Tech for Good gala 2025" },
+    { id: "d2", name: "Robert Kim", currentGiving: "$1,800/yr", targetGiving: "$3,000/yr", assignedTo: "",
+      email: "r.kim@email.com", fundDesignation: "General Operating", totalGiving: "$5,400",
+      lastGiftAmount: "$1,800", lastGiftDate: "December 2025",
+      givingHistory: "$1,800 (Dec 2025), $1,800 (Dec 2024), $1,800 (Dec 2023)",
+      contactNotes: "Local business owner — Kim's Hardware. Interested in workforce development programs.",
+      volunteerHistory: "Donated supplies for community center renovation 2024" },
+    { id: "d3", name: "Patricia Osei", currentGiving: "$3,200/yr", targetGiving: "$7,500/yr", assignedTo: "Maria Santos",
+      email: "p.osei@email.com", fundDesignation: "Youth Programs", totalGiving: "$12,800",
+      lastGiftAmount: "$3,200", lastGiftDate: "February 2026",
+      givingHistory: "$3,200 (Feb 2026), $3,200 (Feb 2025), $3,200 (Feb 2024), $3,200 (Feb 2023)",
+      contactNotes: "School principal. Deeply invested in after-school tutoring program. Has referred three other donors.",
+      volunteerHistory: "Board advisory committee member, Spring Gala host committee 2025" },
   ],
   outreach: [
-    { id: "d4", name: "David Chen", currentGiving: "$2,100/yr", targetGiving: "$5,000/yr", assignedTo: "Maria Santos", outreachDate: "Apr 10, 2026" },
-    { id: "d5", name: "Susan Park", currentGiving: "$4,500/yr", targetGiving: "$10,000/yr", assignedTo: "Kevin Park", outreachDate: "Apr 12, 2026" },
+    { id: "d4", name: "David Chen", currentGiving: "$2,100/yr", targetGiving: "$5,000/yr", assignedTo: "Maria Santos", outreachDate: "Apr 10, 2026",
+      email: "david.chen@email.com", fundDesignation: "General Operating", totalGiving: "$6,300",
+      lastGiftAmount: "$2,100", lastGiftDate: "November 2025",
+      givingHistory: "$2,100 (Nov 2025), $2,100 (Nov 2024), $2,100 (Nov 2023)",
+      contactNotes: "Financial advisor. Expressed interest in planned giving program at last event.",
+      volunteerHistory: "Attended Fall Fundraiser 2024 and 2025" },
+    { id: "d5", name: "Susan Park", currentGiving: "$4,500/yr", targetGiving: "$10,000/yr", assignedTo: "Kevin Park", outreachDate: "Apr 12, 2026",
+      email: "susan.park@email.com", fundDesignation: "Youth Programs", totalGiving: "$18,000",
+      lastGiftAmount: "$4,500", lastGiftDate: "March 2026",
+      givingHistory: "$4,500 (Mar 2026), $4,500 (Mar 2025), $4,500 (Sep 2024), $4,500 (Mar 2024)",
+      contactNotes: "Pediatrician. Her daughter participated in our summer camp. Interested in scholarship fund naming.",
+      volunteerHistory: "Health screening volunteer 2024, Summer Camp sponsor 2025" },
   ],
   conversation: [
-    { id: "d6", name: "Jennifer Walsh", currentGiving: "$1,950/yr", targetGiving: "$5,000/yr", assignedTo: "Maria Santos", lastContact: "Apr 5", note: "Very interested in naming opportunity for youth programs room" },
-    { id: "d7", name: "Mark Abrams", currentGiving: "$3,800/yr", targetGiving: "$7,500/yr", assignedTo: "Kevin Park", lastContact: "Apr 3", note: "Meeting scheduled Apr 15 with ED" },
+    { id: "d6", name: "Jennifer Walsh", currentGiving: "$1,950/yr", targetGiving: "$5,000/yr", assignedTo: "Maria Santos", lastContact: "Apr 5",
+      note: "Very interested in naming opportunity for youth programs room",
+      email: "jennifer.walsh@email.com", fundDesignation: "Youth Programs", totalGiving: "$7,350",
+      lastGiftAmount: "$750", lastGiftDate: "March 2026",
+      givingHistory: "$750 (Mar 2026), $500 (Dec 2025), $700 (Jun 2025), $500 (Dec 2024), $500 (Mar 2024)",
+      contactNotes: "Attorney. Youth education meant a great deal to her late mother, Eleanor Walsh, who volunteered here for 15 years. Jennifer is considering a naming gift in her mother's honor.",
+      volunteerHistory: "Attended Spring Gala 2025 and 2026, Eleanor Walsh Memorial donor since 2024" },
+    { id: "d7", name: "Mark Abrams", currentGiving: "$3,800/yr", targetGiving: "$7,500/yr", assignedTo: "Kevin Park", lastContact: "Apr 3",
+      note: "Meeting scheduled Apr 15 with ED",
+      email: "mark.abrams@email.com", fundDesignation: "General Operating", totalGiving: "$15,200",
+      lastGiftAmount: "$3,800", lastGiftDate: "January 2026",
+      givingHistory: "$3,800 (Jan 2026), $3,800 (Jan 2025), $3,800 (Jan 2024), $3,800 (Jan 2023)",
+      contactNotes: "Real estate developer. Long-time supporter since founding. Interested in capital campaign for new community center wing.",
+      volunteerHistory: "Founding donor, attended every annual gala, site tour host for potential donors" },
   ],
   pledge: [
-    { id: "d8", name: "Thomas Rivera", currentGiving: "$2,500/yr", targetGiving: "$5,000/yr", assignedTo: "Maria Santos", pledgeAmount: "$5,000", pledgeDate: "Apr 1, 2026" },
+    { id: "d8", name: "Thomas Rivera", currentGiving: "$2,500/yr", targetGiving: "$5,000/yr", assignedTo: "Maria Santos", pledgeAmount: "$5,000", pledgeDate: "Apr 1, 2026",
+      email: "thomas.rivera@email.com", fundDesignation: "General Operating", totalGiving: "$12,500",
+      lastGiftAmount: "$5,000", lastGiftDate: "April 2026",
+      givingHistory: "$5,000 pledge (Apr 2026), $2,500 (Jan 2026), $2,500 (Jan 2025), $2,500 (Jan 2024), $2,500 (Jan 2023), $2,500 (Jan 2022)",
+      contactNotes: "Retired teacher. Believes strongly in educational equity. His grandchildren attend our after-school program.",
+      volunteerHistory: "Reading tutor volunteer 2022-present, Mentor Match program participant" },
   ],
   upgraded: [
-    { id: "d9", name: "Carol Nguyen", currentGiving: "$1,200/yr", targetGiving: "$2,500/yr", assignedTo: "Maria Santos", upgradeAmount: "+$1,300/yr", completedDate: "Mar 28, 2026" },
+    { id: "d9", name: "Carol Nguyen", currentGiving: "$1,200/yr", targetGiving: "$2,500/yr", assignedTo: "Maria Santos", upgradeAmount: "+$1,300/yr", completedDate: "Mar 28, 2026",
+      email: "carol.nguyen@email.com", fundDesignation: "Technology Access", totalGiving: "$4,900",
+      lastGiftAmount: "$2,500", lastGiftDate: "March 2026",
+      givingHistory: "$2,500 (Mar 2026 — upgraded!), $1,200 (Mar 2025), $1,200 (Mar 2024), $1,000 (Mar 2023)",
+      contactNotes: "IT consultant. Upgraded after seeing demo of new computer lab. Very excited about STEM curriculum.",
+      volunteerHistory: "Computer lab setup volunteer, Tech Career Day speaker 2025" },
   ],
 };
 
@@ -77,6 +134,12 @@ export default function DonorPipelinePage() {
   const [giftModal, setGiftModal] = useState<Donor | null>(null);
   const [profileDrawer, setProfileDrawer] = useState<Donor | null>(null);
   const [saving, setSaving] = useState(false);
+
+  // Letter generation state
+  const [letterLoading, setLetterLoading] = useState(false);
+  const [generatedLetter, setGeneratedLetter] = useState<string | null>(null);
+  const [editingLetter, setEditingLetter] = useState(false);
+  const [editedLetter, setEditedLetter] = useState("");
 
   const totalInPipeline = Object.values(donors).flat().length;
 
@@ -119,6 +182,61 @@ export default function DonorPipelinePage() {
       [col]: prev[col].map((d) => d.id === donorId ? { ...d, assignedTo: staffName } : d),
     }));
     toast.success(`✓ Assigned to ${staffName}`);
+  };
+
+  const handleGenerateLetter = async (donor: Donor) => {
+    setLetterLoading(true);
+    setGeneratedLetter(null);
+    setEditingLetter(false);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-donor-letter", {
+        body: { donor },
+      });
+      if (error) throw error;
+      const letter = data?.letter || "Letter generation failed.";
+      setGeneratedLetter(letter);
+      setEditedLetter(letter);
+      toast.success("✓ Acknowledgment letter generated");
+    } catch (err) {
+      console.error("Letter generation error:", err);
+      toast.error("Failed to generate letter. Please try again.");
+    } finally {
+      setLetterLoading(false);
+    }
+  };
+
+  const handleCopyLetter = () => {
+    const text = editingLetter ? editedLetter : generatedLetter;
+    if (text) {
+      navigator.clipboard.writeText(text);
+      toast.success("✓ Letter copied to clipboard");
+    }
+  };
+
+  const handleDownloadLetter = () => {
+    const text = editingLetter ? editedLetter : generatedLetter;
+    if (!text || !profileDrawer) return;
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Acknowledgment_Letter_${profileDrawer.name.replace(/\s+/g, "_")}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("✓ Letter downloaded");
+  };
+
+  const handleAttachLetter = () => {
+    if (profileDrawer) {
+      toast.success(`✓ Letter attached to ${profileDrawer.name}'s Salesforce record`);
+    }
+  };
+
+  const resetLetterState = () => {
+    setGeneratedLetter(null);
+    setEditingLetter(false);
+    setEditedLetter("");
+    setLetterLoading(false);
   };
 
   return (
@@ -202,7 +320,7 @@ export default function DonorPipelinePage() {
                     {col.id === "pledge" && (
                       <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setGiftModal(donor)}>Record Gift</Button>
                     )}
-                    <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setProfileDrawer(donor)}>View Profile</Button>
+                    <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => { resetLetterState(); setProfileDrawer(donor); }}>View Profile</Button>
                     <Button
                       size="sm"
                       variant="ghost"
@@ -350,8 +468,8 @@ export default function DonorPipelinePage() {
       </Dialog>
 
       {/* Profile Drawer */}
-      <Sheet open={!!profileDrawer} onOpenChange={() => setProfileDrawer(null)}>
-        <SheetContent className="sm:max-w-md overflow-y-auto">
+      <Sheet open={!!profileDrawer} onOpenChange={() => { setProfileDrawer(null); resetLetterState(); }}>
+        <SheetContent className="sm:max-w-lg overflow-y-auto">
           {profileDrawer && (
             <>
               <SheetHeader><SheetTitle>{profileDrawer.name}</SheetTitle></SheetHeader>
@@ -360,20 +478,94 @@ export default function DonorPipelinePage() {
                   <p><span className="text-muted-foreground">Current Giving:</span> {profileDrawer.currentGiving}</p>
                   <p><span className="text-muted-foreground">Target:</span> {profileDrawer.targetGiving}</p>
                   <p><span className="text-muted-foreground">Assigned to:</span> {profileDrawer.assignedTo || "Unassigned"}</p>
-                  {profileDrawer.note && <p><span className="text-muted-foreground">Notes:</span> {profileDrawer.note}</p>}
+                  {profileDrawer.email && <p><span className="text-muted-foreground">Email:</span> {profileDrawer.email}</p>}
+                  {profileDrawer.fundDesignation && <p><span className="text-muted-foreground">Fund:</span> {profileDrawer.fundDesignation}</p>}
+                  {profileDrawer.totalGiving && <p><span className="text-muted-foreground">Total Lifetime Giving:</span> {profileDrawer.totalGiving}</p>}
+                  {profileDrawer.contactNotes && <p><span className="text-muted-foreground">Notes:</span> {profileDrawer.contactNotes}</p>}
+                  {profileDrawer.volunteerHistory && <p><span className="text-muted-foreground">Volunteer/Events:</span> {profileDrawer.volunteerHistory}</p>}
                 </div>
                 <div>
-                  <h4 className="font-semibold mb-2">Recent Giving History</h4>
-                  <table className="w-full text-xs">
-                    <thead><tr className="border-b"><th className="text-left py-1">Date</th><th className="text-right py-1">Amount</th></tr></thead>
-                    <tbody>
-                      <tr className="border-b"><td className="py-1">Mar 2026</td><td className="text-right py-1">$500</td></tr>
-                      <tr className="border-b"><td className="py-1">Dec 2025</td><td className="text-right py-1">$1,000</td></tr>
-                      <tr><td className="py-1">Jun 2025</td><td className="text-right py-1">$500</td></tr>
-                    </tbody>
-                  </table>
+                  <h4 className="font-semibold mb-2">Giving History</h4>
+                  {profileDrawer.givingHistory ? (
+                    <p className="text-xs text-muted-foreground">{profileDrawer.givingHistory}</p>
+                  ) : (
+                    <table className="w-full text-xs">
+                      <thead><tr className="border-b"><th className="text-left py-1">Date</th><th className="text-right py-1">Amount</th></tr></thead>
+                      <tbody>
+                        <tr className="border-b"><td className="py-1">Mar 2026</td><td className="text-right py-1">$500</td></tr>
+                        <tr className="border-b"><td className="py-1">Dec 2025</td><td className="text-right py-1">$1,000</td></tr>
+                        <tr><td className="py-1">Jun 2025</td><td className="text-right py-1">$500</td></tr>
+                      </tbody>
+                    </table>
+                  )}
                 </div>
-                <Button variant="outline" className="w-full" onClick={() => setProfileDrawer(null)}>Close</Button>
+
+                {/* Generate Letter Button */}
+                <Button
+                  className="w-full"
+                  onClick={() => handleGenerateLetter(profileDrawer)}
+                  disabled={letterLoading}
+                >
+                  {letterLoading ? (
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generating Letter…</>
+                  ) : (
+                    <><FileText className="h-4 w-4 mr-2" /> Generate Acknowledgment Letter</>
+                  )}
+                </Button>
+
+                {/* Letter Preview */}
+                {generatedLetter && (
+                  <div className="space-y-3">
+                    <div className="border-t pt-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-sm">Acknowledgment Letter</h4>
+                        <Badge variant="secondary" className="text-[10px]">AI Generated</Badge>
+                      </div>
+                      <div className="bg-white dark:bg-card border rounded-lg p-6 shadow-sm">
+                        {/* Letterhead */}
+                        <div className="border-b pb-3 mb-4">
+                          <p className="font-semibold text-sm text-primary">Brightside Foundation</p>
+                          <p className="text-[10px] text-muted-foreground">1200 Community Drive, Suite 300 · Springfield, IL 62701</p>
+                        </div>
+
+                        {/* Letter Body */}
+                        {editingLetter ? (
+                          <Textarea
+                            value={editedLetter}
+                            onChange={(e) => setEditedLetter(e.target.value)}
+                            className="min-h-[300px] font-serif text-sm leading-relaxed border-0 shadow-none p-0 focus-visible:ring-0"
+                          />
+                        ) : (
+                          <div className="font-serif text-sm leading-relaxed whitespace-pre-wrap text-foreground">
+                            {generatedLetter}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button variant="outline" size="sm" onClick={handleCopyLetter}>
+                        <Copy className="h-3.5 w-3.5 mr-1.5" /> Copy to Clipboard
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={handleDownloadLetter}>
+                        <Download className="h-3.5 w-3.5 mr-1.5" /> Download
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={handleAttachLetter}>
+                        <Paperclip className="h-3.5 w-3.5 mr-1.5" /> Attach to Record
+                      </Button>
+                      <Button
+                        variant={editingLetter ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setEditingLetter(!editingLetter)}
+                      >
+                        <Edit3 className="h-3.5 w-3.5 mr-1.5" /> {editingLetter ? "Done Editing" : "Edit Letter"}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                <Button variant="outline" className="w-full" onClick={() => { setProfileDrawer(null); resetLetterState(); }}>Close</Button>
               </div>
             </>
           )}
