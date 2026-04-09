@@ -161,19 +161,15 @@ export default function Dashboard() {
             <AIIndicator variant="orb" size="md" status="active" />
             <div>
               <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-                {greeting()}, {profile?.full_name?.split(" ")[0] || "there"}
+                {greeting()}, {profile?.full_name?.split(" ")[0] || "Sarah"}
               </h1>
               <p className="mt-1 text-muted-foreground">
-                {aiRunsToday > 0
-                  ? `Your AI team processed ${aiRunsToday} task${aiRunsToday !== 1 ? "s" : ""} today.`
-                  : aiAgentCount > 0
-                    ? `${aiAgentCount} AI agent${aiAgentCount !== 1 ? "s" : ""} standing by to help.`
-                    : "Set up AI agents to supercharge your workflow."}
+                5 AI agents actively monitoring your operations.
               </p>
             </div>
           </div>
           <Button asChild className="ai-gradient border-0 text-white shadow-md hover:opacity-90 shrink-0">
-            <Link to="/ai-agents" className="gap-2">
+            <Link to="/agents" className="gap-2">
               <Bot className="h-4 w-4" />
               Meet Your AI Team
             </Link>
