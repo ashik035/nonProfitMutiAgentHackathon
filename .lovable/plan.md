@@ -1,44 +1,40 @@
 
 
-# Clean Up Agents Page — Show Only Nonprofit-Relevant Agents
+# Donor Acknowledgment Letter Generator
 
-## Problem
+## What It Does
+Adds a "Generate Acknowledgment Letter" button to the donor profile drawer on the Donor Pipeline page. Clicking it calls the Lovable AI Gateway to generate a personalized thank-you letter using the donor's data, then displays it in a polished letter preview with action buttons.
 
-The `/agents` page currently shows **6 agent teams with ~22 agents**. Only 1 team ("Core Operations Team" with 5 agents) is relevant to the nonprofit demo. The other 5 teams (Donor Intelligence, Meeting AI, Strategy AI, Project AI) are legacy holdovers from the old product and clutter the page, making it confusing for demos.
+## How It Works
 
-Your S3 changes (core agent cards with real findings) ARE live — they're just buried under all the legacy teams.
+1. **Enrich donor data** — Expand the `Donor` interface and `INITIAL_DONORS` data with richer demo context per donor: email, fund designation, giving history array, contact notes, and volunteer/event flags. This gives the AI real material to personalize with.
 
-## What Changes
+2. **Add "Generate Acknowledgment Letter" button** to the profile drawer (`SheetContent`), below the giving history table.
 
-### 1. Remove legacy teams from `agentTeamConfig.ts`
+3. **On click → call edge function** — A new edge function `generate-donor-letter/index.ts` takes donor context and calls the Lovable AI Gateway (`google/gemini-3-flash-preview`) with a system prompt instructing it to write a warm, personalized acknowledgment letter in the ED's voice. The prompt includes all donor details so the letter references specific gifts, funds, and personal touches.
 
-Delete these 4 teams and all their agents:
-- `sales` (Donor Intelligence Team — 4 legacy agents like "Deal Coach")
-- `meetings` (Meeting AI Team — 4 agents)
-- `eos` (Strategy AI Team — 4 agents)
-- `projects` (Project AI Team — 4 agents)
+4. **Letter preview UI** — After generation, the drawer expands to show the letter in a white card styled like a document (serif font, proper spacing, Brightside Foundation letterhead). Below the letter: four action buttons.
 
-**Keep only**: `nonprofit-ops` (Core Operations Team — 5 agents with real findings data)
-
-Also clean up the corresponding entries in `AGENT_ICON_MAP` and `CATEGORY_COLORS`.
-
-### 2. Simplify the browse page layout
-
-With only 1 team, the "Team Cards grid" section (which lets you scroll between teams) becomes unnecessary. Remove it and show the 5 core agent cards directly in a clean grid — no intermediate "team card" navigation step.
-
-### 3. Clean up `AGENT_META` in `AgentsBrowse.tsx`
-
-Remove the demo metadata entries for the 16 deleted agents (deal-coach, meeting-summarizer, eos-coach, etc.) — only keep entries for core agents if needed.
-
-## Result
-
-The `/agents` page will show:
-- Page header + activity banner
-- 5 agent cards in a clean grid, each with real findings, "Run Now", and "View Findings"
-- No confusing team navigation, no legacy agents
+5. **Action buttons** (all local state, no backend):
+   - **Copy to Clipboard** — copies letter text, toast confirmation
+   - **Download as Word Doc** — generates a `.docx` file using the browser (simple Blob download as `.txt` formatted nicely, or we can use a lightweight approach)
+   - **Attach to Donor Record** — toast "Attached to Jennifer Walsh's Salesforce record"
+   - **Edit Before Sending** — switches letter to an editable textarea
 
 ## Files Changed
 
-1. **`src/components/ai/agentTeamConfig.ts`** — Remove 4 legacy teams, clean up icon map and color map
-2. **`src/pages/AgentsBrowse.tsx`** — Remove legacy AGENT_META entries, simplify layout (remove TeamCard grid, show agents directly)
+1. **`supabase/functions/generate-donor-letter/index.ts`** (new) — Edge function that takes donor context, calls Lovable AI Gateway, returns the letter text.
+
+2. **`src/pages/DonorPipelinePage.tsx`** — Enrich donor data with fund/notes/history fields. Add letter generation state, the generate button in the profile drawer, the letter preview card, and the four action buttons.
+
+## Donor-Specific Data for AI Context
+
+Each donor gets enriched fields so the AI can personalize:
+- Jennifer Walsh: Youth Programs fund, $1,950 total giving, interested in naming opportunity, attended Spring Gala
+- Thomas Rivera: General Operating, $5,000 pledge, long-time supporter
+- Margaret Liu: Technology Access fund, $2,500/yr, volunteer mentor
+- etc.
+
+## Demo Flow
+Staff opens profile drawer → clicks "Generate Acknowledgment Letter" → 2-3s spinner → beautiful letter appears with the donor's name, gift amount, fund, and a personal touch → Copy/Download/Attach/Edit buttons all work instantly.
 
