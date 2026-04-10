@@ -17,7 +17,7 @@ Nonprofit Control Tower includes powerful AI capabilities for chat, summarizatio
 
 ## Features Overview
 
-### AI Agent Teams (New)
+### AI Agent Teams
 Discover and explore 16 specialized AI agents organized into 4 teams.
 
 - **Donor Intelligence Team** — Deal Coach, Daily Briefing, Quick Email, Deal AI Chat
@@ -25,6 +25,15 @@ Discover and explore 16 specialized AI agents organized into 4 teams.
 - **Strategy AI Team** — EOS Coach, Pattern Detective, Pod Health, Quarterly Digest
 - **Project AI Team** — Project Analyst, Bug & Feature Planner, Technical Planner, Code Reviewer
 - [Learn more →](../02-modules/11-ai-agent-browse.md)
+
+### Donor Acknowledgment Letter Generator (New)
+AI-powered personalized thank-you letters generated from donor profiles.
+
+- Reads donor name, gift history, fund designation, contact notes, volunteer history
+- Generates letters in the Executive Director's voice
+- Action buttons: Copy · Download · Attach to Record · Edit
+- Powered by edge function `generate-donor-letter` via Lovable AI Gateway
+- [Learn more →](../02-modules/10-nonprofit-operations.md)
 
 ### AI Chat Assistant
 Interactive chat interface for asking questions about your data.

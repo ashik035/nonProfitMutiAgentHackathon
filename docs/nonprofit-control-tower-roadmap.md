@@ -442,5 +442,7 @@ Structure the system to support:
 | **Phase 4** | Step 7B | AI Agent Center + Integration Center | ✅ Done (AI Agent Browse with 4 teams, 16 agents) |
 | **Phase 5** | Step 7C | New user roles + role-specific dashboards | ✅ Done (ED, DD, FM, OM dashboards) |
 | **Phase 6** | Step 7D | Admin enhancements + demo data seeding | ✅ Done (nonprofitDemoData.ts) |
+| **Phase 7** | Donor Pipeline | Donor Pipeline Kanban + AI Acknowledgment Letter Generator | ✅ Done |
+| **Phase 8** | Demo Polish | Full interactive demo — every button works, every page alive | ✅ Done |
 
 > **Rule**: Execute one step at a time. Build must succeed before moving to the next step.

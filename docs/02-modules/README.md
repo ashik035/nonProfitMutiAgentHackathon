@@ -8,17 +8,17 @@ Nonprofit Control Tower includes several configurable modules. Enable or disable
 
 | Module | Description | Default | Feature Flag |
 |--------|-------------|---------|--------------|
-| Dashboard | Role-specific analytics and overview | Always on | - |
+| Dashboard | Role-specific analytics (ED, DD, FM, OM) | Always on | - |
 | [Nonprofit Operations](./10-nonprofit-operations.md) | Grants, Events, Board Reports, Data Health, Reconciliation | On | - |
+| Donor Pipeline | Donor upgrade Kanban + AI Acknowledgment Letter Generator | On | - |
 | [AI Agent Browse](./11-ai-agent-browse.md) | Discover 16 AI agents across 4 teams | On | `enableAIAgents` |
-| [Clients](./clients.md) | Client/company management | On | - |
-| [Meetings](./meetings.md) | Meeting management + Zoom sync | Off | `enableMeetings` |
-| [Tasks](./tasks.md) | Task tracking | On | - |
-| [Knowledge Base](./knowledge-base.md) | Shared knowledge library | On | `enableKnowledgeBase` |
-| [Personal Knowledge](./personal-knowledge.md) | User's private documents | On | `enablePersonalKnowledge` |
+| [Knowledge Base](./07-knowledge-base.md) | Shared knowledge library + semantic search | On | `enableKnowledgeBase` |
 | [AI Chat](./ai-chat.md) | AI assistant interface | On | `enableAIChat` |
 | [AI Agents](./ai-agents.md) | Custom AI agents (operational) | On | `enableAIAgents` |
-| [Notifications](./notifications.md) | In-app + email alerts | On | `enableEmailNotifications` |
+| [Meetings](./03-meetings.md) | Meeting management + Zoom sync | Off | `enableMeetings` |
+| [Tasks](./05-actions.md) | Task tracking | On | `enableTasks` |
+| Integrations | CRM, Finance, Payment, Event connections | On | - |
+| Settings | User preferences and system configuration | On | - |
 
 ---
 
