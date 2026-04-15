@@ -1,34 +1,24 @@
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { HelpCircle, Send, ChevronDown } from "lucide-react";
+import { HelpCircle, Send } from "lucide-react";
+
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
+  Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+  Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
 } from "@/components/ui/form";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 
 const ticketSchema = z.object({
@@ -83,6 +73,8 @@ const faqs = [
 ];
 
 export default function HelpPage() {
+  const { user } = useAuth();
+
   const form = useForm<TicketFormData>({
     resolver: zodResolver(ticketSchema),
     defaultValues: {
@@ -92,7 +84,20 @@ export default function HelpPage() {
     },
   });
 
-  const onSubmit = (data: TicketFormData) => {
+  const onSubmit = async (data: TicketFormData) => {
+    const { error } = await supabase.from("support_tickets").insert({
+      user_id: user?.id ?? null,
+      user_email: user?.email ?? null,
+      subject: data.subject,
+      category: data.category,
+      description: data.description,
+    });
+
+    if (error) {
+      toast.error("Could not submit ticket. Please try again.");
+      return;
+    }
+
     toast.success("Ticket submitted. We'll be in touch within 1 business day.");
     form.reset();
   };
@@ -121,12 +126,8 @@ export default function HelpPage() {
           <Accordion type="single" collapsible className="w-full">
             {faqs.map((faq, index) => (
               <AccordionItem key={index} value={`faq-${index}`}>
-                <AccordionTrigger className="text-left">
-                  {faq.question}
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
-                  {faq.answer}
-                </AccordionContent>
+                <AccordionTrigger className="text-left">{faq.question}</AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">{faq.answer}</AccordionContent>
               </AccordionItem>
             ))}
           </Accordion>
@@ -174,10 +175,10 @@ export default function HelpPage() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="bug">Bug Report</SelectItem>
-                        <SelectItem value="feature">Feature Request</SelectItem>
-                        <SelectItem value="integration">Integration Issue</SelectItem>
-                        <SelectItem value="general">General Question</SelectItem>
+                        <SelectItem value="Bug Report">Bug Report</SelectItem>
+                        <SelectItem value="Feature Request">Feature Request</SelectItem>
+                        <SelectItem value="Integration Issue">Integration Issue</SelectItem>
+                        <SelectItem value="General Question">General Question</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -203,9 +204,9 @@ export default function HelpPage() {
                 )}
               />
 
-              <Button type="submit">
+              <Button type="submit" disabled={form.formState.isSubmitting}>
                 <Send className="mr-2 h-4 w-4" />
-                Submit Ticket
+                {form.formState.isSubmitting ? "Submitting…" : "Submit Ticket"}
               </Button>
             </form>
           </Form>

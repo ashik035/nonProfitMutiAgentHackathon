@@ -77,6 +77,7 @@ import MemoryDashboard from "@/pages/admin/memory/MemoryDashboard";
 import UserMemoryStats from "@/pages/admin/memory/UserMemoryStats";
 import TeamLearningPatterns from "@/pages/admin/memory/TeamLearningPatterns";
 import SemanticSearchAnalytics from "@/pages/admin/memory/SemanticSearchAnalytics";
+import AdminSupportTickets from "@/pages/admin/AdminSupportTickets";
 
 /**
  * Admin routes - require admin role
@@ -176,5 +177,8 @@ export const adminRoutes = (
     <Route path="/admin/meeting-analytics" element={<MeetingAnalytics />} />
     <Route path="/admin/roadmap" element={<ProductRoadmap />} />
     <Route path="/admin/roadmap/seed" element={<SeedRunner />} />
+
+    {/* Support */}
+    <Route path="/admin/support-tickets" element={<AdminSupportTickets />} />
   </>
 );
