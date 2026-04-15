@@ -227,6 +227,7 @@ export const adminNavigation: NavGroup[] = [
     icon: "MessageSquare",
     items: [
       { title: "Feedback Management", href: "/admin/feedback", icon: "MessageSquare" },
+      { title: "Support Tickets", href: "/admin/support-tickets", icon: "Ticket" },
     ],
   },
   {
