@@ -93,6 +93,7 @@ export const navigationGroups: NavGroup[] = [
     position: "bottom",
     items: [
       { title: "Integrations", href: "/integrations", icon: "Plug" },
+      { title: "Help & Support", href: "/help", icon: "HelpCircle" },
       { title: "Settings", href: "/settings", icon: "Settings" },
     ],
   },
