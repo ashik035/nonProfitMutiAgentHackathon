@@ -24,6 +24,7 @@ import Profile from "@/pages/Profile";
 import Settings from "@/pages/Settings";
 import Sessions from "@/pages/Sessions";
 import Help from "@/pages/Help";
+import HelpPage from "@/pages/HelpPage";
 import Notifications from "@/pages/Notifications";
 import Feedback from "@/pages/Feedback";
 import FeedbackDetail from "@/pages/FeedbackDetail";
@@ -72,7 +73,7 @@ export const coreProtectedRoutes = (
     <Route path="/profile" element={<Profile />} />
     <Route path="/settings" element={<Settings />} />
     <Route path="/sessions" element={<Sessions />} />
-    <Route path="/help" element={<Help />} />
+    <Route path="/help" element={<HelpPage />} />
     <Route path="/feedback" element={<Feedback />} />
     <Route path="/feedback/:id" element={<FeedbackDetail />} />
 
