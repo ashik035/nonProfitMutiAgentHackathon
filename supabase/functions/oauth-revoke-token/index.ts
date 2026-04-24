@@ -75,7 +75,7 @@ serve(async (req) => {
           success: false,
           error: `Revocation failed (${response.status}): ${errText}`,
         }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 502 }
       )
     }
 

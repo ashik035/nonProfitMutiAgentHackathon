@@ -78,7 +78,13 @@ serve(async (req) => {
 
     // Update: PATCH /:id
     if (req.method === 'PATCH' && id) {
-      const { id: _omit, ...updates } = body as { id?: string; [k: string]: unknown }
+      const PATCH_ALLOWLIST = ['title', 'description', 'processing_status', 'metadata', 'file_url', 'content'] as const
+      type PatchField = typeof PATCH_ALLOWLIST[number]
+      const updates = Object.fromEntries(
+        PATCH_ALLOWLIST
+          .filter((k): k is PatchField => k in body)
+          .map((k) => [k, body[k]])
+      )
       const { data, error } = await supabaseClient
         .from('unified_documents')
         .update(updates)

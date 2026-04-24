@@ -86,7 +86,7 @@ serve(async (req) => {
           channel: 'linkedin',
           direction: 'internal',
           description: researchSummary,
-          created_by: (await supabase.auth.admin.listUsers()).data.users[0]?.id,
+          created_by: null,
           metadata: {
             research_source: 'perplexity',
             days_back,
