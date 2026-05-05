@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { FileText, AlertTriangle, CheckCircle, ChevronDown, Loader2, Users } from "lucide-react";
+import { FileText, CheckCircle, ChevronDown, Loader2, Users, Copy, Download, Clock } from "lucide-react";
 import { toast } from "sonner";
 
 interface GrantDeliverable {
