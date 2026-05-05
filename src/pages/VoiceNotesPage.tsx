@@ -397,6 +397,7 @@ export default function VoiceNotesPage() {
     transcript,
     interimTranscript,
     isSupported,
+    error: speechError,
     startRecording,
     stopRecording,
     resetTranscript,
