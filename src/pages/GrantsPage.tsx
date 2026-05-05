@@ -177,7 +177,7 @@ export default function GrantsPage() {
                 <Button size="sm" variant="outline" onClick={() => setDrawerGrant(grant)}>
                   <FileText className="h-3.5 w-3.5 mr-1.5" /> View Grant Details
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => handleGenerateReport(grant.id)} disabled={generating === grant.id}>
+                <Button size="sm" variant="outline" onClick={() => handleGenerateReport(grant)} disabled={generating === grant.id}>
                   {generating === grant.id ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : null}
                   Generate Report Draft
                 </Button>
