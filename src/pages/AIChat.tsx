@@ -77,19 +77,12 @@ export default function AIChat() {
         ...allMessages.map((m) => ({ role: m.role as "user" | "assistant", content: m.content })),
       ];
 
-      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          messages: apiMessages,
-          max_completion_tokens: 500,
-        }),
+      const { data, error } = await supabase.functions.invoke('ai-chat', {
+        body: { messages: apiMessages, max_tokens: 500 },
       });
 
-      if (!response.ok) throw new Error("AI request failed");
-      const data = await response.json();
-      const assistantContent = data.choices?.[0]?.message?.content || "I wasn't able to process that request. Please try again.";
+      if (error) throw error;
+      const assistantContent = data?.response || "I wasn't able to process that request. Please try again.";
 
       setMessages((prev) => [
         ...prev,
