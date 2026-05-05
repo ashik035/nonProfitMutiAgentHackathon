@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { FileText, AlertTriangle, CheckCircle, ChevronDown, Loader2, Users } from "lucide-react";
+import { FileText, CheckCircle, ChevronDown, Loader2, Users, Copy, Download, Clock } from "lucide-react";
 import { toast } from "sonner";
 
 interface GrantDeliverable {
@@ -85,22 +84,21 @@ function utilizationColor(pct: number) {
 }
 
 export default function GrantsPage() {
-  const navigate = useNavigate();
   const [grants, setGrants] = useState(INITIAL_GRANTS);
   const [drawerGrant, setDrawerGrant] = useState<Grant | null>(null);
   const [generating, setGenerating] = useState<string | null>(null);
+  const [reportGrant, setReportGrant] = useState<Grant | null>(null);
 
   const totalValue = grants.reduce((s, g) => s + g.amount, 0);
   const reportsDue = grants.filter((g) => g.reportDueDays <= 30).length;
   const avgUtil = Math.round(grants.reduce((s, g) => s + g.utilization, 0) / grants.length);
 
-  const handleGenerateReport = (grantId: string) => {
-    setGenerating(grantId);
+  const handleGenerateReport = (grant: Grant) => {
+    setGenerating(grant.id);
     setTimeout(() => {
       setGenerating(null);
-      toast.success("✓ Report draft generated — opening in Board Reports");
-      setTimeout(() => navigate("/board-reports"), 1000);
-    }, 2000);
+      setReportGrant(grant);
+    }, 1500);
   };
 
   const handleToggleDeliverable = (grantId: string, idx: number) => {
@@ -179,7 +177,7 @@ export default function GrantsPage() {
                 <Button size="sm" variant="outline" onClick={() => setDrawerGrant(grant)}>
                   <FileText className="h-3.5 w-3.5 mr-1.5" /> View Grant Details
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => handleGenerateReport(grant.id)} disabled={generating === grant.id}>
+                <Button size="sm" variant="outline" onClick={() => handleGenerateReport(grant)} disabled={generating === grant.id}>
                   {generating === grant.id ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : null}
                   Generate Report Draft
                 </Button>
@@ -253,6 +251,87 @@ export default function GrantsPage() {
               </div>
             </>
           )}
+        </SheetContent>
+      </Sheet>
+
+      {/* Report Draft Sheet */}
+      <Sheet open={!!reportGrant} onOpenChange={() => setReportGrant(null)}>
+        <SheetContent className="sm:max-w-[480px] overflow-y-auto">
+          {reportGrant && (() => {
+            const utilized = Math.round(reportGrant.amount * reportGrant.utilization / 100);
+            const remaining = reportGrant.amount - utilized;
+            const completedDel = reportGrant.deliverables.filter(d => d.done);
+            const pendingDel = reportGrant.deliverables.filter(d => !d.done);
+            return (
+              <>
+                <SheetHeader>
+                  <SheetTitle>Report Draft — {reportGrant.name}</SheetTitle>
+                </SheetHeader>
+                <div className="mt-6 space-y-5 text-sm">
+                  {/* Header info */}
+                  <div className="rounded-lg border p-4 space-y-1.5 bg-muted/30">
+                    <p><span className="text-muted-foreground">Grant:</span> {reportGrant.name}</p>
+                    <p><span className="text-muted-foreground">Funder:</span> {reportGrant.funder}</p>
+                    <p><span className="text-muted-foreground">Award Amount:</span> ${reportGrant.amount.toLocaleString()}</p>
+                    <p><span className="text-muted-foreground">Grant Period:</span> {reportGrant.period}</p>
+                    <p><span className="text-muted-foreground">Program Officer:</span> {reportGrant.programOfficer}</p>
+                  </div>
+
+                  {/* Utilization */}
+                  <div>
+                    <h4 className="font-semibold mb-2">Fund Utilization</h4>
+                    <div className="h-2.5 rounded-full bg-muted overflow-hidden mb-2">
+                      <div className={`h-full rounded-full ${utilizationColor(reportGrant.utilization)} transition-all`} style={{ width: `${reportGrant.utilization}%` }} />
+                    </div>
+                    <p className="text-muted-foreground">
+                      {reportGrant.utilization}% of ${reportGrant.amount.toLocaleString()} utilized (${utilized.toLocaleString()} spent, ${remaining.toLocaleString()} remaining)
+                    </p>
+                    <div className="mt-2 space-y-1">
+                      {reportGrant.budgetBreakdown.map(b => (
+                        <div key={b.label} className="flex justify-between">
+                          <span className="text-muted-foreground">{b.label}</span>
+                          <span>{b.pct}% — ${Math.round(reportGrant.amount * b.pct / 100).toLocaleString()}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Key Activities */}
+                  <div>
+                    <h4 className="font-semibold mb-2">Key Activities Summary</h4>
+                    <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
+                      {completedDel.map((d, i) => (
+                        <li key={i}>{d.text} — <span className="text-green-600 font-medium">Completed</span></li>
+                      ))}
+                      {pendingDel.length > 0 && (
+                        <li>{pendingDel.length} deliverable{pendingDel.length > 1 ? "s" : ""} remaining: {pendingDel.map(d => d.text).join("; ")}</li>
+                      )}
+                    </ul>
+                  </div>
+
+                  {/* Deadline callout */}
+                  {reportGrant.reportDueDays <= 14 && (
+                    <div className="flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-700 p-3">
+                      <Clock className="h-4 w-4 text-amber-600 shrink-0" />
+                      <span className="text-amber-700 dark:text-amber-400 font-medium">
+                        Report due in {reportGrant.reportDueDays} days — action required
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Actions */}
+                  <div className="flex gap-2 pt-2">
+                    <Button className="flex-1" variant="outline" onClick={() => { toast.success("Draft copied to clipboard!"); }}>
+                      <Copy className="h-3.5 w-3.5 mr-1.5" /> Copy Draft
+                    </Button>
+                    <Button className="flex-1" variant="outline" onClick={() => { toast.success("Download ready — check your downloads folder"); }}>
+                      <Download className="h-3.5 w-3.5 mr-1.5" /> Download as PDF
+                    </Button>
+                  </div>
+                </div>
+              </>
+            );
+          })()}
         </SheetContent>
       </Sheet>
     </div>
