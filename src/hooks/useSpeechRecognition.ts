@@ -110,9 +110,26 @@ export function useSpeechRecognition() {
       }));
     };
 
-    recognition.start();
-    recognitionRef.current = recognition;
-    setState(prev => ({ ...prev, isRecording: true, error: null }));
+    try {
+      recognition.start();
+      recognitionRef.current = recognition;
+      setState(prev => ({ ...prev, isRecording: true, error: null }));
+    } catch (err: unknown) {
+      const error = err as { name?: string; message?: string };
+      let message = 'Could not start speech recognition.';
+      if (error.name === 'NotAllowedError') {
+        message = 'Microphone access denied. If viewing in a preview iframe, try opening the published app directly. You can also type your note manually below.';
+      } else if (error.name === 'NotFoundError') {
+        message = 'No microphone found. Please connect a microphone or type your note manually below.';
+      } else if (error.name === 'NotReadableError') {
+        message = 'Microphone is in use by another application. Close other apps using the mic, or type your note manually below.';
+      }
+      setState(prev => ({
+        ...prev,
+        error: message,
+        isRecording: false,
+      }));
+    }
   }, []);
 
   const stopRecording = useCallback(() => {

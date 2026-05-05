@@ -1,19 +1,37 @@
-## Fix: Remove Admin Access from Executive Director
 
-The Executive Director (`director@nonprofitai.software`) currently has the `admin` role in the `user_roles` table, which is why they still see the ADMIN badge and can access the admin panel.
+# Fix Voice Notes Feature
 
-### What will be done
+## Problem
 
-1. **Create a one-time edge function** (`admin-cleanup`) that uses the service role key to:
-   - Delete the `admin` role from `director@nonprofitai.software` in `user_roles`
-   - Delete the accidentally created `demo@nonprofitai.software` user and their role entry
+The Voice Notes page uses the browser's **Web Speech API** for recording. This fails in the Lovable preview for two reasons:
 
-2. **Deploy and invoke** the edge function to apply the changes immediately
+1. **Iframe microphone permissions** — The preview runs inside an iframe that may not have `allow="microphone"`, so the browser blocks mic access silently or throws a `NotAllowedError`.
+2. **No error surfacing** — The `useSpeechRecognition` hook catches errors but the page component doesn't display them to the user, so recording appears to start but nothing happens.
 
-3. **Delete the edge function** after it runs — it's a one-time cleanup
+## Plan
 
-4. **Verify** that the Executive Director no longer has admin access by querying the database
+### 1. Improve error handling in `useSpeechRecognition` hook
 
-### Result
-- Logging in as Executive Director will show no ADMIN badge and no access to `/admin`
-- The admin account (`admin@nonprofitai.software` / `Demo@123`) remains the only way to access the admin panel
+- Wrap `recognition.start()` in a try/catch to handle `NotAllowedError`, `NotFoundError`, and `NotReadableError`
+- Surface meaningful error messages (e.g., "Microphone blocked — open this page directly or use the manual input below")
+
+### 2. Always show manual text input as fallback
+
+- Currently the manual textarea only appears when `isSupported` is false
+- Change the idle state UI to **always show** a "Or type your note" textarea below the record button, so users can still use the feature regardless of mic access
+- Keep the record button for browsers that support it
+
+### 3. Display speech recognition errors in the UI
+
+- Show the `error` state from `useSpeechRecognition` as an Alert on the page
+- If recording fails, automatically reset to idle state so the user isn't stuck
+
+### 4. Add guidance for preview vs published
+
+- Add a small info note: "Having trouble recording? Try opening the published app directly, or use the text input below."
+
+## Technical Details
+
+**Files changed:**
+- `src/hooks/useSpeechRecognition.ts` — Add try/catch around `recognition.start()`, return specific error messages
+- `src/pages/VoiceNotesPage.tsx` — Show errors from the hook, always render manual text fallback alongside the mic button, handle error-to-idle reset
