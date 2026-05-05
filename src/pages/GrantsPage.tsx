@@ -84,22 +84,21 @@ function utilizationColor(pct: number) {
 }
 
 export default function GrantsPage() {
-  const navigate = useNavigate();
   const [grants, setGrants] = useState(INITIAL_GRANTS);
   const [drawerGrant, setDrawerGrant] = useState<Grant | null>(null);
   const [generating, setGenerating] = useState<string | null>(null);
+  const [reportGrant, setReportGrant] = useState<Grant | null>(null);
 
   const totalValue = grants.reduce((s, g) => s + g.amount, 0);
   const reportsDue = grants.filter((g) => g.reportDueDays <= 30).length;
   const avgUtil = Math.round(grants.reduce((s, g) => s + g.utilization, 0) / grants.length);
 
-  const handleGenerateReport = (grantId: string) => {
-    setGenerating(grantId);
+  const handleGenerateReport = (grant: Grant) => {
+    setGenerating(grant.id);
     setTimeout(() => {
       setGenerating(null);
-      toast.success("✓ Report draft generated — opening in Board Reports");
-      setTimeout(() => navigate("/board-reports"), 1000);
-    }, 2000);
+      setReportGrant(grant);
+    }, 1500);
   };
 
   const handleToggleDeliverable = (grantId: string, idx: number) => {
