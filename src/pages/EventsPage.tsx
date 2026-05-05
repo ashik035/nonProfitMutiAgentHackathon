@@ -9,8 +9,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarDays, Users, Loader2, Send, Tag, Copy, Mail, ClipboardList, Bell, CheckCircle } from "lucide-react";
+import { CalendarDays, Users, Loader2, Send, Tag, Copy, Mail, ClipboardList, Bell, CheckCircle, ChevronDown, ChevronUp, Sparkles, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import ReactMarkdown from "react-markdown";
 
 /* ── Attendee data ── */
 
@@ -125,6 +127,34 @@ export default function EventsPage() {
   const [bulkTaskModal, setBulkTaskModal] = useState(false);
 
   const draftRef = useRef<HTMLTextAreaElement>(null);
+
+  // Event Intelligence panel
+  const [intelOpen, setIntelOpen] = useState(false);
+  const [intelQuestion, setIntelQuestion] = useState("");
+  const [intelLoading, setIntelLoading] = useState(false);
+  const [intelAnswer, setIntelAnswer] = useState<string | null>(null);
+  const [intelError, setIntelError] = useState<string | null>(null);
+  const [intelAsked, setIntelAsked] = useState<string | null>(null);
+
+  const handleAskIntel = async () => {
+    const q = intelQuestion.trim();
+    if (!q) return;
+    setIntelLoading(true);
+    setIntelError(null);
+    setIntelAnswer(null);
+    setIntelAsked(q);
+    try {
+      const { data, error } = await supabase.functions.invoke("event-intelligence", {
+        body: { question: q },
+      });
+      if (error) throw error;
+      setIntelAnswer(data?.response ?? "No response received.");
+    } catch {
+      setIntelError("Unable to reach Event Intelligence — try again");
+    } finally {
+      setIntelLoading(false);
+    }
+  };
 
   /* ── Handlers ── */
 
@@ -295,6 +325,68 @@ export default function EventsPage() {
           </CardContent>
         </Card>
       ))}
+
+      {/* ── Event Intelligence Panel ── */}
+      <div className="border-l-4 border-indigo-400 rounded-lg border border-border bg-card">
+        <button
+          className="flex w-full items-center justify-between p-4 text-left"
+          onClick={() => setIntelOpen((v) => !v)}
+        >
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-indigo-500" />
+            <span className="font-semibold text-sm">Event Intelligence</span>
+            <Badge className="bg-indigo-100 text-indigo-700 border-indigo-200 text-[10px] px-1.5 py-0">AI</Badge>
+          </div>
+          {intelOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+        </button>
+
+        {intelOpen && (
+          <div className="px-4 pb-4 space-y-4">
+            {/* Quick Insights */}
+            <div className="flex flex-wrap gap-2">
+              {["15 attendees not yet tagged", "3 donors attended — no follow-up sent", "Volunteer retention rate: 78%"].map((chip) => (
+                <Badge key={chip} variant="secondary" className="text-xs font-normal">{chip}</Badge>
+              ))}
+            </div>
+
+            {/* Ask Input */}
+            <div className="flex gap-2">
+              <Input
+                placeholder="Ask about your events…"
+                value={intelQuestion}
+                onChange={(e) => setIntelQuestion(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && !intelLoading && handleAskIntel()}
+                className="text-sm"
+              />
+              <Button size="sm" onClick={handleAskIntel} disabled={intelLoading || !intelQuestion.trim()}>
+                {intelLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Ask"}
+              </Button>
+            </div>
+
+            {/* Response */}
+            {intelLoading && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" /> Analyzing event data…
+              </div>
+            )}
+            {intelError && (
+              <div className="flex items-center gap-2 text-sm text-destructive">
+                <AlertCircle className="h-3.5 w-3.5 shrink-0" /> {intelError}
+              </div>
+            )}
+            {intelAnswer && !intelLoading && (
+              <div className="rounded-lg bg-muted/40 p-3 space-y-1">
+                {intelAsked && <p className="text-xs text-muted-foreground font-medium">Q: {intelAsked}</p>}
+                <div className="text-sm prose prose-sm dark:prose-invert max-w-none">
+                  <ReactMarkdown>{intelAnswer}</ReactMarkdown>
+                </div>
+              </div>
+            )}
+
+            <p className="text-[10px] text-muted-foreground">Powered by Event Intelligence Agent</p>
+          </div>
+        )}
+      </div>
 
       {/* ── Attendees Dialog ── */}
       <Dialog open={!!attendeeEvent} onOpenChange={() => setAttendeeEvent(null)}>
