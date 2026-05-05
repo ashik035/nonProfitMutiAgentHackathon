@@ -587,7 +587,16 @@ export default function VoiceNotesPage() {
                     <Alert className="border-yellow-300 bg-yellow-50 dark:bg-yellow-950/30">
                       <AlertTriangle className="h-4 w-4 text-yellow-600" />
                       <AlertDescription className="text-yellow-800 dark:text-yellow-300 text-sm">
-                        Voice recording works best in Chrome on desktop. On other browsers you can type your note manually below.
+                        Voice recording is not available in this browser. You can type your note manually below.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  {speechError && (
+                    <Alert className="border-red-300 bg-red-50 dark:bg-red-950/30">
+                      <AlertTriangle className="h-4 w-4 text-red-600" />
+                      <AlertDescription className="text-red-800 dark:text-red-300 text-sm">
+                        {speechError}
                       </AlertDescription>
                     </Alert>
                   )}
@@ -597,7 +606,7 @@ export default function VoiceNotesPage() {
                     <DonorSelect value={selectedDonor} onChange={setSelectedDonor} />
                   </div>
 
-                  {isSupported ? (
+                  {isSupported && (
                     <button
                       disabled={!selectedDonor}
                       onClick={handleStartRecording}
@@ -609,23 +618,28 @@ export default function VoiceNotesPage() {
                     >
                       <Mic className="h-8 w-8 text-white" />
                     </button>
-                  ) : (
-                    <div className="space-y-3">
-                      <Textarea
-                        placeholder="Type your donor note here..."
-                        value={manualText}
-                        onChange={(e) => setManualText(e.target.value)}
-                        className="min-h-[120px]"
-                      />
-                      <Button
-                        onClick={handleAnalyzeManual}
-                        disabled={!selectedDonor || !manualText.trim()}
-                        className="w-full"
-                      >
-                        Analyze Note
-                      </Button>
-                    </div>
                   )}
+
+                  {/* Manual text input — always available */}
+                  <div className="space-y-3 pt-2 border-t">
+                    <p className="text-xs text-muted-foreground text-center">
+                      {isSupported ? 'Or type your note manually' : 'Type your donor note below'}
+                    </p>
+                    <Textarea
+                      placeholder="Type your donor note here..."
+                      value={manualText}
+                      onChange={(e) => setManualText(e.target.value)}
+                      className="min-h-[100px]"
+                    />
+                    <Button
+                      onClick={handleAnalyzeManual}
+                      disabled={!selectedDonor || !manualText.trim()}
+                      className="w-full"
+                    >
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Analyze Note
+                    </Button>
+                  </div>
                 </div>
               )}
 
