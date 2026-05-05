@@ -128,6 +128,34 @@ export default function EventsPage() {
 
   const draftRef = useRef<HTMLTextAreaElement>(null);
 
+  // Event Intelligence panel
+  const [intelOpen, setIntelOpen] = useState(false);
+  const [intelQuestion, setIntelQuestion] = useState("");
+  const [intelLoading, setIntelLoading] = useState(false);
+  const [intelAnswer, setIntelAnswer] = useState<string | null>(null);
+  const [intelError, setIntelError] = useState<string | null>(null);
+  const [intelAsked, setIntelAsked] = useState<string | null>(null);
+
+  const handleAskIntel = async () => {
+    const q = intelQuestion.trim();
+    if (!q) return;
+    setIntelLoading(true);
+    setIntelError(null);
+    setIntelAnswer(null);
+    setIntelAsked(q);
+    try {
+      const { data, error } = await supabase.functions.invoke("event-intelligence", {
+        body: { question: q },
+      });
+      if (error) throw error;
+      setIntelAnswer(data?.response ?? "No response received.");
+    } catch {
+      setIntelError("Unable to reach Event Intelligence — try again");
+    } finally {
+      setIntelLoading(false);
+    }
+  };
+
   /* ── Handlers ── */
 
   const handleOpenAttendees = (event: EventData) => {
