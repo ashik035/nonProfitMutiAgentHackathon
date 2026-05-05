@@ -448,6 +448,13 @@ export default function VoiceNotesPage() {
     };
   }, [recorderState]);
 
+  // Reset recorder state if speech error occurs during recording
+  useEffect(() => {
+    if (speechError && recorderState === 'recording') {
+      setRecorderState('idle');
+    }
+  }, [speechError, recorderState]);
+
   const handleStartRecording = () => {
     resetTranscript();
     startRecording();
