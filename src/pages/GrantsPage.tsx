@@ -3,9 +3,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { FileText, CheckCircle, ChevronDown, Loader2, Users, Copy, Download, Clock } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { FileText, CheckCircle, ChevronDown, Loader2, Users, Copy, Download, Clock, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import ReactMarkdown from "react-markdown";
 
 interface GrantDeliverable {
   text: string;
@@ -88,6 +92,37 @@ export default function GrantsPage() {
   const [drawerGrant, setDrawerGrant] = useState<Grant | null>(null);
   const [generating, setGenerating] = useState<string | null>(null);
   const [reportGrant, setReportGrant] = useState<Grant | null>(null);
+
+  // Compliance summary state
+  const [complianceGrant, setComplianceGrant] = useState<Grant | null>(null);
+  const [complianceLoading, setComplianceLoading] = useState(false);
+  const [complianceSummary, setComplianceSummary] = useState<string | null>(null);
+  const [complianceError, setComplianceError] = useState<string | null>(null);
+
+  const handleGenerateCompliance = async (grant: Grant) => {
+    setComplianceGrant(grant);
+    setComplianceLoading(true);
+    setComplianceSummary(null);
+    setComplianceError(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-compliance-summary", {
+        body: { grant },
+      });
+      if (error) throw error;
+      setComplianceSummary(data?.summary ?? "No summary received.");
+    } catch {
+      setComplianceError("Unable to generate compliance summary — please try again.");
+    } finally {
+      setComplianceLoading(false);
+    }
+  };
+
+  const handleCloseCompliance = () => {
+    setComplianceGrant(null);
+    setComplianceSummary(null);
+    setComplianceError(null);
+    setComplianceLoading(false);
+  };
 
   const totalValue = grants.reduce((s, g) => s + g.amount, 0);
   const reportsDue = grants.filter((g) => g.reportDueDays <= 30).length;
@@ -181,6 +216,9 @@ export default function GrantsPage() {
                   {generating === grant.id ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : null}
                   Generate Report Draft
                 </Button>
+                <Button size="sm" variant="outline" onClick={() => handleGenerateCompliance(grant)}>
+                  <ShieldCheck className="h-3.5 w-3.5 mr-1.5" /> Generate Compliance Summary
+                </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button size="sm" variant="outline" className="gap-1.5">
@@ -253,6 +291,55 @@ export default function GrantsPage() {
           )}
         </SheetContent>
       </Sheet>
+
+      {/* Compliance Summary Modal */}
+      <Dialog open={!!complianceGrant} onOpenChange={handleCloseCompliance}>
+        <DialogContent className="sm:max-w-[560px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-blue-600" />
+              Compliance Summary — {complianceGrant?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-2">
+            {complianceLoading && (
+              <div className="space-y-3">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6" />
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-4/5" />
+              </div>
+            )}
+            {complianceError && (
+              <p className="text-sm text-red-600 bg-red-50 dark:bg-red-950/30 rounded-lg p-3 border border-red-200 dark:border-red-800">
+                {complianceError}
+              </p>
+            )}
+            {complianceSummary && !complianceLoading && (
+              <div className="space-y-4">
+                <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed">
+                  <ReactMarkdown>{complianceSummary}</ReactMarkdown>
+                </div>
+                <div className="flex items-center justify-between pt-2 border-t">
+                  <p className="text-xs text-muted-foreground">AI-generated summary. Verify against source documents before submission.</p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      navigator.clipboard.writeText(complianceSummary);
+                      toast.success("Compliance summary copied to clipboard");
+                    }}
+                  >
+                    <Copy className="h-3.5 w-3.5 mr-1.5" /> Copy
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Report Draft Sheet */}
       <Sheet open={!!reportGrant} onOpenChange={() => setReportGrant(null)}>

@@ -70,6 +70,7 @@ export const navigationGroups: NavGroup[] = [
       { title: "Donor Retention", href: "/donor-retention", icon: "Heart", requiredPermission: { type: "module", key: "donor-retention" } },
       { title: "Programs", href: "/programs", icon: "Target", requiredPermission: { type: "module", key: "programs" } },
       { title: "Communications", href: "/communications", icon: "Mail", requiredPermission: { type: "module", key: "communications" } },
+      { title: "Grant Writer", href: "/grant-writer", icon: "PenTool", requiredPermission: { type: "module", key: "grant-writer" } },
     ],
   },
   {

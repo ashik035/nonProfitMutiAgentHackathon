@@ -51,6 +51,7 @@ import DonorRetentionPage from "@/pages/DonorRetentionPage";
 import ProgramsPage from "@/pages/ProgramsPage";
 import CommunicationsPage from "@/pages/CommunicationsPage";
 import VoiceNotesPage from "@/pages/VoiceNotesPage";
+import GrantWriterPage from "@/pages/GrantWriterPage";
 
 /**
  * Public routes - no auth required
@@ -118,6 +119,9 @@ export const coreProtectedRoutes = (
 
     {/* Voice Notes */}
     <Route path="/voice-notes" element={<VoiceNotesPage />} />
+
+    {/* Grant Writer */}
+    <Route path="/grant-writer" element={<GrantWriterPage />} />
   </>
 );
 
