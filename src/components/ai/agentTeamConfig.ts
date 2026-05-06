@@ -23,6 +23,8 @@ export interface AgentTeamAgent {
   whereToFind?: { label: string; path: string };
   /** Operational metadata for the 5 core nonprofit agents */
   operational?: AgentOperationalMeta;
+  /** Optional permission key for role-based gating. Agents without this always show. */
+  permissionKey?: string;
 }
 
 export interface AgentTeamDef {
