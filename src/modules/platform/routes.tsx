@@ -46,6 +46,10 @@ import AIAgentSettingsPage from "@/pages/AIAgentSettingsPage";
 import IntegrationCenterPage from "@/pages/IntegrationCenterPage";
 import AgentsBrowse from "@/pages/AgentsBrowse";
 import AgentDetail from "@/pages/AgentDetail";
+import AgentActivityFeed from "@/pages/AgentActivityFeed";
+import DonorRetentionPage from "@/pages/DonorRetentionPage";
+import ProgramsPage from "@/pages/ProgramsPage";
+import CommunicationsPage from "@/pages/CommunicationsPage";
 import VoiceNotesPage from "@/pages/VoiceNotesPage";
 
 /**
