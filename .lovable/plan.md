@@ -1,21 +1,20 @@
+## Enable Role-Based Access Control
 
-# Fix AI Chat "Trouble Connecting" Error
+The RBAC system is fully implemented and wired up — sidebar navigation filtering, agent visibility filtering, and the `RoleGate` component all work correctly. However, the feature flag `ROLE_GATING_ENABLED` is set to `false`, which causes `hasPermission()` to always return `true` for everyone.
 
-## Problem
+### Change
 
-The AI Chat page calls the Lovable AI Gateway **directly from the client** (no auth token) using an unsupported model (`claude-sonnet-4-20250514`). Both issues cause the request to fail silently.
+**File: `src/shared/config/roleGating.ts`**
+- Set `ROLE_GATING_ENABLED = true`
 
-## Solution
+### What this activates
 
-The project already has a working `ai-chat` edge function that properly routes to AI providers. Update `AIChat.tsx` to call it via the Supabase client instead of making direct fetch calls.
+- **Sidebar navigation**: Items with `requiredPermission` (Data Health, Grants, Events, Board Reports, Reconciliation, Donor Pipeline) will only show for roles that have matching permissions in the `nonprofit_role_permissions` table.
+- **Agent visibility**: Agents with a `permissionKey` (Grant Budget Watcher, Integration Health Monitor, Onboarding Checklist AI) will only show for authorized roles.
+- **Admin + Executive Director**: Full access to everything (unchanged).
+- **No role assigned**: Full access (legacy fallback, unchanged).
+- **Development Director, Finance Manager, Operations Manager**: See only their permitted modules and agents per the seeded permission rules.
 
-## Changes
+### Risk
 
-**File: `src/pages/AIChat.tsx`**
-
-1. Import `supabase` client
-2. Replace the direct `fetch("https://ai.gateway.lovable.dev/...")` call with `supabase.functions.invoke('ai-chat', { body: { messages } })`
-3. Remove the hardcoded unsupported model reference
-4. Parse the response from `{ response, model, usage }` format (which is what the edge function returns)
-
-The system prompt will be sent as the first message in the messages array, same as before. The edge function handles model selection automatically.
+Low — single line change. If anything breaks, flipping back to `false` restores current behavior instantly.
