@@ -46,6 +46,10 @@ import AIAgentSettingsPage from "@/pages/AIAgentSettingsPage";
 import IntegrationCenterPage from "@/pages/IntegrationCenterPage";
 import AgentsBrowse from "@/pages/AgentsBrowse";
 import AgentDetail from "@/pages/AgentDetail";
+import AgentActivityFeed from "@/pages/AgentActivityFeed";
+import DonorRetentionPage from "@/pages/DonorRetentionPage";
+import ProgramsPage from "@/pages/ProgramsPage";
+import CommunicationsPage from "@/pages/CommunicationsPage";
 import VoiceNotesPage from "@/pages/VoiceNotesPage";
 
 /**
@@ -104,7 +108,13 @@ export const coreProtectedRoutes = (
 
     {/* Agent discovery pages */}
     <Route path="/agents" element={<AgentsBrowse />} />
+    <Route path="/agents/activity" element={<AgentActivityFeed />} />
     <Route path="/agents/:slug" element={<AgentDetail />} />
+
+    {/* New nonprofit pages */}
+    <Route path="/donor-retention" element={<DonorRetentionPage />} />
+    <Route path="/programs" element={<ProgramsPage />} />
+    <Route path="/communications" element={<CommunicationsPage />} />
 
     {/* Voice Notes */}
     <Route path="/voice-notes" element={<VoiceNotesPage />} />

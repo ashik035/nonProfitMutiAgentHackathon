@@ -67,6 +67,9 @@ export const navigationGroups: NavGroup[] = [
       { title: "Board Reports", href: "/board-reports", icon: "BarChart2", requiredPermission: { type: "module", key: "board-reports" } },
       { title: "Reconciliation", href: "/reconciliation", icon: "ArrowLeftRight", requiredPermission: { type: "module", key: "reconciliation" } },
       { title: "Donor Pipeline", href: "/donor-pipeline", icon: "Users", requiredPermission: { type: "module", key: "donor-pipeline" } },
+      { title: "Donor Retention", href: "/donor-retention", icon: "Heart", requiredPermission: { type: "module", key: "donor-retention" } },
+      { title: "Programs", href: "/programs", icon: "Target", requiredPermission: { type: "module", key: "programs" } },
+      { title: "Communications", href: "/communications", icon: "Mail", requiredPermission: { type: "module", key: "communications" } },
     ],
   },
   {
@@ -76,6 +79,7 @@ export const navigationGroups: NavGroup[] = [
     isAI: true,
     items: [
       { title: "AI Agents", href: "/agents", icon: "Bot", isAI: true },
+      { title: "Agent Activity", href: "/agents/activity", icon: "Activity", isAI: true, requiredPermission: { type: "module", key: "agent-activity" } },
       { title: "AI Chat", href: "/ai-chat", icon: "MessageSquare", isAI: true },
       { title: "Voice Notes", href: "/voice-notes", icon: "Mic", isAI: true },
     ],

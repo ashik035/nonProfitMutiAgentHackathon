@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ShieldCheck, Bot, Zap, Clock, Sparkles, X } from "lucide-react";
 import AITeamsDashboardCard from "@/components/dashboards/AITeamsDashboardCard";
+import AIActivityWidget from "@/components/dashboard/AIActivityWidget";
 import OrgHealthScore from "@/components/dashboard/OrgHealthScore";
 import SinceYouWereAway from "@/components/dashboard/SinceYouWereAway";
 import QuickStatsRow from "@/components/dashboard/QuickStatsRow";
@@ -144,6 +145,8 @@ export default function OperationsManagerDashboard() {
           )}
         </CardContent>
       </Card>
+
+      <AIActivityWidget />
 
       <AITeamsDashboardCard />
     </div>

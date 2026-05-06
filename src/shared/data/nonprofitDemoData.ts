@@ -774,3 +774,168 @@ export const demoDonorNames = [
   'Michael Torres',
   'Sarah Mitchell',
 ];
+
+// ─── Agent Activity Feed ────────────────────────────────────────
+
+export interface AgentActivityRun {
+  id: string;
+  agentName: string;
+  agentSlug: string;
+  team: string;
+  action: string;
+  outcome: string;
+  timestamp: string;
+  status: "success" | "running" | "failed";
+}
+
+export const DEMO_AGENT_ACTIVITY: AgentActivityRun[] = [
+  { id: "run-001", agentName: "CRM Data Integrity Agent", agentSlug: "crm-data-integrity", team: "Core Operations", action: "Full CRM scan", outcome: "12 duplicate records flagged, 8 incomplete profiles identified", timestamp: AGENT_RUN_CRM, status: "success" },
+  { id: "run-002", agentName: "Grant Compliance Agent", agentSlug: "grant-compliance", team: "Core Operations", action: "Deadline monitoring", outcome: "2 grants approaching deadline, utilization alerts generated", timestamp: AGENT_RUN_GRANT, status: "success" },
+  { id: "run-003", agentName: "Board Reporting Agent", agentSlug: "board-reporting", team: "Core Operations", action: "Report generation", outcome: `${currentQuarter} board report draft generated successfully`, timestamp: AGENT_RUN_BOARD, status: "success" },
+  { id: "run-004", agentName: "Event Intelligence Agent", agentSlug: "event-intelligence", team: "Core Operations", action: "Post-event analysis", outcome: "15 attendees flagged for CRM tagging, 8 volunteer prospects found", timestamp: AGENT_RUN_EVENT, status: "success" },
+  { id: "run-005", agentName: "Reconciliation Agent", agentSlug: "reconciliation-fund-accounting", team: "Core Operations", action: "Transaction matching", outcome: "142/147 transactions matched, 5 require manual review", timestamp: AGENT_RUN_RECON, status: "success" },
+  { id: "run-006", agentName: "Grant Budget Watcher", agentSlug: "grant-budget-watcher", team: "Finance", action: "Budget utilization check", outcome: "Health Equity Initiative at 91% — overspend alert triggered", timestamp: hoursAgo(2, 4), status: "success" },
+  { id: "run-007", agentName: "Integration Health Monitor", agentSlug: "integration-health-monitor", team: "Operations", action: "System connectivity check", outcome: "All 4 integrations healthy, Salesforce API latency elevated", timestamp: hoursAgo(1, 3), status: "success" },
+  { id: "run-008", agentName: "CRM Data Integrity Agent", agentSlug: "crm-data-integrity", team: "Core Operations", action: "Incremental scan", outcome: "Scan in progress — analyzing 200 records...", timestamp: "just now", status: "running" },
+  { id: "run-009", agentName: "Onboarding Checklist AI", agentSlug: "onboarding-checklist-ai", team: "Operations", action: "New hire checklist generation", outcome: "Failed to generate — knowledge base documents unavailable", timestamp: hoursAgo(5, 8), status: "failed" },
+  { id: "run-010", agentName: "Event Intelligence Agent", agentSlug: "event-intelligence", team: "Core Operations", action: "Volunteer matching", outcome: "3 attendees matched to existing major donor profiles", timestamp: hoursAgo(6, 10), status: "success" },
+];
+
+// ─── Donor Retention ────────────────────────────────────────────
+
+export interface AtRiskDonor {
+  id: string;
+  name: string;
+  lastGiftDate: string;
+  lastGiftAmount: number;
+  daysSinceLastGift: number;
+  totalGiving: number;
+  segment: string;
+}
+
+export const DEMO_DONOR_RETENTION = {
+  retentionRate: 72,
+  lastYearRetentionRate: 68,
+  lybuntCount: 47,
+  atRiskCount: 23,
+  retentionTrend: [
+    { year: NOW.getFullYear() - 3, rate: 65 },
+    { year: NOW.getFullYear() - 2, rate: 68 },
+    { year: NOW.getFullYear() - 1, rate: 68 },
+    { year: NOW.getFullYear(), rate: 72 },
+  ],
+  atRiskDonors: [
+    { id: "d-001", name: "Carol Nguyen", lastGiftDate: formatRelativeDate(subDays(NOW, 380)), lastGiftAmount: 500, daysSinceLastGift: 380, totalGiving: 3200, segment: "Major Donor" },
+    { id: "d-002", name: "James Wilson", lastGiftDate: formatRelativeDate(subDays(NOW, 320)), lastGiftAmount: 250, daysSinceLastGift: 320, totalGiving: 1800, segment: "Mid-Level" },
+    { id: "d-003", name: "Patricia Osei", lastGiftDate: formatRelativeDate(subDays(NOW, 290)), lastGiftAmount: 1000, daysSinceLastGift: 290, totalGiving: 5400, segment: "Major Donor" },
+    { id: "d-004", name: "Robert Kim", lastGiftDate: formatRelativeDate(subDays(NOW, 275)), lastGiftAmount: 150, daysSinceLastGift: 275, totalGiving: 900, segment: "Regular" },
+    { id: "d-005", name: "Nancy Thompson", lastGiftDate: formatRelativeDate(subDays(NOW, 400)), lastGiftAmount: 75, daysSinceLastGift: 400, totalGiving: 450, segment: "Regular" },
+    { id: "d-006", name: "William Davis", lastGiftDate: formatRelativeDate(subDays(NOW, 350)), lastGiftAmount: 2000, daysSinceLastGift: 350, totalGiving: 8500, segment: "Major Donor" },
+  ] satisfies AtRiskDonor[],
+};
+
+// ─── Programs / Impact Tracker ──────────────────────────────────
+
+export interface ProgramMetrics {
+  beneficiaryCount: number;
+  volunteerHours: number;
+  budgetUsed: number;
+  budgetTotal: number;
+  outcomesAchieved: number;
+  outcomesTarget: number;
+}
+
+export interface DemoProgram {
+  id: string;
+  name: string;
+  description: string;
+  startDate: string;
+  status: "active" | "completed" | "planning";
+  leadStaff: string;
+  metrics: ProgramMetrics;
+}
+
+export const DEMO_PROGRAMS: DemoProgram[] = [
+  {
+    id: "prog-001", name: "Youth Mentorship Program", description: "One-on-one mentorship pairing at-risk youth with community leaders for academic and career guidance.",
+    startDate: formatRelativeDate(subDays(NOW, 180)), status: "active", leadStaff: "Maria Santos",
+    metrics: { beneficiaryCount: 85, volunteerHours: 1200, budgetUsed: 42000, budgetTotal: 50000, outcomesAchieved: 62, outcomesTarget: 80 },
+  },
+  {
+    id: "prog-002", name: "Community Health Initiative", description: "Free health screenings and wellness workshops in underserved neighborhoods.",
+    startDate: formatRelativeDate(subDays(NOW, 365)), status: "active", leadStaff: "Dr. James Lee",
+    metrics: { beneficiaryCount: 320, volunteerHours: 800, budgetUsed: 68000, budgetTotal: 75000, outcomesAchieved: 290, outcomesTarget: 300 },
+  },
+  {
+    id: "prog-003", name: "Digital Literacy Workshop", description: "Teaching basic computer and internet skills to senior citizens and low-income families.",
+    startDate: formatRelativeDate(subDays(NOW, 90)), status: "active", leadStaff: "Kevin Park",
+    metrics: { beneficiaryCount: 45, volunteerHours: 380, budgetUsed: 12000, budgetTotal: 25000, outcomesAchieved: 30, outcomesTarget: 60 },
+  },
+  {
+    id: "prog-004", name: "Food Security Network", description: "Weekly food distribution and nutrition education in partnership with local farms and grocers.",
+    startDate: formatRelativeDate(subDays(NOW, 730)), status: "active", leadStaff: "Linda Chen",
+    metrics: { beneficiaryCount: 500, volunteerHours: 2100, budgetUsed: 95000, budgetTotal: 100000, outcomesAchieved: 480, outcomesTarget: 500 },
+  },
+  {
+    id: "prog-005", name: "Summer Arts Camp", description: "Two-week intensive arts and creativity camp for children ages 8-14.",
+    startDate: formatRelativeDate(subDays(NOW, 400)), status: "completed", leadStaff: "Rachel Adams",
+    metrics: { beneficiaryCount: 60, volunteerHours: 450, budgetUsed: 18000, budgetTotal: 18000, outcomesAchieved: 58, outcomesTarget: 60 },
+  },
+];
+
+// ─── Communications ─────────────────────────────────────────────
+
+export interface SentEmail {
+  id: string;
+  date: string;
+  segment: string;
+  subject: string;
+  recipientCount: number;
+  openRate: number;
+  clickRate: number;
+}
+
+export interface ThankYouItem {
+  id: string;
+  donorName: string;
+  donationAmount: number;
+  donationDate: string;
+  thankYouSent: boolean;
+}
+
+export const DEMO_COMMUNICATIONS = {
+  segments: ["All Donors", "LYBUNT", "Major Donors ($500+)", "First-Time Donors", "Event Attendees"],
+  sentEmails: [
+    { id: "em-001", date: formatRelativeDate(subDays(NOW, 3)), segment: "All Donors", subject: "Spring Newsletter — Impact Update", recipientCount: 1847, openRate: 42, clickRate: 8 },
+    { id: "em-002", date: formatRelativeDate(subDays(NOW, 10)), segment: "LYBUNT", subject: "We Miss You — Your Impact Matters", recipientCount: 47, openRate: 38, clickRate: 12 },
+    { id: "em-003", date: formatRelativeDate(subDays(NOW, 18)), segment: "Major Donors ($500+)", subject: "Exclusive: Behind the Scenes at Brightside", recipientCount: 124, openRate: 56, clickRate: 22 },
+    { id: "em-004", date: formatRelativeDate(subDays(NOW, 25)), segment: "Event Attendees", subject: "Thank You for Attending the Spring Gala!", recipientCount: 120, openRate: 61, clickRate: 15 },
+    { id: "em-005", date: formatRelativeDate(subDays(NOW, 35)), segment: "First-Time Donors", subject: "Welcome to the Brightside Family", recipientCount: 56, openRate: 48, clickRate: 18 },
+  ] satisfies SentEmail[],
+  thankYouQueue: [
+    { id: "ty-001", donorName: "Sarah Mitchell", donationAmount: 250, donationDate: formatRelativeDate(subDays(NOW, 1)), thankYouSent: false },
+    { id: "ty-002", donorName: "David Chen", donationAmount: 500, donationDate: formatRelativeDate(subDays(NOW, 2)), thankYouSent: false },
+    { id: "ty-003", donorName: "Emily Watson", donationAmount: 100, donationDate: formatRelativeDate(subDays(NOW, 2)), thankYouSent: false },
+    { id: "ty-004", donorName: "Michael Torres", donationAmount: 1000, donationDate: formatRelativeDate(subDays(NOW, 3)), thankYouSent: false },
+    { id: "ty-005", donorName: "Lisa Patel", donationAmount: 75, donationDate: formatRelativeDate(subDays(NOW, 4)), thankYouSent: false },
+  ] satisfies ThankYouItem[],
+};
+
+// ─── Board Report History ───────────────────────────────────────
+
+export interface BoardReportHistoryItem {
+  id: string;
+  title: string;
+  generatedDate: string;
+  generatedBy: string;
+  quarter: string;
+  status: "published" | "draft" | "archived";
+}
+
+const prevQuarter = `Q${Math.ceil((NOW.getMonth()) / 3) || 4} ${Math.ceil((NOW.getMonth()) / 3) === 0 ? NOW.getFullYear() - 1 : NOW.getFullYear()}`;
+
+export const DEMO_BOARD_REPORT_HISTORY: BoardReportHistoryItem[] = [
+  { id: "br-001", title: `${currentQuarter} Board Packet`, generatedDate: formatRelativeDate(NOW), generatedBy: "AI Assistant", quarter: currentQuarter, status: "draft" },
+  { id: "br-002", title: `${prevQuarter} Board Packet`, generatedDate: formatRelativeDate(subDays(NOW, 90)), generatedBy: "Lisa Patel", quarter: prevQuarter, status: "published" },
+  { id: "br-003", title: "Annual Summary Report", generatedDate: formatRelativeDate(subDays(NOW, 180)), generatedBy: "AI Assistant", quarter: `FY${NOW.getFullYear() - 1}`, status: "archived" },
+];
