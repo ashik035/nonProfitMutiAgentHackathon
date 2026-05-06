@@ -26,6 +26,8 @@ export interface NavItem {
   children?: NavItem[];
   headerOnly?: boolean;
   agencyRoles?: AgencyRole[];
+  /** Optional permission key for role-based gating (checked when ROLE_GATING_ENABLED=true) */
+  requiredPermission?: { type: "module" | "agent"; key: string };
 }
 
 export interface NavGroup {
