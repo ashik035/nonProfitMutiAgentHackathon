@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { icons, Sparkles, Bot, Clock, Play, Loader2, Eye } from "lucide-react";
 import { toast } from "sonner";
@@ -19,6 +19,7 @@ import {
 } from "@/components/ai/agentTeamConfig";
 import { cn } from "@/lib/utils";
 import { hoursAgo } from "@/shared/data/nonprofitDemoData";
+import { useNonprofitRolePermissions } from "@/hooks/useNonprofitRolePermissions";
 
 /* ── activity banner messages ── */
 
