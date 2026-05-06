@@ -6,6 +6,7 @@ import { useBranding } from "@/contexts/BrandingContext";
 import { useFeatureFlags } from "@/hooks/useFeatureFlags";
 import { useModuleAccess } from "@/shared/hooks/useModuleAccess";
 import { useAgencyRole } from "@/hooks/useAgencyRole";
+import { useNonprofitRolePermissions } from "@/hooks/useNonprofitRolePermissions";
 import { useDealPipelineStats } from "@/modules/business-dev/hooks/useDeals";
 import {
   dashboardItem,
