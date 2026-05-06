@@ -6,6 +6,7 @@ import { useBranding } from "@/contexts/BrandingContext";
 import { useFeatureFlags } from "@/hooks/useFeatureFlags";
 import { useModuleAccess } from "@/shared/hooks/useModuleAccess";
 import { useAgencyRole } from "@/hooks/useAgencyRole";
+import { useNonprofitRolePermissions } from "@/hooks/useNonprofitRolePermissions";
 import { useDealPipelineStats } from "@/modules/business-dev/hooks/useDeals";
 import {
   dashboardItem,
@@ -123,6 +124,7 @@ export function AppSidebar({ open = true, onToggleSidebar }: AppSidebarProps) {
   const { isFeatureEnabled } = useFeatureFlags();
   const { hasModule } = useModuleAccess();
   const { agencyRole, isAdmin } = useAgencyRole();
+  const { hasPermission: hasRolePermission } = useNonprofitRolePermissions();
   const { data: dealStats } = useDealPipelineStats();
   const dealStageCounts = dealStats?.by_stage ?? {};
 
@@ -181,6 +183,10 @@ export function AppSidebar({ open = true, onToggleSidebar }: AppSidebarProps) {
     // Agency role filter: admins bypass, users without a role see all items
     if (item.agencyRoles && !isAdmin && currentAgencyRole) {
       if (!item.agencyRoles.includes(currentAgencyRole)) return false;
+    }
+    // Role-gating permission check (only when ROLE_GATING_ENABLED=true)
+    if (item.requiredPermission) {
+      if (!hasRolePermission(item.requiredPermission.type, item.requiredPermission.key)) return false;
     }
     return true;
   };

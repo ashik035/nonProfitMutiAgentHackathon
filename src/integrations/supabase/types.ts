@@ -2400,6 +2400,33 @@ export type Database = {
           },
         ]
       }
+      nonprofit_role_permissions: {
+        Row: {
+          created_at: string
+          granted: boolean
+          id: string
+          resource_key: string
+          resource_type: string
+          role: string
+        }
+        Insert: {
+          created_at?: string
+          granted?: boolean
+          id?: string
+          resource_key: string
+          resource_type: string
+          role: string
+        }
+        Update: {
+          created_at?: string
+          granted?: boolean
+          id?: string
+          resource_key?: string
+          resource_type?: string
+          role?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string

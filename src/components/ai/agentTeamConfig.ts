@@ -23,6 +23,8 @@ export interface AgentTeamAgent {
   whereToFind?: { label: string; path: string };
   /** Operational metadata for the 5 core nonprofit agents */
   operational?: AgentOperationalMeta;
+  /** Optional permission key for role-based gating. Agents without this always show. */
+  permissionKey?: string;
 }
 
 export interface AgentTeamDef {
@@ -164,6 +166,66 @@ export const agentTeams: Record<string, AgentTeamDef> = {
         ],
         whereToFind: { label: "Board Reports", path: "/board-reports" },
       },
+      {
+        name: "Grant Budget Watcher",
+        slug: "grant-budget-watcher",
+        description: "Alerts when grant spending hits 75% or 90% of budget. Auto-drafts a variance explanation.",
+        icon: "AlertTriangle",
+        permissionKey: "grant-budget-watcher",
+        capabilities: [
+          "Monitor grant spending against approved budgets in real-time",
+          "Trigger alerts at 75% and 90% utilization thresholds",
+          "Auto-draft variance explanation narratives",
+          "Generate budget-to-actual comparison reports",
+        ],
+        howToUse: [
+          "Navigate to Grants page",
+          "Review budget alerts on active grants",
+          "Approve or edit auto-drafted variance explanations",
+          "Export variance reports for funder communication",
+        ],
+        whereToFind: { label: "Grants", path: "/grants" },
+      },
+      {
+        name: "Integration Health Monitor",
+        slug: "integration-health-monitor",
+        description: "Flags sync failures, stale connections, and broken webhooks across integrations.",
+        icon: "Plug",
+        permissionKey: "integration-health-monitor",
+        capabilities: [
+          "Monitor all active integration connections",
+          "Detect sync failures and data discrepancies",
+          "Flag stale or expired API credentials",
+          "Track webhook delivery success rates",
+        ],
+        howToUse: [
+          "Navigate to Integration Center",
+          "Review health status for each integration",
+          "Acknowledge or resolve flagged issues",
+          "Set up alert thresholds per connection",
+        ],
+        whereToFind: { label: "Integrations", path: "/integrations" },
+      },
+      {
+        name: "Onboarding Checklist AI",
+        slug: "onboarding-checklist-ai",
+        description: "Generates staff onboarding task lists from Knowledge Base documents.",
+        icon: "ClipboardList",
+        permissionKey: "onboarding-checklist-ai",
+        capabilities: [
+          "Parse Knowledge Base documents for onboarding procedures",
+          "Generate role-specific task checklists",
+          "Track onboarding completion progress",
+          "Suggest process improvements from completion data",
+        ],
+        howToUse: [
+          "Navigate to AI Agents and select Onboarding Checklist AI",
+          "Choose the role or department for onboarding",
+          "Review and customize the generated checklist",
+          "Assign tasks to new staff members",
+        ],
+        whereToFind: { label: "AI Agents", path: "/agents" },
+      },
     ],
   },
 };
@@ -193,6 +255,9 @@ export const AGENT_ICON_MAP: Record<string, string> = {
   "grant-compliance": "FileText",
   "event-intelligence": "Calendar",
   "board-reporting": "BarChart3",
+  "grant-budget-watcher": "AlertTriangle",
+  "integration-health-monitor": "Plug",
+  "onboarding-checklist-ai": "ClipboardList",
 };
 
 /** Category color map keyed by team id */
