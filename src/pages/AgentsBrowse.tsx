@@ -251,6 +251,7 @@ function AgentBrowseCard({
 
 export default function AgentsBrowse() {
   const [isLoading, setIsLoading] = useState(true);
+  const { hasAgentPermission } = useNonprofitRolePermissions();
 
   useEffect(() => {
     document.title = "AI Agents | Brightside Foundation";
@@ -258,9 +259,15 @@ export default function AgentsBrowse() {
     return () => clearTimeout(t);
   }, []);
 
-  if (isLoading) return <BrowseSkeleton />;
-
   const team = allTeams[0];
+
+  // Filter agents based on role permissions (agents without permissionKey always show)
+  const visibleAgents = useMemo(
+    () => team.agents.filter((a) => !a.permissionKey || hasAgentPermission(a.permissionKey)),
+    [team.agents, hasAgentPermission]
+  );
+
+  if (isLoading) return <BrowseSkeleton />;
 
   return (
     <div className="space-y-10">
@@ -271,7 +278,7 @@ export default function AgentsBrowse() {
         <div>
           <h1 className="text-3xl font-bold text-foreground">AI Agents</h1>
           <p className="text-sm text-muted-foreground">
-            5 agents actively monitoring your operations
+            {visibleAgents.length} agents actively monitoring your operations
           </p>
         </div>
       </div>
@@ -279,7 +286,7 @@ export default function AgentsBrowse() {
       <ActivityBanner />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {team.agents.map((agent) => (
+        {visibleAgents.map((agent) => (
           <AgentBrowseCard
             key={agent.slug}
             agent={agent}
