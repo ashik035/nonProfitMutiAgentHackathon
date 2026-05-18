@@ -1,9 +1,9 @@
 # Nonprofit Control Tower — Complete Feature List
 
-> **Version:** May 2026  
-> **Product:** Operational Intelligence Layer (OIL) for modern nonprofits  
-> **Demo Organization:** Brightside Foundation  
-> **Stack:** React 18 · TypeScript · Vite · Supabase · shadcn/ui · Tailwind CSS
+> **Version:** May 2026 (refreshed)
+> **Product:** Operational Intelligence Layer (OIL) for modern nonprofits
+> **Demo Organization:** Brightside Foundation
+> **Stack:** React 18 · TypeScript · Vite · Tailwind CSS · shadcn/ui · Supabase (Auth, Postgres, pgvector, Edge Functions, Storage) · Lovable AI Gateway
 
 ---
 
@@ -11,30 +11,33 @@
 
 1. [Product Overview](#product-overview)
 2. [Authentication & Access](#authentication--access)
-3. [Role-Based Dashboards](#role-based-dashboards)
-4. [Nonprofit Operations Modules](#nonprofit-operations-modules)
-5. [AI Agent System](#ai-agent-system)
-6. [AI Features](#ai-features)
-7. [Knowledge Base](#knowledge-base)
-8. [Integration Center](#integration-center)
-9. [Admin Panel](#admin-panel)
-10. [Role-Based Access Control (RBAC)](#role-based-access-control-rbac)
-11. [Backend & Edge Functions](#backend--edge-functions)
-12. [Demo Mode](#demo-mode)
-13. [Remixing This Project](#remixing-this-project)
+3. [Navigation Structure](#navigation-structure)
+4. [Role-Based Dashboards](#role-based-dashboards)
+5. [Nonprofit Operations Modules](#nonprofit-operations-modules)
+6. [AI Agent System](#ai-agent-system)
+7. [AI Features](#ai-features)
+8. [Knowledge Base](#knowledge-base)
+9. [Integration Center](#integration-center)
+10. [Admin Panel](#admin-panel)
+11. [Role-Based Access Control (RBAC)](#role-based-access-control-rbac)
+12. [Backend & Edge Functions](#backend--edge-functions)
+13. [Demo Mode](#demo-mode)
+14. [Remixing This Project](#remixing-this-project)
 
 ---
 
 ## Product Overview
 
-Nonprofit Control Tower is an **operational intelligence layer** that sits on top of existing CRM systems (Salesforce, HubSpot, etc.). It is **not** a CRM replacement — it aggregates data from connected systems to provide:
+Nonprofit Control Tower is an **operational intelligence layer** that sits on top of existing CRM systems (Salesforce, HubSpot, Raiser's Edge, etc.). It is **not** a CRM replacement — it aggregates data from connected systems to provide:
 
-- Role-specific dashboards with KPIs
+- Role-specific dashboards with KPIs and AI activity digests
 - AI-powered agents that scan, flag, and draft across operations
-- Grant compliance tracking and board report generation
-- Donor pipeline management and retention analytics
+- Grant compliance tracking, grant writing assistance, and board report generation
+- Donor pipeline management, retention analytics, and acknowledgment automation
 - Event intelligence and post-event follow-up automation
-- Financial reconciliation across payment processors
+- Financial reconciliation across payment processors and finance systems
+- Program impact tracking and outcome reporting
+- Communication center for donor and board outreach
 - Centralized knowledge base with semantic search
 
 ---
@@ -46,308 +49,213 @@ Nonprofit Control Tower is an **operational intelligence layer** that sits on to
 | Email/password login | Standard signup + login with email verification |
 | Google OAuth | One-click Google sign-in |
 | Microsoft Azure AD | Enterprise SSO via MSAL |
-| Protected routes | All app routes behind authentication |
-| Admin routes | Separate admin layout with role check |
-| Session management | Persistent sessions with auto-refresh tokens |
-| Profile auto-creation | User profile created on first login |
+| Protected routes | All app routes behind `ProtectedRoute` |
+| Admin routes | Separate `AdminLayout` behind `AdminRoute` (role check) |
+| Profile auto-creation | Profile row created on first login |
+| Role switching | Reactive role updates via `useSyncExternalStore` (no refresh required) |
 
-**Demo Logins:**
+**Demo logins** (password `Demo@123` for all):
+- `executive_director@nonprofitai.software`
+- `development_director@nonprofitai.software`
+- `finance_manager@nonprofitai.software`
+- `operations_manager@nonprofitai.software`
+- `admin@nonprofitct.com`
 
-| Role | Email | Password |
-|------|-------|----------|
-| Executive Director | `executive_director@nonprofitai.software` | `Demo@123` |
-| Development Director | `development_director@nonprofitai.software` | `Demo@123` |
-| Finance Manager | `finance_manager@nonprofitai.software` | `Demo@123` |
-| Operations Manager | `operations_manager@nonprofitai.software` | `Demo@123` |
-| Admin | `admin@nonprofitct.com` | `Demo@123` |
+---
+
+## Navigation Structure
+
+Sidebar (`src/shared/data/navigationStructure.ts`) is organized in logical groupings:
+
+- **Overview** — Dashboard, Notifications
+- **Fundraising** — Donor Pipeline, Donor Retention, Grants, Grant Writer, Events
+- **Programs & Impact** — Programs, Communications
+- **Finance & Compliance** — Reconciliation, Board Reports
+- **Data & Health** — Data Health, Integrations
+- **AI** — AI Chat, AI Agents (Browse), Agent Activity Feed
+- **Knowledge** — Knowledge Base, Semantic Search, Personal Knowledge
+- **Admin** (admin only) — full admin sub-navigation
+
+Branded as **Brightside Foundation** in the sidebar header.
 
 ---
 
 ## Role-Based Dashboards
 
-Each nonprofit role gets a dedicated dashboard with role-specific KPIs and widgets:
+Four nonprofit personas, each with a tailored dashboard:
 
-### Executive Director Dashboard
-- Organization health score
-- Board readiness indicators
-- Grant portfolio overview
-- Data health summary
-- AI activity digest widget (last 5 agent runs)
-- Personalized greeting with role context
+| Role | Dashboard Focus |
+|------|-----------------|
+| **Executive Director** | Org-wide KPIs, board readiness, grants pipeline, data health digest, **AI Activity Widget** |
+| **Development Director** | Donor engagement, retention signals, event pipeline, lead follow-up |
+| **Finance Manager** | Reconciliation status, fund accounting, grant spend, anomaly alerts |
+| **Operations Manager** | Data health, integration status, agent run summary, **AI Activity Widget** |
 
-### Development Director Dashboard
-- Donor engagement metrics
-- Event pipeline and attendance tracking
-- Lead pipeline summary
-- Fundraising goal progress
-- Recent donor activity
-
-### Finance Manager Dashboard
-- Reconciliation status overview
-- Fund accounting summary
-- Grant spending vs. budget
-- Unmatched transaction alerts
-- Monthly financial snapshots
-
-### Operations Manager Dashboard
-- Data health score and trends
-- Integration health status
-- AI agent run status
-- System uptime indicators
-- AI activity digest widget
+Each dashboard includes:
+- Personalized greeting with time-of-day awareness
+- Core metric cards (calm blues/greens, amber alerts)
+- AI activity digest of recent agent runs
+- Quick-action shortcuts
 
 ---
 
 ## Nonprofit Operations Modules
 
-### 1. Data Health (`/data-health`)
-- CRM data quality scoring
-- Duplicate record detection with merge suggestions
-- Missing field analysis
-- Stale profile identification (12+ months inactive)
-- Data quality trend tracking
+All operational pages use centralized demo data from `src/shared/data/nonprofitDemoData.ts` with runtime-computed timestamps (date-fns).
 
-### 2. Grants Management (`/grants`)
-- Active grant tracking with deadlines
-- Fund utilization monitoring (budget vs. actual)
-- Compliance alert system
-- Funder communication tools
-- Grant reporting workflow
-- Budget threshold alerts (75% and 90%)
-
-### 3. Events (`/events`)
-- Event listing with status indicators
-- Post-event attendance analysis
-- Attendee CRM tagging automation
-- Volunteer interest flag detection
-- Follow-up task generation
-- **Event Intelligence AI Panel** — embedded collapsible panel with quick insight chips and conversational AI
-
-### 4. Board Reports (`/board-reports`)
-- Document-style preview layout
-- Auto-aggregated KPIs from connected systems
-- Financial snapshots
-- Engagement metrics compilation
-- PDF export simulation
-- ED approval workflow for KPI sections
-
-### 5. Reconciliation (`/reconciliation`)
-- Transaction matching (Stripe, PayPal → QuickBooks)
-- Unmatched payment flagging
-- Fee variance detection
-- Restricted fund mismatch alerts
-- Monthly reconciliation summaries
-
-### 6. Donor Pipeline (`/donor-pipeline`)
-- Donor lifecycle stage tracking
-- Pipeline visualization
-- Engagement scoring
-- Gift history and trends
-- Prospect research integration
-
-### 7. Donor Retention (`/donor-retention`)
-- Retention rate KPIs and trend analysis
-- LYBUNT (Last Year But Unfortunately Not This) donor tracking
-- At-risk donor identification
-- AI-powered re-engagement email composer
-- Retention cohort analysis
-
-### 8. Programs (`/programs`)
-- Program metrics dashboard (beneficiaries, budget utilization)
-- AI-generated impact narratives
-- Program outcome tracking
-- Budget-to-actual comparison
-- Beneficiary demographics
-
-### 9. Communications (`/communications`)
-- Bulk email composer with AI assist
-- Sent message log and analytics
-- Thank-you letter queue
-- Template management
-- Donor acknowledgment letter generation
+| Module | Route | Capabilities |
+|--------|-------|--------------|
+| **Data Health** | `/data-health` | Duplicate detection, incomplete profiles, stale data flags, AI-suggested merges |
+| **Grants Management** | `/grants` | Lifecycle tracking, deadlines, fund utilization, compliance status |
+| **Grant Writer** | `/grants/writer` | AI-assisted draft generation via `generate-grant-draft` edge function (deployed) |
+| **Events** | `/events` | Post-event engagement intelligence, follow-up automation, attendance tracking |
+| **Board Reports** | `/board-reports` | Document-style preview, KPI summaries, financial snapshots, export simulation |
+| **Reconciliation** | `/reconciliation` | Match transactions across Stripe/PayPal/CRM/finance systems |
+| **Donor Pipeline** | `/donors` | Major gift pipeline, stage tracking, AI next-best-action suggestions |
+| **Donor Retention** | `/donor-retention` | Lapsed donor analytics, retention cohorts, re-engagement playbooks |
+| **Program Impact** | `/programs` | Program outcomes, beneficiary counts, impact storytelling, KPI tracking |
+| **Communication Center** | `/communications` | Donor and board outreach drafts, templates, AI-assisted copy |
 
 ---
 
 ## AI Agent System
 
-### Core Operations Team — 8 AI Agents
+### Core Operations Agents (8)
 
-| # | Agent | What It Does | Where to Find |
-|---|-------|-------------|---------------|
-| 1 | **CRM Data Integrity Agent** | Scans CRM for duplicates, missing fields, stale profiles. Surfaces merge suggestions. | `/data-health` |
-| 2 | **Reconciliation & Fund Accounting Agent** | Matches transactions across payment processors vs. finance system. Flags variances. | `/reconciliation` |
-| 3 | **Grant Compliance Agent** | Tracks grant deadlines, monitors fund utilization, flags spending anomalies. | `/grants` |
-| 4 | **Event Intelligence Agent** | Analyzes post-event attendance, suggests engagement tags, generates follow-up tasks. | `/events` |
-| 5 | **Board Reporting Agent** | Aggregates KPIs and financial snapshots to generate draft board reports. | `/board-reports` |
-| 6 | **Grant Budget Watcher** | Alerts at 75%/90% budget utilization. Auto-drafts variance explanations. | `/grants` |
-| 7 | **Integration Health Monitor** | Flags sync failures, stale connections, and broken webhooks. | `/integrations` |
-| 8 | **Onboarding Checklist AI** | Generates staff onboarding task lists from Knowledge Base documents. | `/agents` |
+Specialized agents that scan, flag, and draft inside nonprofit operations. Each has an interactive finding page with evidence-of-value cards (gradients, pulse indicators).
 
-### Agent Discovery & Browsing
-- **Browse page** (`/agents`) — Visual cards for all agent teams with gradient accents
-- **Detail pages** (`/agents/:slug`) — Individual agent capabilities, how-to-use guides, and operational metadata
-- **Agent Activity Feed** (`/agents/activity`) — Real-time log of all agent runs with status (success/running/failed), 30-second auto-refresh
-- **Dashboard widgets** — Last 5 agent runs shown on ED and OM dashboards
-- **Presence indicators** — Visual status showing agent activity across the app
+1. Data Hygiene Agent
+2. Grant Deadline Agent
+3. Donor Retention Agent
+4. Reconciliation Agent
+5. Board Report Agent
+6. Event Follow-up Agent
+7. Communication Drafting Agent
+8. Program Impact Agent
+
+### Discovery Catalog (16 agents · 4 teams)
+
+Browseable in `/agents` and configured in `src/components/ai/agentTeamConfig.ts`:
+- Donor Team
+- Meeting Team
+- Strategy Team
+- Project Team
+
+### Agent Visibility Features
+
+| Feature | Route / Location | Details |
+|---------|------------------|---------|
+| **Agent Activity Feed** | `/agents/activity` | Real-time log of all agent runs (agent name, team, action, outcome summary, timestamp, status: success/running/failed). Pulls from `ai_agent_runs`. |
+| **AI Activity Widget** | ED & Ops dashboards | Compact digest of latest agent runs |
+| **Presence Indicators** | Sidebar & agent cards | Pulse badges for active agents |
+| **Agent Detail Pages** | `/agents/:slug` | Capabilities, recent runs, sample outputs |
 
 ---
 
 ## AI Features
 
-| Feature | Details |
-|---------|---------|
-| **AI Chat** (`/ai-chat`) | Conversational AI interface powered by Lovable AI Gateway. System prompts tailored to nonprofit context. |
-| **Event Intelligence Panel** | Embedded collapsible panel on Events page. Quick insight chips + free-form questions. Uses GPT-4o-mini via edge function. |
-| **Donor Acknowledgment Generator** | AI-powered letter generation using Gemini 3.5 Flash. Produces personalized thank-you letters. |
-| **Re-engagement Email Composer** | AI-assisted email drafting for at-risk and lapsed donors on Donor Retention page. |
-| **Impact Narrative Generator** | AI-generated program impact narratives on Programs page. |
-| **Communication AI Assist** | AI-powered content suggestions in the Communications bulk email composer. |
-| **Voice Notes** (`/voice-notes`) | Voice note capture and processing. |
-| **Agent Memory Framework** | Extraction and retrieval functions for agent conversational continuity across sessions. |
-| **AI Usage Tracking** | Logging of AI model usage, tokens, and cost tracking across all AI features. |
+- **Lovable AI Gateway** — Single managed gateway (Gemini, GPT-5 family) with usage tracking
+- **Donor Acknowledgment Generator** — Gemini-powered letter generation (`generate-donor-letter`)
+- **Grant Draft Generator** — Section-by-section grant drafting (`generate-grant-draft`, deployed)
+- **AI Chat** — Conversational assistant with system prompts and chat history
+- **Semantic Search** — pgvector-backed search across knowledge entries
+- **Agentic Memory Framework** — Threaded conversations, long-term state extraction & retrieval
+- **AI Usage Tracking** — Per-model token + cost logging
+- **Provider Management** — Centralized provider config with dynamic routing
 
 ---
 
 ## Knowledge Base
 
-| Feature | Route | Details |
-|---------|-------|---------|
-| Knowledge articles | `/knowledge` | Categorized articles with rich content |
-| Semantic search | Built-in | Vector-based search using pgvector embeddings |
-| Personal knowledge | `/personal-knowledge` | User-specific knowledge items |
-| Auto-embedding | Background | New entries automatically embedded for search |
-| File attachments | Built-in | Document uploads with processing |
-| Category management | Admin | Organize knowledge by topic |
+- Knowledge entries with categories
+- File uploads to Supabase Storage
+- pgvector embeddings for semantic search
+- Personal vs. organizational knowledge spaces
+- Category browse, semantic search, and related-articles UI
 
 ---
 
 ## Integration Center
 
-**Route:** `/integrations`
-
-Provider-agnostic integration management supporting:
-- Connectivity status display for all integrations
-- Simulated setup request workflows
-- Health monitoring across active connections
-- Support for CRM (Salesforce, HubSpot), payment processors (Stripe, PayPal), accounting (QuickBooks), collaboration (Zoom, Microsoft Teams, Google Meet), and cloud storage (Google Drive)
+- Provider-agnostic catalog (`/integrations`)
+- Connectivity status display
+- Simulated setup-request workflows
+- Test & Active toggles for each provider
+- Shared logic pattern with generic adapter stubs (CRM, payment processor, email, finance, calendar)
 
 ---
 
 ## Admin Panel
 
-Accessible to admin users at `/admin` with dedicated sidebar:
+Centralized admin routing under `/admin`:
 
-### People & Performance
-- Admin dashboard with system overview
-- Employee management
-- Task stream configuration
-- POD management and team organization
-- Skill management
-- Resource planning (RP) settings and employee projection
-
-### Knowledge & AI
-- **AI Hub** — Dashboard, agent management, agent analytics, agent categories, prompt templates, email drafting config, deal coaching
-- **Semantic Search Admin** — Search interface and embeddings management
-- **User Memory** — Memory dashboard, user stats, search analytics, team learning patterns
-- **Knowledge Base Admin** — Common knowledge management, category administration
-
-### System
-- Organization settings
-- Role management
-- Integration analytics
-- Activity logs
-- Support tickets
-- Environment validator
-- Project modules configuration
-- Dashboard widget management
+- Role Management
+- Employee / Department / Pod Management
+- Dashboard Widgets configuration
+- Project Modules toggles
+- Integration Analytics
+- Environment Validator
+- Activity Logs
+- AI Dashboard & Agent Analytics
+- Memory Analytics & Team Learning Patterns
+- Organization Settings
+- Gemini RAG Config
+- Support Tickets
 
 ---
 
 ## Role-Based Access Control (RBAC)
 
-| Component | Details |
-|-----------|---------|
-| **Permission table** | `nonprofit_role_permissions` in database |
-| **Feature flag** | `ROLE_GATING_ENABLED` (currently `true`) |
-| **RoleGate component** | Wraps UI elements to show/hide based on role permissions |
-| **Navigation filtering** | Sidebar items gated by `requiredPermission` key |
-| **Agent filtering** | Agent visibility gated by `permissionKey` |
-| **Role switching** | Real-time role reactivity via `useSyncExternalStore` — no page refresh needed |
-
-### Permission Matrix
-
-| Module | Executive Director | Development Director | Finance Manager | Operations Manager |
-|--------|:-:|:-:|:-:|:-:|
-| Data Health | ✅ | ❌ | ❌ | ✅ |
-| Grants | ✅ | ✅ | ✅ | ❌ |
-| Events | ✅ | ✅ | ❌ | ❌ |
-| Board Reports | ✅ | ❌ | ✅ | ❌ |
-| Reconciliation | ✅ | ❌ | ✅ | ❌ |
-| Donor Pipeline | ✅ | ✅ | ❌ | ❌ |
-| Donor Retention | ✅ | ✅ | ❌ | ❌ |
-| Programs | ✅ | ✅ | ❌ | ✅ |
-| Communications | ✅ | ✅ | ❌ | ❌ |
-| Agent Activity | ✅ | ❌ | ❌ | ✅ |
-
-*Admin role has full access to everything.*
+- **Roles**: `executive_director`, `development_director`, `finance_manager`, `operations_manager`, `admin`
+- **Permissions table**: `nonprofit_role_permissions`
+- **Gating component**: `<RoleGate permission="...">`
+- **Feature flag**: `ROLE_GATING_ENABLED` (off by default during demo)
+- **Permission keys**: `grants`, `donor_retention`, `board_reports`, `programs`, `communications`, plus core module keys
+- Roles stored in dedicated table — **never** on the profiles/users table
 
 ---
 
 ## Backend & Edge Functions
 
-- **Database:** PostgreSQL via Supabase with Row Level Security (RLS) on all tables
-- **Vector search:** pgvector extension for embedding-based semantic search
-- **Edge Functions:** 117 serverless functions (Deno runtime) handling AI, integrations, auth, webhooks, and data processing
-- **Auth middleware:** JWT verification per function via `supabase/config.toml`
-- **CORS:** Centralized CORS configuration for all edge functions
+- **Database**: PostgreSQL with RLS on all tables
+- **Vector**: pgvector for embeddings & semantic search
+- **Storage**: Supabase Storage for uploads
+- **Edge Functions**: 117+ Deno functions in `supabase/functions/`
 
-### Key Edge Function Categories
-- AI chat and agent conversation
-- Semantic search and auto-embedding
-- Meeting management (Zoom, Teams, Google Meet)
-- CRM and client APIs
-- Grant and compliance processing
-- Webhook handlers
-- Authentication flows (Azure AD, OAuth)
-- Email and notification services
+Key functions:
+- `generate-donor-letter` — Donor acknowledgment generation
+- `generate-grant-draft` — Grant section drafting (deployed)
+- `ai-chat-assistant` — Conversational AI
+- `semantic-search` — Embedding-based search
+- Agentic framework: 14 functions for thread management, memory extraction, retrieval, summarization
+
+All new functions include CORS headers (`supabase/cors.ts`) and JWT verification configured per-function in `supabase/config.toml`.
 
 ---
 
 ## Demo Mode
 
-The app ships with a fully populated demo experience:
-
-- **Demo organization:** Brightside Foundation
-- **Centralized demo data:** Single source of truth in `src/shared/data/nonprofitDemoData.ts`
-- **Dynamic timestamps:** Computed at runtime using `date-fns` (e.g., "2 hours ago", "3 days ago")
-- **Local state interactions:** Toasts, modals, and local state for all demo interactions — no backend persistence required
-- **Pre-seeded accounts:** 4 nonprofit role accounts + 1 admin account
-- **Populated dashboards:** All pages show realistic data on first load
+- **Demo organization**: Brightside Foundation (single source of truth)
+- **Demo data file**: `src/shared/data/nonprofitDemoData.ts`
+- **Timestamps**: Computed at runtime with date-fns so the data always looks fresh
+- **Interaction pattern**: Local state, toasts, and modals — most demo features intentionally skip backend persistence
+- **Demo logins**: see [Authentication & Access](#authentication--access)
 
 ---
 
 ## Remixing This Project
 
-To create your own version of Nonprofit Control Tower:
+Checklist to rebrand/repurpose:
 
-1. **Fork/remix** the project
-2. **Update branding:**
-   - Replace "Brightside Foundation" in `nonprofitDemoData.ts`
-   - Update logo and colors in `BrandingContext.tsx` and `tailwind.config.ts`
-   - Modify the landing page in `src/pages/Index.tsx`
-3. **Configure backend:**
-   - Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in `.env`
-   - Run database migrations from `supabase/migrations/`
-   - Deploy edge functions from `supabase/functions/`
-4. **Customize modules:**
-   - Toggle modules in `src/shared/config/modules.ts`
-   - Adjust navigation in `src/shared/data/navigationStructure.ts`
-   - Modify RBAC permissions in the `nonprofit_role_permissions` table
-5. **Connect integrations:**
-   - Configure CRM, payment, and collaboration tool credentials
-   - Set up OAuth apps for Google and Microsoft sign-in
-6. **Replace demo data** with your organization's real data
+1. Replace branding in `BrandingContext` and sidebar header
+2. Update `nonprofitDemoData.ts` with your org's sample data
+3. Adjust `navigationStructure.ts` for your modules
+4. Update role names in the roles enum + permission keys
+5. Swap demo logins in seed/auth config
+6. Update `FEATURES.md` (this file) and `README.md`
+7. Configure Lovable AI Gateway / model preferences
+8. Connect real integrations via the Integration Center
 
 ---
 
-*Generated from the Nonprofit Control Tower codebase — May 2026*
+_Last updated: May 18, 2026_
