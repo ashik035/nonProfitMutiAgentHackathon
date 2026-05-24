@@ -189,6 +189,9 @@ export const queryKeys = {
       list: (filters?: Record<string, unknown>) => ["nonprofit", "events", "list", filters] as const,
       detail: (id: string) => ["nonprofit", "events", "detail", id] as const,
       registrants: (eventId: string) => ["nonprofit", "events", "registrants", eventId] as const,
+      speakers: (eventId: string) => ["nonprofit", "events", "speakers", eventId] as const,
+      agenda: (eventId: string) => ["nonprofit", "events", "agenda", eventId] as const,
+      ticketTypes: (eventId: string) => ["nonprofit", "events", "ticketTypes", eventId] as const,
     },
     campaigns: {
       all: ["nonprofit", "campaigns"] as const,
