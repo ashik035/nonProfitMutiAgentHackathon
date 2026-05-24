@@ -4,6 +4,64 @@ All notable changes to Nonprofit Control Tower are documented here.
 
 ---
 
+## [0.2.0] — 2026-05-24
+
+### Added — Tier 2: Real Supabase Backend for 4 Operational Modules
+
+**Database (4 migration files, 11 tables)**
+
+| Table | Purpose |
+|-------|---------|
+| `nonprofit_members` | Member directory — tier (General/Professional/Board/Honorary), status, renewal dates |
+| `nonprofit_volunteers` | Volunteer roster — skills[], availability[], total_hours, donor crossover |
+| `nonprofit_volunteer_shifts` | Per-volunteer shift log — event_name, date, hours, status |
+| `nonprofit_events` | Event lifecycle — status, capacity, fund_raised |
+| `nonprofit_event_ticket_types` | Ticket tiers per event — price, capacity, sold |
+| `nonprofit_event_speakers` | Speaker roster per event |
+| `nonprofit_event_agenda_items` | Agenda items per event |
+| `nonprofit_event_registrants` | Registrants per event — check-in toggle |
+| `nonprofit_campaigns` | Fundraising campaigns — goal, raised, fund_designation, is_active |
+| `nonprofit_donations` | Individual donation records — amount, frequency, fund_designation |
+
+All tables: RLS enabled (all-authenticated policy), `updated_at` triggers, `IF NOT EXISTS` safe.
+
+**TypeScript Types**
+- 11 new table types added to `src/integrations/supabase/types.ts` (Row / Insert / Update / Relationships)
+
+**Cache Keys (`src/lib/cache.ts`)**
+- Added `queryKeys.nonprofit.{members,volunteers,events,campaigns,donations}` key factories
+- Added `invalidateKeys.nonprofitMembers/Volunteers/Events/Campaigns/Donations` helpers
+
+**Hooks (5 new files)**
+
+| File | Exports |
+|------|---------|
+| `src/hooks/useMembers.ts` | `useMembers`, `useMemberById`, `useCreateMember`, `useUpdateMember`, `useDeleteMember` |
+| `src/hooks/useVolunteers.ts` | `useVolunteers`, `useVolunteerById`, `useCreateVolunteer`, `useUpdateVolunteer`, `useVolunteerShifts`, `useAllShifts`, `useCreateShift` |
+| `src/hooks/useNonprofitEvents.ts` | `useNonprofitEvents`, `useNonprofitEventById`, `useCreateNonprofitEvent`, `useUpdateNonprofitEvent`, `useEventRegistrants`, `useCreateRegistrant`, `useToggleCheckin` |
+| `src/hooks/useCampaigns.ts` | `useCampaigns`, `useCampaignById`, `useCreateCampaign`, `useUpdateCampaign` |
+| `src/hooks/useDonations.ts` | `useDonations`, `useDonationsByCampaign`, `useDonationStats`, `useCreateDonation` |
+
+**Pages Updated (4 files)**
+
+| Page | Changes |
+|------|---------|
+| `MembershipPage.tsx` | Live members from DB, computed KPI stats, Add Member form persists, `isLoading` spinner |
+| `VolunteersPage.tsx` | Live volunteers + all shifts (JOIN), economic value computed from real hours, Add Volunteer form persists |
+| `EventManagementPage.tsx` | Live events, Registrations Sheet from DB, check-in toggle persists, Create Event Dialog persists |
+| `DonationCenterPage.tsx` | Live campaigns + donations, fund breakdown from DB, New Donation form persists, stats from DB |
+
+### Added — Playwright smoke-test script
+- `verify-pages.mjs` — authenticates and visits all 7 nonprofit pages, probes UI interactions, saves failure screenshots
+
+### Changed
+- `package.json` — version bumped `0.1.0` → `0.2.0`
+- `CLAUDE.md` — Nonprofit-Specific Pages section annotated with live DB tables; Core Tables section extended; Key Files reference updated with 5 new hook files
+- `docs/02-modules/10-nonprofit-operations.md` — Demo Data section rewritten to distinguish live DB vs demo; individual module entries updated with backend notes
+- `FEATURES.md` — Nonprofit Operations Modules table updated with Backend column; Demo Mode section updated; version header updated
+
+---
+
 ## [0.1.0] — 2026-05-24
 
 ### Added — 7 new pages (Market Demand = High)

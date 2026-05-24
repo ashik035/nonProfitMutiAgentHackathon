@@ -131,16 +131,16 @@ Modules are the primary organizational unit. Defined in `src/shared/config/modul
 
 ### Nonprofit-Specific Pages (Static, no module gating)
 
-These pages use demo data from `src/shared/data/nonprofitDemoData.ts`:
+Pages marked **[live DB]** query real Supabase tables. The rest use demo data from `src/shared/data/nonprofitDemoData.ts`.
 - `/grants` — Grants Management
 - `/events` — Events (post-event intelligence)
 - `/board-reports` — Board Reports
 - `/data-health` — Data Health
 - `/reconciliation` — Reconciliation
-- `/membership` — Membership Management
-- `/volunteers` — Volunteer Management
-- `/event-management` — Full Event Lifecycle (separate from `/events`)
-- `/donations` — Donation Center
+- `/membership` — Membership Management **[live DB → `nonprofit_members`]**
+- `/volunteers` — Volunteer Management **[live DB → `nonprofit_volunteers`, `nonprofit_volunteer_shifts`]**
+- `/event-management` — Full Event Lifecycle **[live DB → `nonprofit_events`, `nonprofit_event_registrants`]**
+- `/donations` — Donation Center **[live DB → `nonprofit_campaigns`, `nonprofit_donations`]**
 - `/public-presence` — Public Presence / Website Layer
 - `/impact-dashboard` — Impact Dashboard (AI annual report via `ai-chat-assistant`)
 - `/engagement-scoring` — AI Engagement Scoring (AI next best action via `ai-chat-assistant`)
@@ -243,6 +243,14 @@ import { useClients } from "@/hooks/useClients";
 - `app_config`, `app_modules`, `user_module_permissions` — Configuration
 - `notifications`, `feedback`, `activity_logs` — Operations
 
+### Nonprofit Operational Tables (v0.2.0)
+- `nonprofit_members` — Member directory (tier, status, renewals)
+- `nonprofit_volunteers`, `nonprofit_volunteer_shifts` — Volunteer roster + shift log
+- `nonprofit_events`, `nonprofit_event_ticket_types`, `nonprofit_event_speakers`, `nonprofit_event_agenda_items`, `nonprofit_event_registrants` — Event lifecycle
+- `nonprofit_campaigns`, `nonprofit_donations` — Fundraising campaigns + individual donations
+
+All nonprofit tables: RLS enabled (all-authenticated policy), `updated_at` triggers.
+
 ## Environment Variables
 
 Required:
@@ -279,8 +287,13 @@ VITE_MODULE_KNOWLEDGE=true
 | `src/shared/data/navigationStructure.ts` | Sidebar navigation config |
 | `src/shared/data/nonprofitDemoData.ts` | Demo data for nonprofit modules |
 | `src/components/ai/agentTeamConfig.ts` | AI agent team definitions (16 agents, 4 teams) |
-| `src/lib/cache.ts` | React Query key factories |
+| `src/lib/cache.ts` | React Query key factories (includes `queryKeys.nonprofit.*`) |
 | `src/lib/validation.ts` | Zod validation schemas |
+| `src/hooks/useMembers.ts` | Members CRUD — `useMembers`, `useCreateMember`, `useUpdateMember`, `useDeleteMember` |
+| `src/hooks/useVolunteers.ts` | Volunteers CRUD + shifts — `useVolunteers`, `useAllShifts`, `useCreateVolunteer`, `useCreateShift` |
+| `src/hooks/useNonprofitEvents.ts` | Event lifecycle — `useNonprofitEvents`, `useEventRegistrants`, `useToggleCheckin` |
+| `src/hooks/useCampaigns.ts` | Campaigns CRUD — `useCampaigns`, `useCreateCampaign`, `useUpdateCampaign` |
+| `src/hooks/useDonations.ts` | Donations + stats — `useDonations`, `useDonationStats`, `useCreateDonation` |
 | `src/integrations/supabase/client.ts` | Supabase client instance |
 | `src/integrations/supabase/types.ts` | Auto-generated database types |
 | `supabase/config.toml` | Edge function JWT verification config |

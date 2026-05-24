@@ -1,6 +1,6 @@
 # Nonprofit Control Tower — Complete Feature List
 
-> **Version:** May 2026 (refreshed)
+> **Version:** v0.2.0 — May 2026
 > **Product:** Operational Intelligence Layer (OIL) for modern nonprofits
 > **Demo Organization:** Brightside Foundation
 > **Stack:** React 18 · TypeScript · Vite · Tailwind CSS · shadcn/ui · Supabase (Auth, Postgres, pgvector, Edge Functions, Storage) · Lovable AI Gateway
@@ -99,27 +99,27 @@ Each dashboard includes:
 
 ## Nonprofit Operations Modules
 
-All operational pages use centralized demo data from `src/shared/data/nonprofitDemoData.ts` with runtime-computed timestamps (date-fns).
+Most pages use centralized demo data from `src/shared/data/nonprofitDemoData.ts`. Pages marked **[live DB]** query real Supabase tables (v0.2.0).
 
-| Module | Route | Capabilities |
-|--------|-------|--------------|
-| **Data Health** | `/data-health` | Duplicate detection, incomplete profiles, stale data flags, AI-suggested merges |
-| **Grants Management** | `/grants` | Lifecycle tracking, deadlines, fund utilization, compliance status |
-| **Grant Writer** | `/grant-writer` | AI-assisted draft generation via `generate-grant-draft` edge function (deployed) |
-| **Events** | `/events` | Post-event engagement intelligence, follow-up automation, attendance tracking |
-| **Board Reports** | `/board-reports` | Document-style preview, KPI summaries, financial snapshots, export simulation |
-| **Reconciliation** | `/reconciliation` | Match transactions across Stripe/PayPal/CRM/finance systems |
-| **Donor Pipeline** | `/donor-pipeline` | Major gift pipeline, stage tracking, AI next-best-action suggestions |
-| **Donor Retention** | `/donor-retention` | Lapsed donor analytics, retention cohorts, re-engagement playbooks |
-| **Program Impact** | `/programs` | Program outcomes, beneficiary counts, impact storytelling, KPI tracking |
-| **Communication Center** | `/communications` | Donor and board outreach drafts, templates, AI-assisted copy |
-| **Membership Management** | `/membership` | Member directory, tier/status management, renewals, onboarding form |
-| **Volunteer Management** | `/volunteers` | Volunteer roster, shift tracking, skills, donor crossover, economic value |
-| **Event Management** | `/event-management` | Full event lifecycle: create, capacity, speakers, agenda, registrations, tickets |
-| **Donation Center** | `/donations` | Campaign management, donation history, fund breakdown, record donation form |
-| **Public Presence** | `/public-presence` | Visibility toggles, embed codes, social sharing, website layer controls |
-| **Impact Dashboard** | `/impact-dashboard` | Program outcomes, milestones, AI-drafted annual report |
-| **AI Engagement Scoring** | `/engagement-scoring` | 0–100 member scores, At Risk detection, AI next-best-action per member |
+| Module | Route | Backend | Capabilities |
+|--------|-------|---------|--------------|
+| **Data Health** | `/data-health` | Demo | Duplicate detection, incomplete profiles, stale data flags, AI-suggested merges |
+| **Grants Management** | `/grants` | Demo | Lifecycle tracking, deadlines, fund utilization, compliance status |
+| **Grant Writer** | `/grant-writer` | Demo | AI-assisted draft generation via `generate-grant-draft` edge function (deployed) |
+| **Events** | `/events` | Demo | Post-event engagement intelligence, follow-up automation, attendance tracking |
+| **Board Reports** | `/board-reports` | Demo | Document-style preview, KPI summaries, financial snapshots, export simulation |
+| **Reconciliation** | `/reconciliation` | Demo | Match transactions across Stripe/PayPal/CRM/finance systems |
+| **Donor Pipeline** | `/donor-pipeline` | Demo | Major gift pipeline, stage tracking, AI next-best-action suggestions |
+| **Donor Retention** | `/donor-retention` | Demo | Lapsed donor analytics, retention cohorts, re-engagement playbooks |
+| **Program Impact** | `/programs` | Demo | Program outcomes, beneficiary counts, impact storytelling, KPI tracking |
+| **Communication Center** | `/communications` | Demo | Donor and board outreach drafts, templates, AI-assisted copy |
+| **Membership Management** | `/membership` | **[live DB]** | Member directory, tier/status management, renewals, onboarding form → `nonprofit_members` |
+| **Volunteer Management** | `/volunteers` | **[live DB]** | Volunteer roster, shift tracking, skills, donor crossover, economic value → `nonprofit_volunteers`, `nonprofit_volunteer_shifts` |
+| **Event Management** | `/event-management` | **[live DB]** | Full event lifecycle: create, capacity, registrations, check-in → `nonprofit_events`, `nonprofit_event_registrants` |
+| **Donation Center** | `/donations` | **[live DB]** | Campaign management, donation history, fund breakdown, record donation → `nonprofit_campaigns`, `nonprofit_donations` |
+| **Public Presence** | `/public-presence` | Demo | Visibility toggles, embed codes, social sharing, website layer controls |
+| **Impact Dashboard** | `/impact-dashboard` | Demo | Program outcomes, milestones, AI-drafted annual report |
+| **AI Engagement Scoring** | `/engagement-scoring` | Demo | 0–100 member scores, At Risk detection, AI next-best-action per member |
 
 ---
 
@@ -244,6 +244,7 @@ All new functions include CORS headers (`supabase/cors.ts`) and JWT verification
 - **Demo data file**: `src/shared/data/nonprofitDemoData.ts`
 - **Timestamps**: Computed at runtime with date-fns so the data always looks fresh
 - **Interaction pattern**: Local state, toasts, and modals — most demo features intentionally skip backend persistence
+- **Live modules (v0.2.0)**: Membership, Volunteers, Event Management, Donation Center write to real Supabase tables — these pages show empty states until data is entered
 - **Demo logins**: see [Authentication & Access](#authentication--access)
 
 ---

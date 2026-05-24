@@ -114,12 +114,14 @@ Match transactions across payment processors and CRM/finance systems.
 
 Member directory, renewals management, and onboarding.
 
+**Backend:** Live Supabase — `nonprofit_members` table. Hook: `useMembers`, `useCreateMember` (`src/hooks/useMembers.ts`).
+
 **Features:**
 - Member directory with search and tier filter (General / Professional / Board / Honorary)
 - Status badges: Active, Expiring (within 30 days), Lapsed, Pending
-- 4 KPI cards: Total Members, Active, Expiring Soon, Lapsed
+- 4 KPI cards: Total Members, Active, Expiring Soon, Lapsed (computed from live data)
 - Renewals tab: Expiring-soon list + Lapsed list with Send Reminder / Re-Engage actions (toast)
-- Add Member form (React Hook Form + Zod: name, email, tier)
+- Add Member form (React Hook Form + Zod: name, email, tier) — persists to DB
 - Member detail Sheet: contact info, employer, interests as badges, action buttons
 
 **Key components:** `MembershipPage.tsx`
@@ -130,12 +132,14 @@ Member directory, renewals management, and onboarding.
 
 Volunteer roster, shift tracking, and economic value reporting.
 
+**Backend:** Live Supabase — `nonprofit_volunteers` + `nonprofit_volunteer_shifts` tables. Hooks: `useVolunteers`, `useAllShifts`, `useCreateVolunteer` (`src/hooks/useVolunteers.ts`).
+
 **Features:**
-- 4 KPI cards: Total Volunteers, Active This Month, Total Hours, Economic Value ($31.80/hr × hours)
+- 4 KPI cards: Total Volunteers, Active This Month, Total Hours, Economic Value ($29.95/hr × hours, computed from live data)
 - Card grid with avatar initials, skills as badges, availability slots, donor crossover indicator (❤️)
-- Shifts tab: flat table of all shifts sorted by date (Upcoming / Completed / Cancelled)
-- Add Volunteer form (RHF + Zod: name, email, skills, availability)
-- Volunteer detail Sheet: skills, availability, hours gauge, shift history, donor crossover amber callout
+- Shifts tab: flat table of all shifts (JOIN on volunteer name) sorted by date (Upcoming / Completed / Cancelled)
+- Add Volunteer form (RHF + Zod: name, email, skills, availability) — persists to DB
+- Volunteer detail Sheet: skills, availability, hours gauge, per-volunteer shift history, donor crossover amber callout
 
 **Key components:** `VolunteersPage.tsx`
 
@@ -147,12 +151,14 @@ Full event lifecycle — create, manage registrations, track capacity, and recor
 
 **Important:** This is separate from `/events` (post-event intelligence). `/events` is not modified.
 
+**Backend:** Live Supabase — `nonprofit_events` + `nonprofit_event_registrants` tables. Hooks: `useNonprofitEvents`, `useEventRegistrants`, `useCreateNonprofitEvent`, `useToggleCheckin` (`src/hooks/useNonprofitEvents.ts`).
+
 **Features:**
 - Status filters: All / Upcoming / Active / Past
-- Event cards with capacity progress bar (green → amber → red at 90%), ticket summary
-- Event detail Sheet: description, speakers, agenda, ticket types with revenue
-- Registrations Sheet: attendee table with check-in status
-- Create Event Dialog (RHF + Zod: title, date, location, capacity, description)
+- Event cards with fund_raised display, capacity count
+- Event detail Sheet: description, fund raised callout
+- Registrations Sheet: attendee table with name/email/ticket_tier/check-in — check-in toggle persists to DB
+- Create Event Dialog (RHF + Zod: title, date, location, capacity, description) — persists to DB
 
 **Key components:** `EventManagementPage.tsx`
 
@@ -162,12 +168,16 @@ Full event lifecycle — create, manage registrations, track capacity, and recor
 
 Campaign management, donation tracking, and fund breakdown reporting.
 
+**Backend:** Live Supabase — `nonprofit_campaigns` + `nonprofit_donations` tables. Hooks: `useCampaigns`, `useDonations`, `useDonationStats`, `useCreateDonation` (`src/hooks/useCampaigns.ts`, `src/hooks/useDonations.ts`).
+
 **Features:**
-- 4 KPI cards: Raised This Year, Average Gift, Recurring Donors, Active Campaigns
+- 4 KPI cards: Raised This Year, Average Gift, Recurring Donors, Active Campaigns (all computed from live DB)
 - Campaigns tab: Campaign cards with name, fund designation badge, goal progress bar (raised/goal %)
 - Donations tab: Frequency filter pills (All / One-Time / Monthly / Quarterly / Annual) + Table
-- Fund Breakdown tab: Horizontal progress bars per fund with amounts and percentages
-- New Donation tab: RHF + Zod (donor name, amount, frequency, campaign, fund designation)
+- Fund Breakdown tab: Horizontal progress bars per fund computed from real donation records
+- New Donation tab: RHF + Zod (donor name, amount, frequency, campaign, fund designation) — persists to DB
+
+**Fund designations:** General Operating / Youth Programs / Health Initiative / Technology Fund / Emergency Relief
 
 **Key components:** `DonationCenterPage.tsx`
 
@@ -217,9 +227,18 @@ AI-powered member/donor engagement scores with next-best-action recommendations.
 
 ---
 
-## Demo Data
+## Demo Data vs. Live Database
 
-All nonprofit modules use demo data from `src/shared/data/nonprofitDemoData.ts` and inline component state. This provides:
+As of v0.2.0, four modules query real Supabase tables instead of demo data:
+
+| Module | Backend |
+|--------|---------|
+| Membership Management | `nonprofit_members` table |
+| Volunteer Management | `nonprofit_volunteers` + `nonprofit_volunteer_shifts` tables |
+| Full Event Management | `nonprofit_events` + child tables (registrants, speakers, agenda, ticket types) |
+| Donation Center | `nonprofit_campaigns` + `nonprofit_donations` tables |
+
+The remaining modules still use demo data from `src/shared/data/nonprofitDemoData.ts`:
 
 - Sample grants with realistic deadlines and utilization percentages
 - Event attendance records with engagement tagging
@@ -227,13 +246,31 @@ All nonprofit modules use demo data from `src/shared/data/nonprofitDemoData.ts` 
 - Data health scores and duplicate detection results
 - Reconciliation transaction matches
 - Donor pipeline with 8+ enriched donor profiles (giving history, fund designations, contact notes, volunteer history)
-- 20 members across General / Professional / Board / Honorary tiers with status and renewal dates
-- 15 volunteers with skills, availability slots, shift history, and donor crossover flags
-- 5 managed events (2 Upcoming, 1 Active, 2 Past) with speakers, agenda, ticket types, and registrants
-- 3 active donation campaigns + 20 recent donations + fund breakdown stats
 - Public presence config (visibility toggles, social handles, embed codes)
 - 6 programs with outcome metrics, 8 milestones, and impact KPIs
 - 12 engagement-scored members with signal breakdowns
+
+### Nonprofit DB Tables (v0.2.0)
+- `nonprofit_members` — tier (General/Professional/Board/Honorary), status (Active/Expiring/Lapsed/Pending)
+- `nonprofit_volunteers` — skills[], availability[], total_hours, is_also_donor
+- `nonprofit_volunteer_shifts` — FK → volunteers, event_name, date, hours, status
+- `nonprofit_events` — status (Upcoming/Active/Past), capacity, fund_raised
+- `nonprofit_event_ticket_types` — tier, price, capacity, sold
+- `nonprofit_event_speakers` — name, title, bio, display_order
+- `nonprofit_event_agenda_items` — time, title, speaker_name, display_order
+- `nonprofit_event_registrants` — name, email, ticket_tier, checked_in
+- `nonprofit_campaigns` — goal, raised, donor_count, fund_designation, is_active
+- `nonprofit_donations` — amount, frequency, fund_designation, is_anonymous, payment_method
+
+All tables: RLS enabled (all-authenticated policy), `updated_at` triggers.
+
+Migration files:
+```
+supabase/migrations/20260524191344_nonprofit_members.sql
+supabase/migrations/20260524191345_nonprofit_volunteers.sql
+supabase/migrations/20260524191346_nonprofit_events.sql
+supabase/migrations/20260524191347_nonprofit_donations.sql
+```
 
 ---
 
