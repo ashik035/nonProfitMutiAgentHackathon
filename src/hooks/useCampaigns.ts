@@ -81,6 +81,7 @@ export function useCreateCampaign() {
     },
     onSuccess: (campaign) => {
       invalidateKeys.nonprofitCampaigns(queryClient);
+      invalidateKeys.nonprofitDonations(queryClient);
       logCrud("create", "nonprofit_campaign", campaign.id, { name: campaign.name });
       toast({ title: "Campaign created", description: `${campaign.name} is now active.` });
     },
