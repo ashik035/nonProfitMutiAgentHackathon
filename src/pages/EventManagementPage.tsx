@@ -161,6 +161,130 @@ function RegistrationsSheet({
   );
 }
 
+// ── Sub-component: Event Detail Sheet ─────────────────────────────
+
+function EventDetailSheet({
+  event,
+  onClose,
+}: {
+  event: NonprofitEvent | null;
+  onClose: () => void;
+}) {
+  const { data: speakers = [] } = useEventSpeakers(event?.id ?? null);
+  const { data: agendaItems = [] } = useEventAgendaItems(event?.id ?? null);
+  const { data: ticketTypes = [] } = useEventTicketTypes(event?.id ?? null);
+  const ticketRevenue = ticketTypes.reduce((sum, t) => sum + Number(t.price) * Number(t.sold), 0);
+
+  return (
+    <Sheet open={!!event} onOpenChange={(open) => !open && onClose()}>
+      <SheetContent className="sm:max-w-xl overflow-y-auto">
+        {event && (
+          <>
+            <SheetHeader>
+              <div className="flex items-center gap-2 flex-wrap">
+                <SheetTitle>{event.title}</SheetTitle>
+                <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${statusColor(event.status)}`}>
+                  {event.status}
+                </span>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
+                <span className="flex items-center gap-1">
+                  <Calendar className="h-3.5 w-3.5" /> {formatDate(event.date)}
+                </span>
+                {event.location && (
+                  <span className="flex items-center gap-1">
+                    <MapPin className="h-3.5 w-3.5" /> {event.location}
+                  </span>
+                )}
+              </div>
+            </SheetHeader>
+
+            <div className="mt-6 space-y-5">
+              {event.description && (
+                <p className="text-sm text-muted-foreground">{event.description}</p>
+              )}
+
+              <div className="grid grid-cols-3 gap-3 text-sm">
+                <div className="rounded-lg border p-3 text-center">
+                  <p className="text-2xl font-bold">{event.capacity}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Capacity</p>
+                </div>
+                <div className="rounded-lg border p-3 text-center">
+                  <p className="text-2xl font-bold">{ticketTypes.reduce((s, t) => s + Number(t.sold), 0)}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Tickets Sold</p>
+                </div>
+                <div className="rounded-lg border p-3 text-center">
+                  <p className="text-2xl font-bold text-green-700 dark:text-green-400">
+                    ${(Number(event.fund_raised) + ticketRevenue).toLocaleString()}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Total Raised</p>
+                </div>
+              </div>
+
+              {ticketTypes.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-semibold flex items-center gap-1.5 mb-2">
+                    <Ticket className="h-3.5 w-3.5 text-primary" /> Ticket Types
+                  </h4>
+                  <div className="space-y-2">
+                    {ticketTypes.map((t) => (
+                      <div key={t.id} className="flex items-center justify-between rounded-lg border px-3 py-2 text-sm">
+                        <span className="font-medium">{t.tier}</span>
+                        <div className="flex gap-4 text-muted-foreground text-xs">
+                          <span>${Number(t.price).toLocaleString()}</span>
+                          <span>{t.sold} / {t.capacity} sold</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {speakers.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-semibold flex items-center gap-1.5 mb-2">
+                    <Mic2 className="h-3.5 w-3.5 text-primary" /> Speakers
+                  </h4>
+                  <div className="space-y-2">
+                    {speakers.map((s) => (
+                      <div key={s.id} className="rounded-lg border px-3 py-2 text-sm">
+                        <p className="font-medium">{s.name}</p>
+                        {s.title && <p className="text-xs text-muted-foreground">{s.title}</p>}
+                        {s.bio && <p className="text-xs text-muted-foreground mt-1">{s.bio}</p>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {agendaItems.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-semibold flex items-center gap-1.5 mb-2">
+                    <Clock className="h-3.5 w-3.5 text-primary" /> Agenda
+                  </h4>
+                  <div className="space-y-1">
+                    {agendaItems.map((item) => (
+                      <div key={item.id} className="flex gap-3 text-sm py-1.5 border-b last:border-0">
+                        <span className="text-muted-foreground tabular-nums w-14 shrink-0">{item.time}</span>
+                        <div>
+                          <span className="font-medium">{item.title}</span>
+                          {item.speaker_name && (
+                            <span className="text-muted-foreground ml-1.5 text-xs">— {item.speaker_name}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </SheetContent>
+    </Sheet>
+  );
+}
+
 // ── Component ─────────────────────────────────────────────────────
 
 export default function EventManagementPage() {
