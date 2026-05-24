@@ -168,6 +168,41 @@ export const queryKeys = {
     count: ["notifications", "count"] as const,
   },
 
+  // Nonprofit modules
+  nonprofit: {
+    members: {
+      all: ["nonprofit", "members"] as const,
+      list: (filters?: Record<string, unknown>) => ["nonprofit", "members", "list", filters] as const,
+      detail: (id: string) => ["nonprofit", "members", "detail", id] as const,
+      stats: ["nonprofit", "members", "stats"] as const,
+    },
+    volunteers: {
+      all: ["nonprofit", "volunteers"] as const,
+      list: (filters?: Record<string, unknown>) => ["nonprofit", "volunteers", "list", filters] as const,
+      detail: (id: string) => ["nonprofit", "volunteers", "detail", id] as const,
+      shifts: (volunteerId: string) => ["nonprofit", "volunteers", "shifts", volunteerId] as const,
+      allShifts: (filters?: Record<string, unknown>) => ["nonprofit", "volunteers", "allShifts", filters] as const,
+      stats: ["nonprofit", "volunteers", "stats"] as const,
+    },
+    events: {
+      all: ["nonprofit", "events"] as const,
+      list: (filters?: Record<string, unknown>) => ["nonprofit", "events", "list", filters] as const,
+      detail: (id: string) => ["nonprofit", "events", "detail", id] as const,
+      registrants: (eventId: string) => ["nonprofit", "events", "registrants", eventId] as const,
+    },
+    campaigns: {
+      all: ["nonprofit", "campaigns"] as const,
+      list: (filters?: Record<string, unknown>) => ["nonprofit", "campaigns", "list", filters] as const,
+      detail: (id: string) => ["nonprofit", "campaigns", "detail", id] as const,
+    },
+    donations: {
+      all: ["nonprofit", "donations"] as const,
+      list: (filters?: Record<string, unknown>) => ["nonprofit", "donations", "list", filters] as const,
+      byCampaign: (campaignId: string) => ["nonprofit", "donations", "campaign", campaignId] as const,
+      stats: ["nonprofit", "donations", "stats"] as const,
+    },
+  },
+
   // Dashboard (agency-first)
   dashboard: {
     ownerMetrics: ["dashboard", "ownerMetrics"] as const,
@@ -290,5 +325,20 @@ export const invalidateKeys = {
     queryClient.invalidateQueries({ queryKey: queryKeys.sendgrid.config });
     queryClient.invalidateQueries({ queryKey: queryKeys.sendgrid.integration });
     queryClient.invalidateQueries({ queryKey: queryKeys.sendgrid.trackingEvents() });
+  },
+  nonprofitMembers: (queryClient: any) => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.nonprofit.members.all });
+  },
+  nonprofitVolunteers: (queryClient: any) => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.nonprofit.volunteers.all });
+  },
+  nonprofitEvents: (queryClient: any) => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.nonprofit.events.all });
+  },
+  nonprofitCampaigns: (queryClient: any) => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.nonprofit.campaigns.all });
+  },
+  nonprofitDonations: (queryClient: any) => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.nonprofit.donations.all });
   },
 };

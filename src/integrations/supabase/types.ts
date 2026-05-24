@@ -2400,6 +2400,352 @@ export type Database = {
           },
         ]
       }
+      nonprofit_campaigns: {
+        Row: {
+          id: string
+          created_by: string | null
+          name: string
+          description: string | null
+          goal: number
+          raised: number
+          donor_count: number
+          start_date: string | null
+          end_date: string | null
+          is_active: boolean
+          fund_designation: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          created_by?: string | null
+          name: string
+          description?: string | null
+          goal?: number
+          raised?: number
+          donor_count?: number
+          start_date?: string | null
+          end_date?: string | null
+          is_active?: boolean
+          fund_designation?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          created_by?: string | null
+          name?: string
+          description?: string | null
+          goal?: number
+          raised?: number
+          donor_count?: number
+          start_date?: string | null
+          end_date?: string | null
+          is_active?: boolean
+          fund_designation?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      nonprofit_donations: {
+        Row: {
+          id: string
+          campaign_id: string | null
+          donor_name: string
+          donor_email: string | null
+          amount: number
+          frequency: string
+          fund_designation: string | null
+          is_anonymous: boolean
+          payment_method: string | null
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          campaign_id?: string | null
+          donor_name: string
+          donor_email?: string | null
+          amount: number
+          frequency: string
+          fund_designation?: string | null
+          is_anonymous?: boolean
+          payment_method?: string | null
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          campaign_id?: string | null
+          donor_name?: string
+          donor_email?: string | null
+          amount?: number
+          frequency?: string
+          fund_designation?: string | null
+          is_anonymous?: boolean
+          payment_method?: string | null
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nonprofit_donations_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "nonprofit_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nonprofit_event_agenda_items: {
+        Row: {
+          id: string
+          event_id: string
+          time: string
+          title: string
+          speaker_name: string | null
+          display_order: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          event_id: string
+          time: string
+          title: string
+          speaker_name?: string | null
+          display_order?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          event_id?: string
+          time?: string
+          title?: string
+          speaker_name?: string | null
+          display_order?: number
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nonprofit_event_agenda_items_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "nonprofit_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nonprofit_event_registrants: {
+        Row: {
+          id: string
+          event_id: string
+          name: string
+          email: string
+          ticket_tier: string | null
+          checked_in: boolean
+          registered_at: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          event_id: string
+          name: string
+          email: string
+          ticket_tier?: string | null
+          checked_in?: boolean
+          registered_at?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          event_id?: string
+          name?: string
+          email?: string
+          ticket_tier?: string | null
+          checked_in?: boolean
+          registered_at?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nonprofit_event_registrants_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "nonprofit_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nonprofit_event_speakers: {
+        Row: {
+          id: string
+          event_id: string
+          name: string
+          title: string | null
+          bio: string | null
+          display_order: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          event_id: string
+          name: string
+          title?: string | null
+          bio?: string | null
+          display_order?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          event_id?: string
+          name?: string
+          title?: string | null
+          bio?: string | null
+          display_order?: number
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nonprofit_event_speakers_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "nonprofit_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nonprofit_event_ticket_types: {
+        Row: {
+          id: string
+          event_id: string
+          tier: string
+          price: number
+          capacity: number
+          sold: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          event_id: string
+          tier: string
+          price?: number
+          capacity?: number
+          sold?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          event_id?: string
+          tier?: string
+          price?: number
+          capacity?: number
+          sold?: number
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nonprofit_event_ticket_types_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "nonprofit_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nonprofit_events: {
+        Row: {
+          id: string
+          created_by: string | null
+          title: string
+          status: string
+          date: string
+          location: string | null
+          description: string | null
+          capacity: number
+          fund_raised: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          created_by?: string | null
+          title: string
+          status?: string
+          date: string
+          location?: string | null
+          description?: string | null
+          capacity?: number
+          fund_raised?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          created_by?: string | null
+          title?: string
+          status?: string
+          date?: string
+          location?: string | null
+          description?: string | null
+          capacity?: number
+          fund_raised?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      nonprofit_members: {
+        Row: {
+          id: string
+          created_by: string | null
+          name: string
+          email: string
+          phone: string | null
+          tier: string
+          status: string
+          join_date: string | null
+          renewal_date: string | null
+          employer: string | null
+          interests: string[]
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          created_by?: string | null
+          name: string
+          email: string
+          phone?: string | null
+          tier?: string
+          status?: string
+          join_date?: string | null
+          renewal_date?: string | null
+          employer?: string | null
+          interests?: string[]
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          created_by?: string | null
+          name?: string
+          email?: string
+          phone?: string | null
+          tier?: string
+          status?: string
+          join_date?: string | null
+          renewal_date?: string | null
+          employer?: string | null
+          interests?: string[]
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       nonprofit_role_permissions: {
         Row: {
           created_at: string
@@ -2424,6 +2770,95 @@ export type Database = {
           resource_key?: string
           resource_type?: string
           role?: string
+        }
+        Relationships: []
+      }
+      nonprofit_volunteer_shifts: {
+        Row: {
+          id: string
+          volunteer_id: string
+          event_name: string
+          date: string
+          hours: number
+          status: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          volunteer_id: string
+          event_name: string
+          date: string
+          hours?: number
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          volunteer_id?: string
+          event_name?: string
+          date?: string
+          hours?: number
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nonprofit_volunteer_shifts_volunteer_id_fkey"
+            columns: ["volunteer_id"]
+            isOneToOne: false
+            referencedRelation: "nonprofit_volunteers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nonprofit_volunteers: {
+        Row: {
+          id: string
+          created_by: string | null
+          name: string
+          email: string
+          phone: string | null
+          skills: string[]
+          availability: string[]
+          total_hours: number
+          joined_date: string | null
+          is_also_donor: boolean
+          donor_total_giving: number | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          created_by?: string | null
+          name: string
+          email: string
+          phone?: string | null
+          skills?: string[]
+          availability?: string[]
+          total_hours?: number
+          joined_date?: string | null
+          is_also_donor?: boolean
+          donor_total_giving?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          created_by?: string | null
+          name?: string
+          email?: string
+          phone?: string | null
+          skills?: string[]
+          availability?: string[]
+          total_hours?: number
+          joined_date?: string | null
+          is_also_donor?: boolean
+          donor_total_giving?: number | null
+          created_at?: string
+          updated_at?: string
         }
         Relationships: []
       }

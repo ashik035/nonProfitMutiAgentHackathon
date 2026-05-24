@@ -2,7 +2,7 @@
  * Membership Management — /membership
  *
  * Member directory, renewals tracking, and member onboarding.
- * All data is demo data — no Supabase queries.
+ * Backed by Supabase nonprofit_members table.
  */
 
 import { useState } from "react";
@@ -11,7 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import {
-  Users, UserCheck, UserX, Clock, Search, Mail, RefreshCw, Phone, Building2,
+  Users, UserCheck, UserX, Clock, Search, Mail, RefreshCw, Phone, Building2, Loader2,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -27,30 +27,36 @@ import {
 } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import {
-  DEMO_MEMBERS, DEMO_MEMBERSHIP_STATS,
-  type DemoMember, type MemberTier, type MemberStatus,
-} from "@/shared/data/nonprofitDemoData";
+  useMembers, useCreateMember,
+  type Member, type MemberTier, type MemberStatus,
+} from "@/hooks/useMembers";
+import { useAuth } from "@/contexts/AuthContext";
 
 // ── Helpers ──────────────────────────────────────────────────────
 
-function tierBadgeVariant(tier: MemberTier): string {
-  const map: Record<MemberTier, string> = {
+function tierBadgeVariant(tier: string): string {
+  const map: Record<string, string> = {
     General: "bg-gray-100 text-gray-700 border-gray-200",
     Professional: "bg-blue-100 text-blue-700 border-blue-200",
     Board: "bg-purple-100 text-purple-700 border-purple-200",
     Honorary: "bg-amber-100 text-amber-700 border-amber-200",
   };
-  return map[tier];
+  return map[tier] ?? "bg-gray-100 text-gray-700 border-gray-200";
 }
 
-function statusBadgeVariant(status: MemberStatus): string {
-  const map: Record<MemberStatus, string> = {
+function statusBadgeVariant(status: string): string {
+  const map: Record<string, string> = {
     Active: "bg-green-100 text-green-700 border-green-200",
     Expiring: "bg-amber-100 text-amber-700 border-amber-200",
     Lapsed: "bg-red-100 text-red-700 border-red-200",
     Pending: "bg-blue-100 text-blue-700 border-blue-200",
   };
-  return map[status];
+  return map[status] ?? "bg-gray-100 text-gray-700 border-gray-200";
+}
+
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return "—";
+  return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
 // ── Form schema ───────────────────────────────────────────────────
@@ -65,9 +71,14 @@ type MemberForm = z.infer<typeof memberSchema>;
 // ── Component ─────────────────────────────────────────────────────
 
 export default function MembershipPage() {
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [tierFilter, setTierFilter] = useState<MemberTier | "All">("All");
-  const [selectedMember, setSelectedMember] = useState<DemoMember | null>(null);
+  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+  const [addTab, setAddTab] = useState("directory");
+
+  const { data: members = [], isLoading } = useMembers({ search: searchQuery, tier: tierFilter });
+  const createMember = useCreateMember();
 
   const form = useForm<MemberForm>({
     resolver: zodResolver(memberSchema),
@@ -77,32 +88,28 @@ export default function MembershipPage() {
   // Destructure once to avoid multiple watch() subscriptions causing excessive re-renders
   const { tier: watchedTier } = form.watch();
 
-  const filteredMembers = DEMO_MEMBERS.filter((m) => {
-    const matchesSearch =
-      searchQuery === "" ||
-      m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      m.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (m.employer ?? "").toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesTier = tierFilter === "All" || m.tier === tierFilter;
-    return matchesSearch && matchesTier;
-  });
+  // All members (unfiltered) for stats & renewals
+  const { data: allMembers = [] } = useMembers();
+  const expiringMembers = allMembers.filter((m) => m.status === "Expiring");
+  const lapsedMembers = allMembers.filter((m) => m.status === "Lapsed");
 
-  const expiringMembers = DEMO_MEMBERS.filter((m) => m.status === "Expiring");
-  const lapsedMembers = DEMO_MEMBERS.filter((m) => m.status === "Lapsed");
-
-  const onSubmit = (data: MemberForm) => {
-    console.log("New member:", data);
-    toast.success(`Member ${data.name} added`, {
-      description: `${data.tier} membership created. Welcome email will be sent to ${data.email}.`,
+  const onSubmit = async (data: MemberForm) => {
+    await createMember.mutateAsync({
+      name: data.name,
+      email: data.email,
+      tier: data.tier,
+      status: "Active",
+      created_by: user?.id ?? null,
     });
     form.reset();
+    setAddTab("directory");
   };
 
   const kpiCards = [
-    { label: "Total Members", value: DEMO_MEMBERSHIP_STATS.totalMembers, icon: Users, color: "text-blue-600" },
-    { label: "Active", value: DEMO_MEMBERSHIP_STATS.activeMembers, icon: UserCheck, color: "text-green-600" },
-    { label: "Expiring Soon", value: DEMO_MEMBERSHIP_STATS.expiringMembers, icon: Clock, color: "text-amber-600" },
-    { label: "Lapsed", value: DEMO_MEMBERSHIP_STATS.lapsedMembers, icon: UserX, color: "text-red-600" },
+    { label: "Total Members", value: allMembers.length, icon: Users, color: "text-blue-600" },
+    { label: "Active", value: allMembers.filter((m) => m.status === "Active").length, icon: UserCheck, color: "text-green-600" },
+    { label: "Expiring Soon", value: expiringMembers.length, icon: Clock, color: "text-amber-600" },
+    { label: "Lapsed", value: lapsedMembers.length, icon: UserX, color: "text-red-600" },
   ];
 
   const tierFilters: Array<MemberTier | "All"> = ["All", "General", "Professional", "Board", "Honorary"];
@@ -128,7 +135,7 @@ export default function MembershipPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">{card.label}</p>
-                  <p className="text-3xl font-bold mt-1">{card.value}</p>
+                  <p className="text-3xl font-bold mt-1">{isLoading ? "—" : card.value}</p>
                 </div>
                 <card.icon className={`h-8 w-8 ${card.color} opacity-80`} />
               </div>
@@ -138,7 +145,7 @@ export default function MembershipPage() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="directory" className="space-y-4">
+      <Tabs value={addTab} onValueChange={setAddTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="directory">Directory</TabsTrigger>
           <TabsTrigger value="renewals">
@@ -192,14 +199,20 @@ export default function MembershipPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredMembers.length === 0 ? (
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8">
+                        <Loader2 className="h-5 w-5 animate-spin mx-auto text-muted-foreground" />
+                      </TableCell>
+                    </TableRow>
+                  ) : members.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                        No members match your search
+                        {searchQuery || tierFilter !== "All" ? "No members match your search" : "No members yet — add the first one!"}
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredMembers.map((member) => (
+                    members.map((member) => (
                       <TableRow
                         key={member.id}
                         className="cursor-pointer hover:bg-muted/50"
@@ -222,10 +235,10 @@ export default function MembershipPage() {
                           </span>
                         </TableCell>
                         <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
-                          {member.joinDate}
+                          {formatDate(member.join_date)}
                         </TableCell>
                         <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
-                          {member.renewalDate}
+                          {formatDate(member.renewal_date)}
                         </TableCell>
                         <TableCell>
                           <Button
@@ -244,7 +257,7 @@ export default function MembershipPage() {
             </CardContent>
           </Card>
           <p className="text-xs text-muted-foreground">
-            Showing {filteredMembers.length} of {DEMO_MEMBERS.length} members
+            Showing {members.length} of {allMembers.length} members
           </p>
         </TabsContent>
 
@@ -267,7 +280,7 @@ export default function MembershipPage() {
                         <div>
                           <p className="font-medium text-sm">{member.name}</p>
                           <p className="text-xs text-muted-foreground">
-                            {member.email} · Renewal: {member.renewalDate}
+                            {member.email} · Renewal: {formatDate(member.renewal_date)}
                           </p>
                         </div>
                         <div className="flex gap-2">
@@ -307,7 +320,7 @@ export default function MembershipPage() {
                         <div>
                           <p className="font-medium text-sm">{member.name}</p>
                           <p className="text-xs text-muted-foreground">
-                            {member.email} · Expired: {member.renewalDate}
+                            {member.email} · Expired: {formatDate(member.renewal_date)}
                           </p>
                         </div>
                         <div className="flex gap-2">
@@ -369,8 +382,12 @@ export default function MembershipPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <Button type="submit" className="w-full">
-                  <Users className="h-4 w-4 mr-2" /> Add Member
+                <Button type="submit" className="w-full" disabled={createMember.isPending}>
+                  {createMember.isPending ? (
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Adding…</>
+                  ) : (
+                    <><Users className="h-4 w-4 mr-2" /> Add Member</>
+                  )}
                 </Button>
               </form>
             </CardContent>
@@ -423,17 +440,17 @@ export default function MembershipPage() {
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div>
                       <p className="text-muted-foreground">Joined</p>
-                      <p className="font-medium">{selectedMember.joinDate}</p>
+                      <p className="font-medium">{formatDate(selectedMember.join_date)}</p>
                     </div>
                     <div>
                       <p className="text-muted-foreground">Renewal</p>
-                      <p className="font-medium">{selectedMember.renewalDate}</p>
+                      <p className="font-medium">{formatDate(selectedMember.renewal_date)}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Interests */}
-                {selectedMember.interests.length > 0 && (
+                {selectedMember.interests && selectedMember.interests.length > 0 && (
                   <div className="space-y-2">
                     <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Interests</h4>
                     <div className="flex flex-wrap gap-1.5">
