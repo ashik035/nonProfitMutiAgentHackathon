@@ -308,58 +308,7 @@ export default function EventManagementPage() {
       )}
 
       {/* Event Detail Sheet */}
-      <Sheet open={!!detailEvent} onOpenChange={(open) => !open && setDetailEvent(null)}>
-        <SheetContent className="sm:max-w-xl overflow-y-auto">
-          {detailEvent && (
-            <>
-              <SheetHeader>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <SheetTitle>{detailEvent.title}</SheetTitle>
-                  <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${statusColor(detailEvent.status)}`}>
-                    {detailEvent.status}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
-                  <span className="flex items-center gap-1">
-                    <Calendar className="h-3.5 w-3.5" /> {formatDate(detailEvent.date)}
-                  </span>
-                  {detailEvent.location && (
-                    <span className="flex items-center gap-1">
-                      <MapPin className="h-3.5 w-3.5" /> {detailEvent.location}
-                    </span>
-                  )}
-                </div>
-              </SheetHeader>
-
-              <div className="mt-6 space-y-5">
-                {detailEvent.description && (
-                  <p className="text-sm text-muted-foreground">{detailEvent.description}</p>
-                )}
-
-                {Number(detailEvent.fund_raised) > 0 && (
-                  <div className="rounded-lg border border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-800 p-3">
-                    <p className="text-sm font-semibold text-green-700 dark:text-green-400 flex items-center gap-1">
-                      <DollarSign className="h-4 w-4" />
-                      {Number(detailEvent.fund_raised).toLocaleString()} raised at this event
-                    </p>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div className="rounded-lg border p-3 text-center">
-                    <p className="text-2xl font-bold">{detailEvent.capacity}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">Capacity</p>
-                  </div>
-                  <div className="rounded-lg border p-3 text-center">
-                    <p className="text-2xl font-bold">{detailEvent.status}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">Status</p>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-        </SheetContent>
-      </Sheet>
+      <EventDetailSheet event={detailEvent} onClose={() => setDetailEvent(null)} />
 
       {/* Registrations Sheet */}
       <RegistrationsSheet
