@@ -84,6 +84,54 @@ export function useEventRegistrants(eventId: string | null) {
   });
 }
 
+export function useEventSpeakers(eventId: string | null) {
+  return useQuery({
+    queryKey: queryKeys.nonprofit.events.speakers(eventId ?? ""),
+    queryFn: async (): Promise<EventSpeaker[]> => {
+      const { data, error } = await supabase
+        .from("nonprofit_event_speakers")
+        .select("*")
+        .eq("event_id", eventId!)
+        .order("display_order", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as EventSpeaker[];
+    },
+    enabled: !!eventId,
+  });
+}
+
+export function useEventAgendaItems(eventId: string | null) {
+  return useQuery({
+    queryKey: queryKeys.nonprofit.events.agenda(eventId ?? ""),
+    queryFn: async (): Promise<EventAgendaItem[]> => {
+      const { data, error } = await supabase
+        .from("nonprofit_event_agenda_items")
+        .select("*")
+        .eq("event_id", eventId!)
+        .order("display_order", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as EventAgendaItem[];
+    },
+    enabled: !!eventId,
+  });
+}
+
+export function useEventTicketTypes(eventId: string | null) {
+  return useQuery({
+    queryKey: queryKeys.nonprofit.events.ticketTypes(eventId ?? ""),
+    queryFn: async (): Promise<EventTicketType[]> => {
+      const { data, error } = await supabase
+        .from("nonprofit_event_ticket_types")
+        .select("*")
+        .eq("event_id", eventId!)
+        .order("price", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as EventTicketType[];
+    },
+    enabled: !!eventId,
+  });
+}
+
 export function useCreateNonprofitEvent() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
