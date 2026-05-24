@@ -1,9 +1,8 @@
 import { chromium } from 'playwright';
-import { writeFileSync } from 'fs';
 
-const BASE = 'http://127.0.0.1:8080';
-const EMAIL = 'executive_director@nonprofitai.software';
-const PASS  = 'Demo@123';
+const BASE  = process.env.SITE_URL  || 'http://127.0.0.1:8080';
+const EMAIL = process.env.SUPABASE_TEST_EMAIL    || 'executive_director@nonprofitai.software';
+const PASS  = process.env.SUPABASE_TEST_PASSWORD || 'Demo@123';
 
 const pages = [
   { name: 'membership',         path: '/membership' },
@@ -59,7 +58,7 @@ const log = (...args) => console.log('[verify]', ...args);
 
   for (const { name, path } of pages) {
     log(`→ navigating to ${path}`);
-    const resp = await page.goto(BASE + path, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.goto(BASE + path, { waitUntil: 'domcontentloaded', timeout: 15000 });
     await page.waitForTimeout(1500); // let React render
     const url = page.url();
     const title = await page.title();
@@ -175,4 +174,5 @@ const log = (...args) => console.log('[verify]', ...args);
   console.log('Screenshots in /tmp/ss-*.png');
 
   await browser.close();
+  if (failed.length > 0) process.exit(1);
 })();
