@@ -108,6 +108,7 @@ export function useUpdateCampaign() {
     },
     onSuccess: (campaign) => {
       invalidateKeys.nonprofitCampaigns(queryClient);
+      invalidateKeys.nonprofitDonations(queryClient);
       queryClient.invalidateQueries({ queryKey: queryKeys.nonprofit.campaigns.detail(campaign.id) });
       logCrud("update", "nonprofit_campaign", campaign.id, { name: campaign.name });
       toast({ title: "Campaign updated" });
