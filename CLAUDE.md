@@ -99,7 +99,10 @@ npm run migrations:hook        # Setup migration hook
 ├── .claude/                       # Claude Code configuration
 │   ├── agents.md                  # Agent delegation rules
 │   ├── agents/                    # 11 specialized agent definitions
-│   ├── skills/                    # Skill definitions + 6 gstack skills
+│   ├── skills/                    # Skill definitions
+│
+├── .cursor/
+│   └── skills/                    # gstack skills for Cursor (53 skills)
 │   ├── hooks/                     # Session hooks
 │   └── settings.json              # Hook configuration
 │
@@ -377,31 +380,11 @@ Comprehensive docs in `/docs/` organized by topic:
 
 ---
 
-## gstack Skills — SJ Innovation
-Installed: 2026-05-10
-Source: github.com/garrytan/gstack
-
-Slash commands now available:
-- `/plan-ceo-review` — Adversarial CEO-level plan review; finds scope gaps and 10-star opportunities (run in Claude.ai before any spec)
-- `/plan-eng-review` — Engineering manager architecture + spec review; locks data flow, edge cases, test plan (run in Claude Code Desktop)
-- `/design-consultation` — Full design system creation for new projects; produces DESIGN.md (run in Claude.ai, new projects only)
-- `/ship` — Pre-production push checklist: lint, build, type-safety, code review, version bump, PR creation (run in Claude Code Desktop)
-- `/document-release` — Post-deploy documentation sync; updates CLAUDE.md, README, CHANGELOG to match what shipped (run in Claude Code Desktop, same session)
-- `/retro` — Weekly engineering retrospective with shipping velocity, quality signals, and per-contributor analysis (run in Claude.ai, every Friday)
-
-Build flow (follow this order every time):
-1. /plan-ceo-review → Claude.ai (before any spec)
-2. /plan-eng-review → Claude Code Desktop (spec + architecture)
-3. /design-consultation → Claude.ai (new projects only)
-4. Build → Lovable → Cowork QA pass
-5. /review → Claude Code Desktop (before staging push)
-6. /ship → Claude Code Desktop (before production push)
-7. /document-release → Claude Code Desktop (after every deploy, same session)
-8. /retro → Claude.ai (every Friday)
-
-Garry Tan's top rules applied to our workflow:
-- Context rot is real — stay under 60%, new session per feature
-- CLAUDE.md stays lean — this section only, no bloat added
-- Every token in this file must earn its place
-- Skills are knowledge, /commands are deterministic triggers
-- Subagents: always Opus unless specified otherwise
+## gstack
+Use /browse from gstack for all web browsing. Never use mcp__claude-in-chrome__* tools.
+Available skills: /office-hours, /plan-ceo-review, /plan-eng-review, /plan-design-review,
+/design-consultation, /design-shotgun, /design-html, /review, /ship, /land-and-deploy,
+/canary, /benchmark, /browse, /open-gstack-browser, /qa, /qa-only, /design-review,
+/setup-browser-cookies, /setup-deploy, /setup-gbrain, /sync-gbrain, /retro, /investigate,
+/document-release, /document-generate, /codex, /cso, /autoplan, /pair-agent, /careful, /freeze,
+/guard, /unfreeze, /gstack-upgrade, /learn.
