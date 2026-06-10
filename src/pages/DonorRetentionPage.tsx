@@ -1,14 +1,15 @@
 /**
  * Donor Retention Dashboard — /donor-retention
  *
- * Retention rate, LYBUNT count, at-risk donor table,
- * retention trend, and AI re-engage button.
+ * Retention rate, LYBUNT count, at-risk donor table with engagement
+ * scores, retention trend, and AI re-engage button.
+ * Click a donor name to open their unified profile.
  */
 
 import { useState } from "react";
 import { toast } from "sonner";
 import {
-  Users, TrendingUp, AlertTriangle, Heart, Mail, ArrowUpRight, ArrowDownRight,
+  AlertTriangle, Heart, Mail, ArrowUpRight, ArrowDownRight,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,11 +23,14 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { DEMO_DONOR_RETENTION, type AtRiskDonor } from "@/shared/data/nonprofitDemoData";
+import { DEMO_DONOR_RETENTION, findDonorProfile, type AtRiskDonor } from "@/shared/data/nonprofitDemoData";
+import { DonorProfileSheet } from "@/components/donors/DonorProfileSheet";
+import { donorScoreColor } from "@/components/donors/donorBadges";
 
 export default function DonorRetentionPage() {
   const [emailOpen, setEmailOpen] = useState(false);
   const [selectedDonor, setSelectedDonor] = useState<AtRiskDonor | null>(null);
+  const [profileDonor, setProfileDonor] = useState<string | null>(null);
   const data = DEMO_DONOR_RETENTION;
 
   const handleReEngage = (donor: AtRiskDonor) => {
@@ -117,6 +121,7 @@ export default function DonorRetentionPage() {
               <TableRow>
                 <TableHead>Donor Name</TableHead>
                 <TableHead>Segment</TableHead>
+                <TableHead className="text-center">Engagement</TableHead>
                 <TableHead>Last Gift Date</TableHead>
                 <TableHead className="text-right">Last Gift</TableHead>
                 <TableHead className="text-right">Total Giving</TableHead>
@@ -125,11 +130,29 @@ export default function DonorRetentionPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.atRiskDonors.map((donor) => (
+              {data.atRiskDonors.map((donor) => {
+                const profile = findDonorProfile(donor.name);
+                return (
                 <TableRow key={donor.id}>
-                  <TableCell className="font-medium">{donor.name}</TableCell>
+                  <TableCell className="font-medium">
+                    <button
+                      className="hover:underline text-left"
+                      onClick={() => setProfileDonor(donor.name)}
+                    >
+                      {donor.name}
+                    </button>
+                  </TableCell>
                   <TableCell>
                     <Badge variant="outline" className="text-xs">{donor.segment}</Badge>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {profile ? (
+                      <Badge variant="outline" className={`text-xs font-semibold ${donorScoreColor(profile.engagementScore)}`}>
+                        {profile.engagementScore}
+                      </Badge>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    )}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">{donor.lastGiftDate}</TableCell>
                   <TableCell className="text-right text-sm">${donor.lastGiftAmount.toLocaleString()}</TableCell>
@@ -146,11 +169,15 @@ export default function DonorRetentionPage() {
                     </Button>
                   </TableCell>
                 </TableRow>
-              ))}
+                );
+              })}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
+
+      {/* Unified donor profile */}
+      <DonorProfileSheet donorName={profileDonor} onOpenChange={(open) => !open && setProfileDonor(null)} />
 
       {/* Re-engage email dialog */}
       <Dialog open={emailOpen} onOpenChange={setEmailOpen}>

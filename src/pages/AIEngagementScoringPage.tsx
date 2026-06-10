@@ -1,13 +1,15 @@
 /**
- * AI Engagement Scoring — /engagement-scoring
+ * Member Engagement — /engagement-scoring
  *
  * Member engagement scores, lapse risk detection, predicted renewal likelihood,
- * and AI-suggested next best actions per member/donor.
+ * and AI-suggested next best actions per member. Scoped to members —
+ * donor engagement scores surface in Donor Retention and the unified
+ * donor profile instead.
  * Engagement scores computed from demo data; AI suggestions via edge function.
- * All base data is demo data — no Supabase queries for data.
  */
 
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import {
   Sparkles, TrendingDown, TrendingUp, Users, AlertTriangle,
@@ -255,10 +257,12 @@ Respond with only the action suggestion, no preamble.`,
       <div>
         <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
           <Sparkles className="h-6 w-6 text-primary" />
-          AI Engagement Scoring
+          Member Engagement
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          AI-powered engagement scores, lapse risk detection, and next best actions for every member and donor
+          AI-powered engagement scores, lapse risk detection, and next best actions for every member.
+          Looking for donors? Engagement scores live in{" "}
+          <Link to="/donor-retention" className="text-primary hover:underline">Donor Retention</Link>.
         </p>
       </div>
 

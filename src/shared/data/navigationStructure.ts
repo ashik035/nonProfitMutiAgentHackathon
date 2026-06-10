@@ -57,27 +57,52 @@ export const dashboardItem: NavItem = {
  */
 export const navigationGroups: NavGroup[] = [
   {
-    id: "nonprofit-ops",
-    title: "Nonprofit Operations",
-    icon: "ShieldCheck",
+    id: "fundraising",
+    title: "Fundraising",
+    icon: "BadgeDollarSign",
     items: [
-      { title: "Data Health", href: "/data-health", icon: "ShieldCheck", requiredPermission: { type: "module", key: "data-health" } },
-      { title: "Grants", href: "/grants", icon: "FileText", requiredPermission: { type: "module", key: "grants" } },
-      { title: "Events", href: "/events", icon: "Calendar", requiredPermission: { type: "module", key: "events" } },
-      { title: "Board Reports", href: "/board-reports", icon: "BarChart2", requiredPermission: { type: "module", key: "board-reports" } },
-      { title: "Reconciliation", href: "/reconciliation", icon: "ArrowLeftRight", requiredPermission: { type: "module", key: "reconciliation" } },
       { title: "Donor Pipeline", href: "/donor-pipeline", icon: "Users", requiredPermission: { type: "module", key: "donor-pipeline" } },
       { title: "Donor Retention", href: "/donor-retention", icon: "Heart", requiredPermission: { type: "module", key: "donor-retention" } },
-      { title: "Programs", href: "/programs", icon: "Target", requiredPermission: { type: "module", key: "programs" } },
-      { title: "Communications", href: "/communications", icon: "Mail", requiredPermission: { type: "module", key: "communications" } },
+      { title: "Donation Center", href: "/donations", icon: "BadgeDollarSign", requiredPermission: { type: "module", key: "donations" } },
+    ],
+  },
+  {
+    id: "grants",
+    title: "Grants",
+    icon: "FileText",
+    items: [
+      { title: "Grants Management", href: "/grants", icon: "FileText", requiredPermission: { type: "module", key: "grants" } },
       { title: "Grant Writer", href: "/grant-writer", icon: "PenTool", requiredPermission: { type: "module", key: "grant-writer" } },
+    ],
+  },
+  {
+    id: "people",
+    title: "People",
+    icon: "Users",
+    items: [
       { title: "Membership", href: "/membership", icon: "CreditCard", requiredPermission: { type: "module", key: "membership" } },
       { title: "Volunteers", href: "/volunteers", icon: "HandHeart", requiredPermission: { type: "module", key: "volunteers" } },
-      { title: "Event Management", href: "/event-management", icon: "CalendarPlus", requiredPermission: { type: "module", key: "event-management" } },
-      { title: "Donation Center", href: "/donations", icon: "BadgeDollarSign", requiredPermission: { type: "module", key: "donations" } },
-      { title: "Public Presence", href: "/public-presence", icon: "Globe", requiredPermission: { type: "module", key: "public-presence" } },
+      { title: "Communications", href: "/communications", icon: "Mail", requiredPermission: { type: "module", key: "communications" } },
+    ],
+  },
+  {
+    id: "events",
+    title: "Events",
+    icon: "Calendar",
+    items: [
+      { title: "Events", href: "/events", icon: "Calendar", requiredPermission: { type: "module", key: "events" } },
+    ],
+  },
+  {
+    id: "reporting",
+    title: "Reporting",
+    icon: "BarChart2",
+    items: [
+      { title: "Board Reports", href: "/board-reports", icon: "BarChart2", requiredPermission: { type: "module", key: "board-reports" } },
+      { title: "Programs", href: "/programs", icon: "Target", requiredPermission: { type: "module", key: "programs" } },
       { title: "Impact Dashboard", href: "/impact-dashboard", icon: "BarChart3", requiredPermission: { type: "module", key: "impact-dashboard" } },
-      { title: "Engagement Scoring", href: "/engagement-scoring", icon: "Sparkles", requiredPermission: { type: "module", key: "engagement-scoring" } },
+      { title: "Data Health", href: "/data-health", icon: "ShieldCheck", requiredPermission: { type: "module", key: "data-health" } },
+      { title: "Financial Reconciliation", href: "/reconciliation", icon: "ArrowLeftRight", requiredPermission: { type: "module", key: "reconciliation" } },
     ],
   },
   {
@@ -106,6 +131,7 @@ export const navigationGroups: NavGroup[] = [
     icon: "Settings",
     position: "bottom",
     items: [
+      { title: "Public Presence", href: "/public-presence", icon: "Globe", requiredPermission: { type: "module", key: "public-presence" } },
       { title: "Integrations", href: "/integrations", icon: "Plug" },
       { title: "Help & Support", href: "/help", icon: "HelpCircle" },
       { title: "Settings", href: "/settings", icon: "Settings" },

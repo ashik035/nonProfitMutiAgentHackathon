@@ -1,14 +1,15 @@
 import { useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { PenTool, Copy, RefreshCw, FileText, Loader2, Info } from "lucide-react";
+import { PenTool, Copy, RefreshCw, FileText, Loader2, Info, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { DEMO_GRANTS } from "@/shared/data/nonprofitDemoData";
+import { DEMO_GRANTS, type Grant } from "@/shared/data/nonprofitDemoData";
 import { DEMO_PROGRAMS } from "@/shared/data/nonprofitDemoData";
 
 const WRITING_SECTIONS = [
@@ -21,10 +22,34 @@ const WRITING_SECTIONS = [
 
 type WritingSection = typeof WRITING_SECTIONS[number];
 
-const activeGrants = DEMO_GRANTS.grants.filter((g) => g.status === "active");
+const demoActiveGrants = DEMO_GRANTS.grants.filter((g) => g.status === "active");
+
+/** Builds a Grant from deep-link params (Grants Management uses its own grant list) */
+function grantFromParams(params: URLSearchParams): Grant | null {
+  const name = params.get("grant");
+  if (!name) return null;
+  return {
+    name,
+    funder: params.get("funder") ?? "—",
+    amount: Number(params.get("amount") ?? 0),
+    utilized: Number(params.get("utilized") ?? 0),
+    daysUntilDeadline: 0,
+    deadlineDate: "",
+    status: "active",
+  };
+}
 
 export default function GrantWriterPage() {
-  const [selectedGrantName, setSelectedGrantName] = useState<string>("");
+  const [searchParams] = useSearchParams();
+  const incomingGrant = grantFromParams(searchParams);
+  const cameFromGrants = !!incomingGrant;
+
+  const activeGrants: Grant[] =
+    incomingGrant && !demoActiveGrants.some((g) => g.name === incomingGrant.name)
+      ? [incomingGrant, ...demoActiveGrants]
+      : demoActiveGrants;
+
+  const [selectedGrantName, setSelectedGrantName] = useState<string>(incomingGrant?.name ?? "");
   const [selectedProgramIds, setSelectedProgramIds] = useState<Set<string>>(new Set());
   const [selectedSection, setSelectedSection] = useState<WritingSection | "">("");
   const [loading, setLoading] = useState(false);
@@ -87,6 +112,14 @@ export default function GrantWriterPage() {
   return (
     <div className="p-6 space-y-6">
       <div>
+        {cameFromGrants && (
+          <Link
+            to="/grants"
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-1"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" /> Back to Grants Management
+          </Link>
+        )}
         <h1 className="text-2xl font-bold tracking-tight">Grant Writer</h1>
         <p className="text-sm text-muted-foreground">
           Brightside Foundation · AI-assisted grant writing using your real program data

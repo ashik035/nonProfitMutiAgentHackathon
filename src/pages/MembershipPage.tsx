@@ -6,12 +6,13 @@
  */
 
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import {
-  Users, UserCheck, UserX, Clock, Search, Mail, RefreshCw, Phone, Building2, Loader2,
+  Users, UserCheck, UserX, Clock, Search, Mail, RefreshCw, Phone, Building2, Loader2, Sparkles,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -117,14 +118,21 @@ export default function MembershipPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-          <Users className="h-6 w-6 text-primary" />
-          Membership Management
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Track members, manage renewals, and grow your membership base
-        </p>
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+            <Users className="h-6 w-6 text-primary" />
+            Membership Management
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Track members, manage renewals, and grow your membership base
+          </p>
+        </div>
+        <Button variant="outline" asChild>
+          <Link to="/engagement-scoring">
+            <Sparkles className="h-4 w-4 mr-2" /> Member Engagement
+          </Link>
+        </Button>
       </div>
 
       {/* KPI Cards */}

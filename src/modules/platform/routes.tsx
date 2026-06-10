@@ -5,7 +5,7 @@
  * notifications, and auth callbacks.
  * These are always available regardless of module configuration.
  */
-import { Route } from "react-router-dom";
+import { Navigate, Route } from "react-router-dom";
 import { ModuleRoute } from "@/components/routing/ModuleRoute";
 
 // Public pages
@@ -36,7 +36,7 @@ import PersonalKnowledge from "@/modules/knowledge/pages/PersonalKnowledge";
 import DataHealthPage from "@/pages/DataHealthPage";
 import DonorPipelinePage from "@/pages/DonorPipelinePage";
 import ReconciliationPage from "@/pages/ReconciliationPage";
-import EventsPage from "@/pages/EventsPage";
+import EventsHubPage from "@/pages/EventsHubPage";
 import GrantsPage from "@/pages/GrantsPage";
 import BoardReportsPage from "@/pages/BoardReportsPage";
 import AIAgentsPage from "@/pages/AIAgentsPage";
@@ -53,7 +53,6 @@ import VoiceNotesPage from "@/pages/VoiceNotesPage";
 import GrantWriterPage from "@/pages/GrantWriterPage";
 import MembershipPage from "@/pages/MembershipPage";
 import VolunteersPage from "@/pages/VolunteersPage";
-import EventManagementPage from "@/pages/EventManagementPage";
 import DonationCenterPage from "@/pages/DonationCenterPage";
 import PublicPresencePage from "@/pages/PublicPresencePage";
 import ImpactDashboardPage from "@/pages/ImpactDashboardPage";
@@ -104,7 +103,7 @@ export const coreProtectedRoutes = (
     <Route path="/data-health" element={<DataHealthPage />} />
     <Route path="/donor-pipeline" element={<DonorPipelinePage />} />
     <Route path="/reconciliation" element={<ReconciliationPage />} />
-    <Route path="/events" element={<EventsPage />} />
+    <Route path="/events" element={<EventsHubPage />} />
     <Route path="/grants" element={<GrantsPage />} />
     <Route path="/board-reports" element={<BoardReportsPage />} />
     <Route path="/ai-agents" element={<AIAgentsPage />} />
@@ -132,7 +131,7 @@ export const coreProtectedRoutes = (
     {/* Tier 1 new pages */}
     <Route path="/membership" element={<MembershipPage />} />
     <Route path="/volunteers" element={<VolunteersPage />} />
-    <Route path="/event-management" element={<EventManagementPage />} />
+    <Route path="/event-management" element={<Navigate to="/events?tab=manage" replace />} />
     <Route path="/donations" element={<DonationCenterPage />} />
     <Route path="/public-presence" element={<PublicPresencePage />} />
     <Route path="/impact-dashboard" element={<ImpactDashboardPage />} />

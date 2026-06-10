@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
-import { FileText, CheckCircle, ChevronDown, Loader2, Users, Copy, Download, Clock, ShieldCheck } from "lucide-react";
+import { FileText, CheckCircle, ChevronDown, Loader2, Users, Copy, Download, Clock, ShieldCheck, PenTool } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
@@ -88,6 +89,7 @@ function utilizationColor(pct: number) {
 }
 
 export default function GrantsPage() {
+  const navigate = useNavigate();
   const [grants, setGrants] = useState(INITIAL_GRANTS);
   const [drawerGrant, setDrawerGrant] = useState<Grant | null>(null);
   const [generating, setGenerating] = useState<string | null>(null);
@@ -159,7 +161,7 @@ export default function GrantsPage() {
   return (
     <div className="space-y-8 p-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Grants</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Grants Management</h1>
         <p className="text-sm text-muted-foreground">Brightside Foundation · Track grants, deadlines, and fund utilization</p>
       </div>
 
@@ -218,6 +220,17 @@ export default function GrantsPage() {
                 </Button>
                 <Button size="sm" variant="outline" onClick={() => handleGenerateCompliance(grant)}>
                   <ShieldCheck className="h-3.5 w-3.5 mr-1.5" /> Generate Compliance Summary
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() =>
+                    navigate(
+                      `/grant-writer?grant=${encodeURIComponent(grant.name)}&funder=${encodeURIComponent(grant.funder)}&amount=${grant.amount}&utilized=${grant.utilization}`
+                    )
+                  }
+                >
+                  <PenTool className="h-3.5 w-3.5 mr-1.5" /> Open in Grant Writer
                 </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

@@ -6,9 +6,10 @@
  */
 
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import {
-  Target, Users, Clock, DollarSign, TrendingUp, Sparkles, FileText, CheckCircle2,
+  Target, Users, Clock, DollarSign, TrendingUp, Sparkles, FileText, CheckCircle2, BarChart3,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -46,14 +47,21 @@ export default function ProgramsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-          <Target className="h-6 w-6 text-primary" />
-          Program Impact Tracker
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Track program outcomes, volunteer engagement, and budget utilization
-        </p>
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+            <Target className="h-6 w-6 text-primary" />
+            Program Impact Tracker
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Operational program management — track outcomes, log beneficiaries, and monitor budgets
+          </p>
+        </div>
+        <Button variant="outline" asChild>
+          <Link to="/impact-dashboard">
+            <BarChart3 className="h-4 w-4 mr-2" /> View Impact Dashboard
+          </Link>
+        </Button>
       </div>
 
       {/* KPI Cards */}

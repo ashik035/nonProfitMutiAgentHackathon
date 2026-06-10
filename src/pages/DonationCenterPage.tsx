@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/select";
 import { useCampaigns } from "@/hooks/useCampaigns";
 import { useDonations, useDonationStats, useCreateDonation, type DonationFrequency } from "@/hooks/useDonations";
+import { DonorProfileSheet } from "@/components/donors/DonorProfileSheet";
 import { toast } from "sonner";
 
 // ── Helpers ──────────────────────────────────────────────────────
@@ -62,6 +63,7 @@ type DonationForm = z.infer<typeof donationSchema>;
 
 export default function DonationCenterPage() {
   const [frequencyFilter, setFrequencyFilter] = useState<DonationFrequency | "All">("All");
+  const [profileDonor, setProfileDonor] = useState<string | null>(null);
 
   const { data: campaigns = [], isLoading: campaignsLoading } = useCampaigns();
   const { data: donations = [], isLoading: donationsLoading } = useDonations({
@@ -264,7 +266,17 @@ export default function DonationCenterPage() {
                     donations.map((donation) => (
                       <TableRow key={donation.id}>
                         <TableCell className="font-medium text-sm">
-                          {donation.is_anonymous ? "Anonymous" : donation.donor_name}
+                          {donation.is_anonymous ? (
+                            "Anonymous"
+                          ) : (
+                            <button
+                              className="hover:underline text-left"
+                              title="View unified donor profile"
+                              onClick={() => setProfileDonor(donation.donor_name)}
+                            >
+                              {donation.donor_name}
+                            </button>
+                          )}
                         </TableCell>
                         <TableCell className="text-sm font-semibold text-green-700 dark:text-green-400">
                           ${Number(donation.amount).toLocaleString()}
@@ -407,6 +419,9 @@ export default function DonationCenterPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Unified donor profile */}
+      <DonorProfileSheet donorName={profileDonor} onOpenChange={(open) => !open && setProfileDonor(null)} />
     </div>
   );
 }

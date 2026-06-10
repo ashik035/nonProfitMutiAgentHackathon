@@ -92,7 +92,7 @@ export const agentTeams: Record<string, AgentTeamDef> = {
           "Match or flag each item",
           "Export reconciliation report",
         ],
-        whereToFind: { label: "Reconciliation", path: "/reconciliation" },
+        whereToFind: { label: "Financial Reconciliation", path: "/reconciliation" },
       },
       {
         name: "Grant Compliance Agent",

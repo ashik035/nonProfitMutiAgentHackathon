@@ -543,7 +543,7 @@ export default function VoiceNotesPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Voice Notes</h1>
         <p className="text-sm text-muted-foreground">
-          Brightside Foundation · Record donor insights directly from your voice — no typing required
+          Brightside Foundation · Record donor insights directly from your voice — your notes are transcribed and processed by AI agents
         </p>
       </div>
 

@@ -135,18 +135,21 @@ Modules are the primary organizational unit. Defined in `src/shared/config/modul
 ### Nonprofit-Specific Pages (Static, no module gating)
 
 Pages marked **[live DB]** query real Supabase tables. The rest use demo data from `src/shared/data/nonprofitDemoData.ts`.
-- `/grants` — Grants Management
-- `/events` — Events (post-event intelligence)
+- `/grants` — Grants Management (links into Grant Writer via `?grant=` deep link)
+- `/events` — Events Hub: tabbed Manage (full lifecycle **[live DB → `nonprofit_events`, `nonprofit_event_registrants`]**) + Post-Event Intelligence; `/event-management` redirects to `/events?tab=manage`
 - `/board-reports` — Board Reports
 - `/data-health` — Data Health
-- `/reconciliation` — Reconciliation
+- `/reconciliation` — Financial Reconciliation
 - `/membership` — Membership Management **[live DB → `nonprofit_members`]**
 - `/volunteers` — Volunteer Management **[live DB → `nonprofit_volunteers`, `nonprofit_volunteer_shifts`]**
-- `/event-management` — Full Event Lifecycle **[live DB → `nonprofit_events`, `nonprofit_event_registrants`]**
 - `/donations` — Donation Center **[live DB → `nonprofit_campaigns`, `nonprofit_donations`]**
-- `/public-presence` — Public Presence / Website Layer
-- `/impact-dashboard` — Impact Dashboard (AI annual report via `ai-chat-assistant`)
-- `/engagement-scoring` — AI Engagement Scoring (AI next best action via `ai-chat-assistant`)
+- `/public-presence` — Public Presence / Website Layer (sidebar: Settings group)
+- `/impact-dashboard` — Impact Dashboard (read-only executive view; AI annual report via `ai-chat-assistant`)
+- `/engagement-scoring` — Member Engagement (members only; AI next best action via `ai-chat-assistant`; linked from Membership)
+
+Unified donor profile: `DonorProfileSheet` (`src/components/donors/`) aggregates pipeline stage, gifts, membership, engagement score, and outreach per donor (matched by name via `DEMO_DONOR_PROFILES`). Opens from Donor Pipeline, Donor Retention, Donation Center, and Communications.
+
+Sidebar groups (see `navigationStructure.ts`): Fundraising, Grants, People, Events, Reporting + AI, Intelligence, Settings (bottom).
 
 ### AI Agent Browse System
 

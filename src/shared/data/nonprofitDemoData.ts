@@ -1402,6 +1402,153 @@ export const DEMO_DONATION_STATS = {
   ],
 };
 
+// ─── Unified Donor Profiles ──────────────────────────────────────
+// Canonical donor registry that reconciles names appearing across the
+// Donor Pipeline, Donor Retention, Donation Center, Membership, and
+// Communications surfaces. Matched by donor name (interim contract until
+// a real donor entity exists — see docs/02-modules/ux-consolidation-spec.md).
+
+export type DonorSegment = "Major Gift" | "Mid-Level" | "Grassroots" | "Lapsed";
+
+export interface DonorOutreachEntry {
+  date: string;
+  channel: "Email" | "Phone" | "Meeting" | "Event" | "Mail";
+  summary: string;
+}
+
+export interface DemoDonorProfile {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  segment: DonorSegment;
+  engagementScore: number; // 0–100
+  nextBestAction: string;
+  pipelineStage?: string; // matches Donor Pipeline column titles
+  isMember: boolean;
+  memberTier?: MemberTier;
+  totalGiving: number;
+  lastGiftAmount: number;
+  lastGiftDate: string;
+  outreachHistory: DonorOutreachEntry[];
+}
+
+export const DEMO_DONOR_PROFILES: DemoDonorProfile[] = [
+  {
+    id: "dp-01", name: "Margaret Liu", email: "margaret.liu@email.com", phone: "(617) 555-0201",
+    segment: "Mid-Level", engagementScore: 82, nextBestAction: "Invite to volunteer appreciation dinner — combines her coding mentorship with upgrade conversation",
+    pipelineStage: "Identified", isMember: false, totalGiving: 8750, lastGiftAmount: 2500, lastGiftDate: "January 2026",
+    outreachHistory: [
+      { date: formatRelativeDate(subDays(NOW, 12)), channel: "Email", summary: "Spring newsletter — opened, clicked impact story" },
+      { date: formatRelativeDate(subDays(NOW, 40)), channel: "Event", summary: "Attended Tech for Good gala" },
+    ],
+  },
+  {
+    id: "dp-02", name: "Robert Kim", email: "r.kim@email.com", segment: "Mid-Level",
+    engagementScore: 44, nextBestAction: "Re-engage: no gift in 275 days — pair workforce development ask with board update",
+    pipelineStage: "Identified", isMember: true, memberTier: "Board", totalGiving: 5400, lastGiftAmount: 500, lastGiftDate: "December 2025",
+    outreachHistory: [
+      { date: formatRelativeDate(subDays(NOW, 10)), channel: "Email", summary: "LYBUNT re-engagement campaign — not yet opened" },
+      { date: formatRelativeDate(subDays(NOW, 90)), channel: "Meeting", summary: "Board finance committee meeting" },
+    ],
+  },
+  {
+    id: "dp-03", name: "Patricia Osei", email: "p.osei@email.com", phone: "(617) 555-0203",
+    segment: "Major Gift", engagementScore: 38, nextBestAction: "Priority call from ED — major donor at risk, 290 days since last gift",
+    pipelineStage: "Identified", isMember: false, totalGiving: 12800, lastGiftAmount: 1000, lastGiftDate: "February 2026",
+    outreachHistory: [
+      { date: formatRelativeDate(subDays(NOW, 8)), channel: "Phone", summary: "Left voicemail re: after-school tutoring expansion" },
+      { date: formatRelativeDate(subDays(NOW, 120)), channel: "Event", summary: "Spring Gala host committee" },
+    ],
+  },
+  {
+    id: "dp-04", name: "David Chen", email: "david.chen@email.com", segment: "Mid-Level",
+    engagementScore: 76, nextBestAction: "Send planned giving brochure — expressed interest at last event",
+    pipelineStage: "Outreach Scheduled", isMember: false, totalGiving: 6300, lastGiftAmount: 750, lastGiftDate: formatRelativeDate(subDays(NOW, 5)),
+    outreachHistory: [
+      { date: formatRelativeDate(subDays(NOW, 2)), channel: "Email", summary: "Thank-you pending for $500 gift" },
+      { date: formatRelativeDate(subDays(NOW, 30)), channel: "Event", summary: "Attended Fall Fundraiser" },
+    ],
+  },
+  {
+    id: "dp-05", name: "Susan Park", email: "susan.park@email.com", phone: "(617) 555-0205",
+    segment: "Major Gift", engagementScore: 88, nextBestAction: "Present scholarship fund naming proposal at Apr 12 meeting",
+    pipelineStage: "Outreach Scheduled", isMember: false, totalGiving: 18000, lastGiftAmount: 4500, lastGiftDate: "March 2026",
+    outreachHistory: [
+      { date: formatRelativeDate(subDays(NOW, 6)), channel: "Phone", summary: "Confirmed Apr 12 meeting — bring scholarship fund materials" },
+      { date: formatRelativeDate(subDays(NOW, 45)), channel: "Event", summary: "Summer Camp sponsor site visit" },
+    ],
+  },
+  {
+    id: "dp-06", name: "Jennifer Walsh", email: "j.walsh@lawfirm.com", phone: "(617) 555-0112",
+    segment: "Mid-Level", engagementScore: 91, nextBestAction: "Draft naming gift proposal for Eleanor Walsh Memorial youth room",
+    pipelineStage: "In Conversation", isMember: true, memberTier: "Professional", totalGiving: 7350, lastGiftAmount: 250, lastGiftDate: formatRelativeDate(subDays(NOW, 7)),
+    outreachHistory: [
+      { date: formatRelativeDate(subDays(NOW, 5)), channel: "Meeting", summary: "Discussed naming opportunity for youth programs room" },
+      { date: formatRelativeDate(subDays(NOW, 60)), channel: "Event", summary: "Attended Spring Gala" },
+    ],
+  },
+  {
+    id: "dp-07", name: "Mark Abrams", email: "mark.abrams@email.com", segment: "Major Gift",
+    engagementScore: 85, nextBestAction: "Prepare capital campaign one-pager for Apr 15 ED meeting",
+    pipelineStage: "In Conversation", isMember: false, totalGiving: 15200, lastGiftAmount: 3800, lastGiftDate: "January 2026",
+    outreachHistory: [
+      { date: formatRelativeDate(subDays(NOW, 7)), channel: "Phone", summary: "Confirmed Apr 15 meeting with ED re: community center wing" },
+      { date: formatRelativeDate(subDays(NOW, 70)), channel: "Event", summary: "Hosted site tour for potential donors" },
+    ],
+  },
+  {
+    id: "dp-08", name: "Thomas Rivera", email: "t.rivera@email.com", segment: "Mid-Level",
+    engagementScore: 79, nextBestAction: "Send pledge fulfillment reminder + grandchildren program update",
+    pipelineStage: "Pledge Made", isMember: true, memberTier: "Professional", totalGiving: 12500, lastGiftAmount: 300, lastGiftDate: formatRelativeDate(subDays(NOW, 10)),
+    outreachHistory: [
+      { date: formatRelativeDate(subDays(NOW, 9)), channel: "Mail", summary: "$5,000 pledge confirmation letter sent" },
+      { date: formatRelativeDate(subDays(NOW, 50)), channel: "Meeting", summary: "Reading tutor volunteer check-in" },
+    ],
+  },
+  {
+    id: "dp-09", name: "Carol Nguyen", email: "carol.nguyen@email.com", segment: "Lapsed",
+    engagementScore: 35, nextBestAction: "Re-engage: 380 days lapsed despite recent upgrade record — verify CRM data conflict",
+    pipelineStage: "Upgraded ✓", isMember: false, totalGiving: 4900, lastGiftAmount: 75, lastGiftDate: formatRelativeDate(subDays(NOW, 15)),
+    outreachHistory: [
+      { date: formatRelativeDate(subDays(NOW, 13)), channel: "Email", summary: "Monthly giving receipt" },
+      { date: formatRelativeDate(subDays(NOW, 100)), channel: "Event", summary: "Tech Career Day speaker" },
+    ],
+  },
+  {
+    id: "dp-10", name: "Sarah Mitchell", email: "s.mitchell@brightsideboard.org", phone: "(617) 555-0118",
+    segment: "Major Gift", engagementScore: 94, nextBestAction: "Thank-you pending for $2,500 gift — send within 48 hours",
+    isMember: true, memberTier: "Board", totalGiving: 24500, lastGiftAmount: 2500, lastGiftDate: formatRelativeDate(subDays(NOW, 1)),
+    outreachHistory: [
+      { date: formatRelativeDate(subDays(NOW, 1)), channel: "Email", summary: "Gift receipt sent — thank-you letter queued" },
+      { date: formatRelativeDate(subDays(NOW, 20)), channel: "Meeting", summary: "Board fundraising committee" },
+    ],
+  },
+  {
+    id: "dp-11", name: "Patricia Lee", email: "p.lee@brightsideboard.org", phone: "(617) 555-0116",
+    segment: "Major Gift", engagementScore: 90, nextBestAction: "Schedule endowment legacy conversation — strong affinity for youth mentorship",
+    isMember: true, memberTier: "Board", totalGiving: 31000, lastGiftAmount: 5000, lastGiftDate: formatRelativeDate(subDays(NOW, 3)),
+    outreachHistory: [
+      { date: formatRelativeDate(subDays(NOW, 3)), channel: "Mail", summary: "$5,000 endowment gift acknowledged" },
+      { date: formatRelativeDate(subDays(NOW, 30)), channel: "Meeting", summary: "Strategic planning session" },
+    ],
+  },
+  {
+    id: "dp-12", name: "Kevin Park", email: "kevin.park@kpmg.com", segment: "Mid-Level",
+    engagementScore: 72, nextBestAction: "Invite to finance committee — professional member with annual giving pattern",
+    isMember: true, memberTier: "Professional", totalGiving: 4200, lastGiftAmount: 1000, lastGiftDate: formatRelativeDate(subDays(NOW, 8)),
+    outreachHistory: [
+      { date: formatRelativeDate(subDays(NOW, 8)), channel: "Email", summary: "Annual gift receipt + audit committee interest noted" },
+    ],
+  },
+];
+
+export function findDonorProfile(name: string | null | undefined): DemoDonorProfile | undefined {
+  if (!name) return undefined;
+  const normalized = name.trim().toLowerCase();
+  return DEMO_DONOR_PROFILES.find((p) => p.name.toLowerCase() === normalized);
+}
+
 // ─── Public Presence ──────────────────────────────────────────────
 
 export interface PublicVisibilityConfig {

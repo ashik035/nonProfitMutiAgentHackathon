@@ -1,10 +1,8 @@
 /**
- * Event Management — /event-management
+ * Event Lifecycle Tab — "Manage" tab of /events
  *
  * Full event lifecycle management: create events, manage registrations,
  * track capacity, view agendas and speakers.
- *
- * NOTE: This is separate from /events (post-event intelligence). Do not modify EventsPage.tsx.
  * Backed by Supabase nonprofit_events + nonprofit_event_registrants tables.
  */
 
@@ -12,9 +10,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { toast } from "sonner";
 import {
-  CalendarPlus, Calendar, MapPin, Users, Plus, Eye, ClipboardList, CheckCircle2, DollarSign, Loader2, Mic2, Clock, Ticket,
+  CalendarPlus, Calendar, MapPin, Users, Plus, Eye, ClipboardList, CheckCircle2, DollarSign, Loader2, Mic2, Clock, Ticket, ArrowRight,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -287,7 +284,12 @@ function EventDetailSheet({
 
 // ── Component ─────────────────────────────────────────────────────
 
-export default function EventManagementPage() {
+export function EventLifecycleTab({
+  onViewPostEvent,
+}: {
+  /** Switches the events hub to the Post-Event Intelligence tab */
+  onViewPostEvent?: () => void;
+}) {
   const { user } = useAuth();
   const [statusFilter, setStatusFilter] = useState<ManagedEventStatus | "All">("All");
   const [detailEvent, setDetailEvent] = useState<NonprofitEvent | null>(null);
@@ -324,39 +326,28 @@ export default function EventManagementPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <CalendarPlus className="h-6 w-6 text-primary" />
-            Event Management
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Create and manage your full event lifecycle
-          </p>
+      {/* Toolbar: status filter pills + create */}
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex gap-2 flex-wrap">
+          {statusFilters.map((filter) => (
+            <Button
+              key={filter}
+              size="sm"
+              variant={statusFilter === filter ? "default" : "outline"}
+              onClick={() => setStatusFilter(filter)}
+            >
+              {filter}
+              {filter !== "All" && (
+                <span className="ml-1.5 text-xs opacity-70">
+                  ({allEvents.filter((e) => e.status === filter).length})
+                </span>
+              )}
+            </Button>
+          ))}
         </div>
         <Button onClick={() => setCreateOpen(true)}>
           <Plus className="h-4 w-4 mr-2" /> New Event
         </Button>
-      </div>
-
-      {/* Status filter pills */}
-      <div className="flex gap-2 flex-wrap">
-        {statusFilters.map((filter) => (
-          <Button
-            key={filter}
-            size="sm"
-            variant={statusFilter === filter ? "default" : "outline"}
-            onClick={() => setStatusFilter(filter)}
-          >
-            {filter}
-            {filter !== "All" && (
-              <span className="ml-1.5 text-xs opacity-70">
-                ({allEvents.filter((e) => e.status === filter).length})
-              </span>
-            )}
-          </Button>
-        ))}
       </div>
 
       {/* Event list */}
@@ -404,6 +395,17 @@ export default function EventManagementPage() {
                           <DollarSign className="h-3.5 w-3.5" />
                           {Number(event.fund_raised).toLocaleString()} raised
                         </p>
+                      )}
+
+                      {event.status === "Past" && onViewPostEvent && (
+                        <Button
+                          variant="link"
+                          size="sm"
+                          className="px-0 h-auto mt-2 text-sm"
+                          onClick={onViewPostEvent}
+                        >
+                          View follow-up intelligence <ArrowRight className="h-3.5 w-3.5 ml-1" />
+                        </Button>
                       )}
                     </div>
 

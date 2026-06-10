@@ -89,7 +89,7 @@ export default function ReconciliationPage() {
   return (
     <div className="space-y-8 p-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Reconciliation</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Financial Reconciliation</h1>
         <p className="text-sm text-muted-foreground">Brightside Foundation · Stripe ↔ Salesforce transaction matching</p>
       </div>
 

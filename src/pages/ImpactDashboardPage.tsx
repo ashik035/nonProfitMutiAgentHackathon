@@ -7,6 +7,7 @@
  */
 
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import {
   BarChart3, Users, Clock, DollarSign, Heart, Sparkles, Download,
@@ -181,12 +182,24 @@ This year, Brightside Foundation reached more community members than ever before
             Impact Dashboard
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Track program outcomes, measure community impact, and generate funder-ready reports
+            Executive presentation layer — read-only impact summary, milestones, and AI annual report
           </p>
         </div>
         <Badge variant="outline" className="text-green-700 border-green-200 bg-green-50">
           <Globe className="h-3 w-3 mr-1" /> Public-Facing
         </Badge>
+      </div>
+
+      {/* Read-only banner */}
+      <div className="rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/30 dark:border-blue-800 px-4 py-2.5 flex items-center justify-between gap-3 flex-wrap">
+        <p className="text-sm text-blue-800 dark:text-blue-300">
+          Read-only executive view — program data is managed in the Program Impact Tracker.
+        </p>
+        <Button variant="outline" size="sm" asChild>
+          <Link to="/programs">
+            <Target className="h-3.5 w-3.5 mr-1.5" /> Manage Programs
+          </Link>
+        </Button>
       </div>
 
       {/* KPI Grid */}

@@ -1,3 +1,10 @@
+/**
+ * Post-Event Intelligence Tab — "Post-Event" tab of /events
+ *
+ * Post-event engagement intelligence: attendee follow-up, AI-drafted emails,
+ * bulk task creation, and the Event Intelligence AI panel.
+ */
+
 import { useState, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -97,9 +104,9 @@ function followUpBadge(status: Attendee["followUp"]) {
   }
 }
 
-/* ── Page Component ── */
+/* ── Component ── */
 
-export default function EventsPage() {
+export function PostEventIntelligenceTab() {
   // Attendee dialog
   const [attendeeEvent, setAttendeeEvent] = useState<EventData | null>(null);
   const [attendeesState, setAttendeesState] = useState<Record<string, Attendee[]>>({
@@ -236,12 +243,7 @@ export default function EventsPage() {
   };
 
   return (
-    <div className="space-y-8 p-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Events</h1>
-        <p className="text-sm text-muted-foreground">Brightside Foundation · Post-event engagement intelligence</p>
-      </div>
-
+    <div className="space-y-8">
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[

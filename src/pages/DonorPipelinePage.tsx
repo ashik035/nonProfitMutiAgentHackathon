@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ChevronDown, Loader2, DollarSign, TrendingUp, Clock, Users, Mic, FileText, Copy, Download, Paperclip, Edit3 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { DonorProfileSheet } from "@/components/donors/DonorProfileSheet";
 
 interface Donor {
   id: string;
@@ -133,6 +134,7 @@ export default function DonorPipelinePage() {
   const [pledgeModal, setPledgeModal] = useState<Donor | null>(null);
   const [giftModal, setGiftModal] = useState<Donor | null>(null);
   const [profileDrawer, setProfileDrawer] = useState<Donor | null>(null);
+  const [unifiedProfileDonor, setUnifiedProfileDonor] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   // Letter generation state
@@ -279,7 +281,13 @@ export default function DonorPipelinePage() {
             {(donors[col.id] || []).map((donor) => (
               <Card key={donor.id} className={`${col.color} border shadow-sm`}>
                 <CardContent className="p-3 space-y-2">
-                  <p className="font-medium text-sm">{donor.name}</p>
+                  <button
+                    className="font-medium text-sm hover:underline text-left"
+                    title="View unified donor profile"
+                    onClick={() => setUnifiedProfileDonor(donor.name)}
+                  >
+                    {donor.name}
+                  </button>
                   <p className="text-xs text-muted-foreground">{donor.currentGiving} → {donor.targetGiving}</p>
                   {donor.assignedTo && <p className="text-[11px] text-muted-foreground">Assigned: {donor.assignedTo}</p>}
                   {donor.outreachDate && <p className="text-[11px] text-muted-foreground">Outreach: {donor.outreachDate}</p>}
@@ -466,6 +474,9 @@ export default function DonorPipelinePage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Unified donor profile */}
+      <DonorProfileSheet donorName={unifiedProfileDonor} onOpenChange={(open) => !open && setUnifiedProfileDonor(null)} />
 
       {/* Profile Drawer */}
       <Sheet open={!!profileDrawer} onOpenChange={() => { setProfileDrawer(null); resetLetterState(); }}>

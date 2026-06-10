@@ -1,6 +1,6 @@
 /**
  * useNonprofitEvents — Event lifecycle management hooks.
- * Replaces DEMO_MANAGED_EVENTS in EventManagementPage.
+ * Replaces DEMO_MANAGED_EVENTS in the Events hub (EventLifecycleTab).
  * NOTE: Uses "nonprofit_events" table, separate from "events" table (post-event intelligence).
  */
 

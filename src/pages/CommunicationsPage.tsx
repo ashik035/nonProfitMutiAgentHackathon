@@ -23,11 +23,13 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { DEMO_COMMUNICATIONS, type ThankYouItem } from "@/shared/data/nonprofitDemoData";
+import { DonorProfileSheet } from "@/components/donors/DonorProfileSheet";
 
 export default function CommunicationsPage() {
   const [selectedSegment, setSelectedSegment] = useState("All Donors");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
+  const [profileDonor, setProfileDonor] = useState<string | null>(null);
   const [thankYouItems, setThankYouItems] = useState<ThankYouItem[]>(DEMO_COMMUNICATIONS.thankYouQueue);
   const data = DEMO_COMMUNICATIONS;
 
@@ -209,7 +211,15 @@ export default function CommunicationsPage() {
                 <TableBody>
                   {thankYouItems.map((item) => (
                     <TableRow key={item.id}>
-                      <TableCell className="font-medium">{item.donorName}</TableCell>
+                      <TableCell className="font-medium">
+                        <button
+                          className="hover:underline text-left"
+                          title="View unified donor profile"
+                          onClick={() => setProfileDonor(item.donorName)}
+                        >
+                          {item.donorName}
+                        </button>
+                      </TableCell>
                       <TableCell className="text-right">${item.donationAmount.toLocaleString()}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{item.donationDate}</TableCell>
                       <TableCell>
@@ -240,6 +250,9 @@ export default function CommunicationsPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Unified donor profile */}
+      <DonorProfileSheet donorName={profileDonor} onOpenChange={(open) => !open && setProfileDonor(null)} />
     </div>
   );
 }
