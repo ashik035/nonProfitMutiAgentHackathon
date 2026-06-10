@@ -61,38 +61,38 @@ export default function AgentDetail() {
       </Button>
 
       {/* Hero */}
-      <Card className="overflow-hidden rounded-2xl border border-border">
-        {/* Gradient banner */}
+      <Card className="overflow-hidden rounded-2xl border border-border shadow-sm">
         <div
-          className="h-36 sm:h-44 relative overflow-hidden"
+          className="h-[132px] sm:h-[148px] relative"
           style={{
-            background: `linear-gradient(135deg, hsl(${team.gradientFrom}), hsl(${team.gradientTo}))`,
+            background: `linear-gradient(90deg, hsl(${team.gradientFrom}), hsl(${team.gradientTo}))`,
           }}
         >
           <div
-            className="absolute w-32 h-32 rounded-full top-4 right-12 opacity-10"
+            className="absolute -left-6 top-2 h-32 w-32 rounded-full opacity-20"
             style={{ background: "white" }}
           />
           <div
-            className="absolute w-20 h-20 rounded-full bottom-2 right-36 opacity-20"
+            className="absolute right-12 top-4 h-24 w-24 rounded-full opacity-15"
             style={{ background: "white" }}
           />
         </div>
 
-        <div className="px-6 pb-6">
-          {/* Icon overlay */}
+        <div className="bg-card px-6 pb-6">
+          {/* Icon overlapping the banner, left aligned */}
           <div
-            className="w-20 h-20 rounded-2xl flex items-center justify-center -mt-10 ring-4 ring-background shadow-lg"
+            className="relative z-20 -mt-6 w-[72px] h-[72px] rounded-2xl flex items-center justify-center ring-4 ring-background shadow-lg"
             style={{
               background: `linear-gradient(135deg, hsl(${team.gradientFrom}), hsl(${team.gradientTo}))`,
             }}
           >
-            <Icon className="h-9 w-9 text-white" />
+            <Icon className="h-8 w-8 text-white" />
           </div>
 
-          <div className="mt-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-            <div className="space-y-2">
-              <h1 className="text-3xl font-bold text-foreground">{agent.name}</h1>
+          {/* Title block below the icon, CTA on the right */}
+          <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="space-y-2 min-w-0">
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{agent.name}</h1>
               <Badge variant="secondary" className="text-xs">
                 <Sparkles className="h-3 w-3 mr-1" />
                 Part of {team.name}
@@ -104,7 +104,7 @@ export default function AgentDetail() {
 
             {agent.whereToFind && (
               <Button
-                className="hidden sm:flex gap-2 shrink-0"
+                className="hidden sm:flex gap-2 shrink-0 shadow-sm"
                 onClick={() => navigate(agent.whereToFind!.path)}
                 style={{
                   background: `linear-gradient(135deg, hsl(${team.gradientFrom}), hsl(${team.gradientTo}))`,
@@ -119,7 +119,7 @@ export default function AgentDetail() {
           {/* Mobile CTA */}
           {agent.whereToFind && (
             <Button
-              className="w-full mt-4 sm:hidden gap-2"
+              className="w-full mt-4 sm:hidden gap-2 shadow-sm"
               onClick={() => navigate(agent.whereToFind!.path)}
               style={{
                 background: `linear-gradient(135deg, hsl(${team.gradientFrom}), hsl(${team.gradientTo}))`,

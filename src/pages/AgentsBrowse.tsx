@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { icons, Sparkles, Bot, Clock, Play, Loader2, Eye } from "lucide-react";
 import { toast } from "sonner";
 
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -108,9 +108,9 @@ function BrowseSkeleton() {
         <Skeleton className="h-4 w-64" />
       </div>
       <Skeleton className="h-12 w-full rounded-xl" />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         {[1, 2, 3, 4, 5].map((i) => (
-          <Skeleton key={i} className="h-44 rounded-2xl" />
+          <Skeleton key={i} className="h-72 rounded-xl" />
         ))}
       </div>
     </div>
@@ -154,44 +154,42 @@ function AgentBrowseCard({
   };
 
   return (
-    <Card className="overflow-hidden rounded-2xl border border-border transition-all duration-300 hover:shadow-xl">
+    <Card className="overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all duration-300 hover:shadow-md flex flex-col h-full min-w-0">
+      {/* Gradient header + overlapping icon */}
       <div
-        className="h-20 relative"
+        className="h-24 shrink-0 relative z-0"
         style={{
-          background: `linear-gradient(135deg, hsl(${gradientFrom}), hsl(${gradientTo}))`,
+          background: `linear-gradient(90deg, hsl(${gradientFrom}), hsl(${gradientTo}))`,
         }}
       >
         <Badge
-          className={cn("absolute top-3 right-3 text-[10px] px-2 py-0.5 font-medium border-0", cat.badge)}
+          className={cn(
+            "absolute top-3 right-3 text-[10px] px-2 py-0.5 font-medium border-0 z-10",
+            cat.badge
+          )}
         >
           Core Ops
         </Badge>
-      </div>
-
-      <div className="px-5 pt-0 pb-5">
-        <div
-          className="w-14 h-14 rounded-2xl flex items-center justify-center -mt-7 ring-4 ring-background shadow-lg"
-          style={{
-            background: `linear-gradient(135deg, hsl(${gradientFrom}), hsl(${gradientTo}))`,
-          }}
-        >
+        <div className="absolute -bottom-7 left-4 z-20 w-14 h-14 rounded-full flex items-center justify-center bg-slate-900 ring-4 ring-background shadow-md">
           <Icon className="h-6 w-6 text-white" />
         </div>
+      </div>
 
-        <div className="mt-3 space-y-1">
-          <div className="flex items-center gap-2">
-            <h4 className="text-base font-semibold text-foreground leading-tight">{agent.name}</h4>
-            <ActivePulse />
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-green-600 border-green-200 bg-green-50 dark:bg-green-950/20">
-              Active
-            </Badge>
-            <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
-              <Clock className="h-3 w-3" />
-              Last run: {displayLastRun}
-            </span>
-          </div>
+      <div className="px-4 pb-4 pt-9 flex flex-col flex-1 min-w-0">
+        {/* Title row */}
+        <div className="flex items-center gap-2 min-w-0">
+          <h4 className="text-sm font-semibold text-foreground leading-tight line-clamp-2">{agent.name}</h4>
+          <ActivePulse />
+        </div>
+
+        <div className="flex items-center gap-2 mt-1.5">
+          <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-green-600 border-green-200 bg-green-50 dark:bg-green-950/20">
+            Active
+          </Badge>
+          <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+            <Clock className="h-3 w-3" />
+            Last run: {displayLastRun}
+          </span>
         </div>
 
         {hasOperational ? (
@@ -204,7 +202,7 @@ function AgentBrowseCard({
           </p>
         )}
 
-        <div className="flex items-center gap-2 mt-3 text-[11px] text-muted-foreground">
+        <div className="flex items-center gap-2 mt-3 text-[11px] text-muted-foreground flex-wrap">
           {displayFindings > 0 && (
             <Badge
               variant="secondary"
@@ -218,31 +216,31 @@ function AgentBrowseCard({
           )}
         </div>
 
-        <div className="flex gap-2 mt-4">
+        <div className="flex gap-1.5 mt-auto pt-3 min-w-0">
           <Button
             size="sm"
-            className="flex-1 gap-1.5"
+            className="flex-1 min-w-0 h-8 px-2 text-xs gap-1"
             onClick={(e) => {
               e.stopPropagation();
               navigate(`/agents/${agent.slug}`);
             }}
           >
-            <Eye className="h-3.5 w-3.5" />
-            View Findings
+            <Eye className="h-3 w-3 shrink-0" />
+            <span className="truncate">View Findings</span>
           </Button>
           <Button
             size="sm"
             variant="outline"
-            className="gap-1.5"
+            className="flex-1 min-w-0 h-8 px-2 text-xs gap-1"
             onClick={handleRunNow}
             disabled={running}
           >
             {running ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              <Loader2 className="h-3 w-3 shrink-0 animate-spin" />
             ) : (
-              <Play className="h-3.5 w-3.5" />
+              <Play className="h-3 w-3 shrink-0" />
             )}
-            {running ? "Running…" : "Run Now"}
+            <span className="truncate">{running ? "Running…" : "Run Now"}</span>
           </Button>
         </div>
       </div>
@@ -288,7 +286,7 @@ export default function AgentsBrowse() {
 
       <ActivityBanner />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {visibleAgents.map((agent) => (
           <AgentBrowseCard
             key={agent.slug}
