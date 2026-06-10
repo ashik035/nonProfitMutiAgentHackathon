@@ -115,7 +115,7 @@ Most pages use centralized demo data from `src/shared/data/nonprofitDemoData.ts`
 | **Communication Center** | `/communications` | Demo | Donor and board outreach drafts, templates, AI-assisted copy |
 | **Membership Management** | `/membership` | **[live DB]** | Member directory, tier/status management, renewals, onboarding form → `nonprofit_members` |
 | **Volunteer Management** | `/volunteers` | **[live DB]** | Volunteer roster, shift tracking, skills, donor crossover, economic value → `nonprofit_volunteers`, `nonprofit_volunteer_shifts` |
-| **Event Management** | `/event-management` | **[live DB]** | Full event lifecycle: create, capacity, registrations, check-in → `nonprofit_events`, `nonprofit_event_registrants` |
+| **Event Management** | `/event-management` | **[live DB]** | Full event lifecycle: create, capacity, registrations, check-in, plus `EventDetailSheet` deep-dive showing speakers, agenda timeline, and ticket-tier breakdown with revenue calc (`fund_raised + Σ ticket.price × sold`) → `nonprofit_events`, `nonprofit_event_registrants`, `nonprofit_event_speakers`, `nonprofit_event_agenda_items`, `nonprofit_event_ticket_types` |
 | **Donation Center** | `/donations` | **[live DB]** | Campaign management, donation history, fund breakdown, record donation → `nonprofit_campaigns`, `nonprofit_donations` |
 | **Public Presence** | `/public-presence` | Demo | Visibility toggles, embed codes, social sharing, website layer controls |
 | **Impact Dashboard** | `/impact-dashboard` | Demo | Program outcomes, milestones, AI-drafted annual report |
@@ -264,4 +264,14 @@ Checklist to rebrand/repurpose:
 
 ---
 
-_Last updated: May 24, 2026_
+## Recent Updates (post-v0.2.0)
+
+- **Event sub-entities live**: speakers (`nonprofit_event_speakers`), agenda items (`nonprofit_event_agenda_items`), ticket types (`nonprofit_event_ticket_types`) — all RLS-enabled
+- **New hooks** in `src/hooks/useNonprofitEvents.ts`: `useEventSpeakers`, `useEventAgendaItems`, `useEventTicketTypes`
+- **New cache keys**: `queryKeys.nonprofit.events.speakers / agenda / ticketTypes`
+- **EventDetailSheet** component on `/event-management` — slide-over with speakers list, agenda timeline (Clock icon), and ticket-tier revenue breakdown (Ticket icon)
+- **Campaign ↔ donation sync**: `useCreateCampaign` and `useUpdateCampaign` now invalidate `nonprofitDonations` queries to keep counts consistent
+
+---
+
+_Last updated: June 10, 2026_
