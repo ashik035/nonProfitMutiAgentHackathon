@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle, FileDown, MessageSquare, Clock, BarChart3, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { format, subDays, subHours } from "date-fns";
+import { boardReportPdfFilename, downloadBoardReportPdf } from "@/lib/boardReportPdf";
 
 const NOW = new Date();
 const currentQuarter = `Q${Math.ceil((NOW.getMonth() + 1) / 3)} ${NOW.getFullYear()}`;
@@ -47,11 +48,16 @@ export default function BoardReportingDetail() {
 
   const handleExport = () => {
     setExporting(true);
-    toast("Preparing PDF...", { icon: "📄" });
-    setTimeout(() => {
+    try {
+      downloadBoardReportPdf(true);
+      toast.success("Board report downloaded", {
+        description: `${boardReportPdfFilename()} — check your downloads folder.`,
+      });
+    } catch {
+      toast.error("Failed to generate PDF");
+    } finally {
       setExporting(false);
-      toast.success("Board report ready to download");
-    }, 2000);
+    }
   };
 
   const pendingCount = kpis.filter((k) => k.status === "needs_approval").length;

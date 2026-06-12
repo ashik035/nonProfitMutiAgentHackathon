@@ -291,6 +291,8 @@ export interface FinancialSnapshotItem {
 
 const currentQuarter = `Q${Math.ceil((NOW.getMonth() + 1) / 3)} ${NOW.getFullYear()}`;
 
+export const ORG_NAME = "Brightside Foundation";
+
 export const DEMO_BOARD_REPORT = {
   status: "Draft Ready",
   generatedDate: formatRelativeDate(NOW),
@@ -310,6 +312,59 @@ export const DEMO_BOARD_REPORT = {
     { label: "Program Fees", amount: 24000, change: 8 },
     { label: "Operating Expenses", amount: 210000, change: 5 },
   ] satisfies FinancialSnapshotItem[],
+};
+
+export interface BoardReportFinancialRow {
+  metric: string;
+  target: string;
+  actual: string;
+  variance: number;
+}
+
+export interface BoardReportDonorMetric {
+  label: string;
+  value: string;
+  detail?: string;
+}
+
+export interface BoardReportGrantRow {
+  grant: string;
+  funder: string;
+  amount: string;
+  status: string;
+  utilization: number;
+}
+
+export interface BoardReportDataHealthItem {
+  label: string;
+  value: string;
+}
+
+export const DEMO_BOARD_REPORT_SECTIONS = {
+  executiveSummary: `${ORG_NAME} closed ${currentQuarter} with $487,000 in revenue against a $510,000 target (95%). Major gift activity increased 18% year-over-year. Two grant reports are due in the next 30 days.`,
+  financialRows: [
+    { metric: "Total Revenue", target: "$510,000", actual: "$487,000", variance: -4.5 },
+    { metric: "Major Gifts", target: "$210,000", actual: "$248,000", variance: 18.1 },
+    { metric: "Events Revenue", target: "$160,000", actual: "$142,000", variance: -11.3 },
+    { metric: "Foundation Grants", target: "$140,000", actual: "$97,000", variance: -30.7 },
+  ] satisfies BoardReportFinancialRow[],
+  donorMetrics: [
+    { label: "Active Donors", value: "1,847", detail: "↑ 23 vs prior quarter" },
+    { label: "New Donors Acquired", value: "94" },
+    { label: "Lapsed Donors Recovered", value: "12" },
+    { label: "Mid-Level Upgrades in Pipeline", value: "8" },
+  ] satisfies BoardReportDonorMetric[],
+  grantRows: [
+    { grant: "Community Health Initiative", funder: "Kresge Foundation", amount: "$185,000", status: "Report due Apr 16", utilization: 61 },
+    { grant: "Youth Programs", funder: "Robert Wood Johnson", amount: "$95,000", status: "On track", utilization: 88 },
+    { grant: "Technology Access", funder: "Gates Foundation", amount: "$125,000", status: "Active", utilization: 44 },
+    { grant: "Housing Support", funder: "Local Community Foundation", amount: "$92,000", status: "Active", utilization: 71 },
+  ] satisfies BoardReportGrantRow[],
+  dataHealth: [
+    { label: "Data Health Score", value: "82%" },
+    { label: `Duplicates Resolved (${currentQuarter})`, value: "7" },
+    { label: "Records Updated by AI", value: "143" },
+  ] satisfies BoardReportDataHealthItem[],
 };
 
 // ─── AI Agents ──────────────────────────────────────────────────

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Download, RefreshCw, Send, Loader2, FileText, CheckCircle, X } from "lucide-react";
+import { Download, RefreshCw, Send, Loader2, FileText, CheckCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,20 +23,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  DEMO_BOARD_REPORT,
+  DEMO_BOARD_REPORT_SECTIONS,
+  DEMO_AGENT_ACTIVITY,
+  ORG_NAME,
+} from "@/shared/data/nonprofitDemoData";
+import { boardReportPdfFilename, downloadBoardReportPdf } from "@/lib/boardReportPdf";
 
-const FINANCIAL_ROWS = [
-  { metric: "Total Revenue", target: "$510,000", actual: "$487,000", variance: -4.5 },
-  { metric: "Major Gifts", target: "$210,000", actual: "$248,000", variance: 18.1 },
-  { metric: "Events Revenue", target: "$160,000", actual: "$142,000", variance: -11.3 },
-  { metric: "Foundation Grants", target: "$140,000", actual: "$97,000", variance: -30.7 },
-];
-
-const GRANT_ROWS = [
-  { grant: "Community Health Initiative", funder: "Kresge Foundation", amount: "$185,000", status: "Report due Apr 16", utilization: 61 },
-  { grant: "Youth Programs", funder: "Robert Wood Johnson", amount: "$95,000", status: "On track", utilization: 88 },
-  { grant: "Technology Access", funder: "Gates Foundation", amount: "$125,000", status: "Active", utilization: 44 },
-  { grant: "Housing Support", funder: "Local Community Foundation", amount: "$92,000", status: "Active", utilization: 71 },
-];
+const { quarter } = DEMO_BOARD_REPORT;
+const sections = DEMO_BOARD_REPORT_SECTIONS;
+const boardAgentActivity = DEMO_AGENT_ACTIVITY.filter((run) => run.agentSlug === "board-reporting");
 
 function PageSkeleton() {
   return (
@@ -64,34 +61,33 @@ export default function BoardReportsPage() {
   const [reviewModal, setReviewModal] = useState(false);
   const [draftGenerating, setDraftGenerating] = useState(false);
   const [reviewEmail, setReviewEmail] = useState("executive@brightsideFdn.org");
-  const [reviewMessage, setReviewMessage] = useState("The Q1 Board Report draft is ready for your review and approval.");
+  const [reviewMessage, setReviewMessage] = useState(`The ${quarter} Board Report draft is ready for your review and approval.`);
   const [draftSources, setDraftSources] = useState({ salesforce: true, stripe: true, grants: true });
-  const [draftSections, setDraftSections] = useState({ exec: true, financial: true, donor: true, grants: true, health: true });
+  const [draftSections, setDraftSections] = useState({ exec: true, financial: true, donor: true, grants: true, health: true, agents: true });
 
   useEffect(() => {
-    document.title = "Board Reports | Brightside Foundation";
+    document.title = `Board Reports | ${ORG_NAME}`;
     const timer = setTimeout(() => setIsLoading(false), 600);
     return () => clearTimeout(timer);
   }, []);
 
-  const handleExport = () => {
+  const runPdfExport = (markApproved: boolean) => {
     setExporting(true);
-    setTimeout(() => {
-      setExporting(false);
-      setApproved(true);
-      toast.success("✓ Q1 Board Report approved and exported", {
-        description: "Brightside Foundation Q1 2026 Board Report is ready to download.",
+    try {
+      downloadBoardReportPdf(markApproved || approved);
+      if (markApproved) setApproved(true);
+      toast.success(markApproved ? `✓ ${quarter} Board Report approved and exported` : "✓ Board report re-exported successfully", {
+        description: `${boardReportPdfFilename()} downloaded — check your downloads folder.`,
       });
-    }, 2000);
+    } catch {
+      toast.error("Failed to generate PDF");
+    } finally {
+      setExporting(false);
+    }
   };
 
-  const handleReExport = () => {
-    setExporting(true);
-    setTimeout(() => {
-      setExporting(false);
-      toast.success("✓ Board report re-exported successfully");
-    }, 2000);
-  };
+  const handleExport = () => runPdfExport(true);
+  const handleReExport = () => runPdfExport(false);
 
   const handleGenerateDraft = () => {
     setDraftGenerating(true);
@@ -100,7 +96,7 @@ export default function BoardReportsPage() {
       setDraftModal(false);
       setApproved(false);
       toast.success("✓ New draft generated", {
-        description: "Q1 2026 Board Report regenerated from latest data.",
+        description: `${quarter} Board Report regenerated from latest data.`,
       });
     }, 2000);
   };
@@ -114,6 +110,7 @@ export default function BoardReportsPage() {
 
   const now = new Date();
   const exportDate = `${now.toLocaleString("en-US", { month: "short" })} ${now.getDate()}, ${now.getFullYear()}`;
+  const quarterLabel = quarter.split(" ")[0];
 
   if (isLoading) return <PageSkeleton />;
 
@@ -127,7 +124,7 @@ export default function BoardReportsPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Board Reports</h1>
           <p className="text-sm text-muted-foreground">
-            Brightside Foundation · Board-ready reports generated from your data
+            {ORG_NAME} · Board-ready reports generated from your data
           </p>
         </div>
       </div>
@@ -166,7 +163,7 @@ export default function BoardReportsPage() {
                   <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg shrink-0">BF</div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h2 className="text-xl font-bold text-foreground">Board Report — Q1 2026</h2>
+                      <h2 className="text-xl font-bold text-foreground">Board Report — {quarter}</h2>
                       {approved && <CheckCircle className="h-5 w-5 text-green-600" />}
                     </div>
                     <p className="text-sm text-muted-foreground">
@@ -185,8 +182,7 @@ export default function BoardReportsPage() {
             <section className="space-y-2">
               <h3 className="text-base font-semibold text-foreground">Executive Summary</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Brightside Foundation closed Q1 2026 with $487,000 in revenue against a $510,000 target (95%).
-                Major gift activity increased 18% year-over-year. Two grant reports are due in the next 30 days.
+                {sections.executiveSummary}
               </p>
             </section>
 
@@ -198,13 +194,13 @@ export default function BoardReportsPage() {
                   <TableHeader>
                     <TableRow className="bg-muted/50">
                       <TableHead className="text-xs font-semibold">Metric</TableHead>
-                      <TableHead className="text-xs font-semibold text-right">Q1 Target</TableHead>
-                      <TableHead className="text-xs font-semibold text-right">Q1 Actual</TableHead>
+                      <TableHead className="text-xs font-semibold text-right">{quarterLabel} Target</TableHead>
+                      <TableHead className="text-xs font-semibold text-right">{quarterLabel} Actual</TableHead>
                       <TableHead className="text-xs font-semibold text-right">Variance</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {FINANCIAL_ROWS.map((row, i) => (
+                    {sections.financialRows.map((row, i) => (
                       <TableRow key={row.metric} className={i % 2 === 1 ? "bg-muted/30" : ""}>
                         <TableCell className="text-sm font-medium">{row.metric}</TableCell>
                         <TableCell className="text-sm text-right text-muted-foreground">{row.target}</TableCell>
@@ -225,12 +221,7 @@ export default function BoardReportsPage() {
             <section className="space-y-3">
               <h3 className="text-base font-semibold text-foreground">Donor Engagement</h3>
               <div className="grid grid-cols-2 gap-3">
-                {[
-                  { label: "Active Donors", value: "1,847", detail: "↑ 23 vs Q4" },
-                  { label: "New Donors Acquired", value: "94" },
-                  { label: "Lapsed Donors Recovered", value: "12" },
-                  { label: "Mid-Level Upgrades in Pipeline", value: "8" },
-                ].map((item) => (
+                {sections.donorMetrics.map((item) => (
                   <div key={item.label} className="rounded-lg border p-3">
                     <p className="text-lg font-bold text-foreground">{item.value}</p>
                     <p className="text-xs text-muted-foreground">{item.label}</p>
@@ -255,7 +246,7 @@ export default function BoardReportsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {GRANT_ROWS.map((row, i) => (
+                    {sections.grantRows.map((row, i) => (
                       <TableRow key={row.grant} className={i % 2 === 1 ? "bg-muted/30" : ""}>
                         <TableCell className="text-sm font-medium">{row.grant}</TableCell>
                         <TableCell className="text-sm text-muted-foreground">{row.funder}</TableCell>
@@ -279,16 +270,39 @@ export default function BoardReportsPage() {
             <section className="space-y-3">
               <h3 className="text-base font-semibold text-foreground">Data Health</h3>
               <div className="grid grid-cols-3 gap-3">
-                {[
-                  { label: "Data Health Score", value: "82%" },
-                  { label: "Duplicates Resolved (Q1)", value: "7" },
-                  { label: "Records Updated by AI", value: "143" },
-                ].map((item) => (
+                {sections.dataHealth.map((item) => (
                   <div key={item.label} className="rounded-lg border p-3 text-center">
                     <p className="text-lg font-bold text-foreground">{item.value}</p>
                     <p className="text-xs text-muted-foreground">{item.label}</p>
                   </div>
                 ))}
+              </div>
+            </section>
+
+            {/* AI Agent Activity */}
+            <section className="space-y-3">
+              <h3 className="text-base font-semibold text-foreground">AI Agent Activity</h3>
+              <div className="rounded-lg border overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/50">
+                      <TableHead className="text-xs font-semibold">Agent</TableHead>
+                      <TableHead className="text-xs font-semibold">Action</TableHead>
+                      <TableHead className="text-xs font-semibold">Outcome</TableHead>
+                      <TableHead className="text-xs font-semibold text-right">When</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {boardAgentActivity.map((run, i) => (
+                      <TableRow key={run.id} className={i % 2 === 1 ? "bg-muted/30" : ""}>
+                        <TableCell className="text-sm font-medium">{run.agentName}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{run.action}</TableCell>
+                        <TableCell className="text-sm">{run.outcome}</TableCell>
+                        <TableCell className="text-sm text-right text-muted-foreground">{run.timestamp}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
             </section>
 
@@ -311,7 +325,8 @@ export default function BoardReportsPage() {
           <div className="space-y-4 py-2">
             <div>
               <label className="text-sm font-medium text-foreground">Select report period</label>
-              <select className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+              <select className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" defaultValue={quarter}>
+                <option>{quarter}</option>
                 <option>Q1 2026</option>
                 <option>Q4 2025</option>
                 <option>Q3 2025</option>
@@ -344,6 +359,7 @@ export default function BoardReportsPage() {
                   { key: "donor", label: "Donor Engagement" },
                   { key: "grants", label: "Grant Status" },
                   { key: "health", label: "Data Health" },
+                  { key: "agents", label: "AI Agent Activity" },
                 ].map((s) => (
                   <div key={s.key} className="flex items-center gap-2">
                     <Checkbox

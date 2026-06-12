@@ -1,0 +1,142 @@
+import { jsPDF } from "jspdf";
+import {
+  DEMO_BOARD_REPORT,
+  DEMO_BOARD_REPORT_SECTIONS,
+  DEMO_AGENTS,
+  DEMO_AGENT_ACTIVITY,
+  ORG_NAME,
+} from "@/shared/data/nonprofitDemoData";
+
+const MARGIN_X = 48;
+const MARGIN_TOP = 56;
+const LINE_HEIGHT = 15;
+const SECTION_GAP = 12;
+
+export function boardReportPdfFilename(): string {
+  const quarterSlug = DEMO_BOARD_REPORT.quarter.replace(" ", "-");
+  return `Brightside-Foundation-${quarterSlug}-Board-Report.pdf`;
+}
+
+function formatExportDate(date: Date): string {
+  return `${date.toLocaleString("en-US", { month: "short" })} ${date.getDate()}, ${date.getFullYear()}`;
+}
+
+function formatCurrency(amount: number): string {
+  return `$${amount.toLocaleString()}`;
+}
+
+interface PdfLayout {
+  doc: jsPDF;
+  y: number;
+  maxWidth: number;
+  pageHeight: number;
+}
+
+function ensureSpace(layout: PdfLayout, needed: number): void {
+  if (layout.y + needed > layout.pageHeight - MARGIN_TOP) {
+    layout.doc.addPage();
+    layout.y = MARGIN_TOP;
+  }
+}
+
+function writeLines(layout: PdfLayout, lines: string[], fontSize = 11, bold = false): void {
+  layout.doc.setFont("helvetica", bold ? "bold" : "normal");
+  layout.doc.setFontSize(fontSize);
+  const wrapped = lines.flatMap((line) => layout.doc.splitTextToSize(line, layout.maxWidth) as string[]);
+  wrapped.forEach((line) => {
+    ensureSpace(layout, LINE_HEIGHT);
+    layout.doc.text(line, MARGIN_X, layout.y);
+    layout.y += LINE_HEIGHT;
+  });
+}
+
+function writeSectionHeading(layout: PdfLayout, title: string): void {
+  ensureSpace(layout, LINE_HEIGHT + SECTION_GAP);
+  layout.y += SECTION_GAP;
+  writeLines(layout, [title], 13, true);
+}
+
+export function downloadBoardReportPdf(approved = true): void {
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const maxWidth = pageWidth - MARGIN_X * 2;
+  const exportDate = formatExportDate(new Date());
+  const { quarter } = DEMO_BOARD_REPORT;
+  const sections = DEMO_BOARD_REPORT_SECTIONS;
+
+  const layout: PdfLayout = { doc, y: MARGIN_TOP, maxWidth, pageHeight };
+
+  writeLines(layout, [ORG_NAME], 18, true);
+  writeLines(layout, [`Board Report — ${quarter}`], 14, true);
+  writeLines(layout, [
+    `Prepared by Nonprofit Control Tower · ${exportDate}`,
+    approved ? `Status: Approved — Exported ${exportDate}` : "Status: Draft — Pending ED Approval",
+  ]);
+
+  writeSectionHeading(layout, "Executive Summary");
+  writeLines(layout, [sections.executiveSummary]);
+
+  writeSectionHeading(layout, "KPI Summary");
+  const report = DEMO_BOARD_REPORT;
+  writeLines(layout, [
+    `Revenue: ${formatCurrency(report.totalRevenue)} of ${formatCurrency(report.revenueGoal)} goal (${report.revenueVsGoal}%)`,
+    `Active Donors: ${report.totalDonors.toLocaleString()} (↑ ${report.donorGrowth}% vs prior quarter)`,
+    `Donor Retention Rate: ${report.retentionRate}%`,
+    `Volunteer Hours: ${report.volunteerHours.toLocaleString()}`,
+    `Programs Active: ${report.programsActive}`,
+    `New Donors: ${report.newDonors}`,
+  ]);
+
+  writeSectionHeading(layout, "Financial Snapshot");
+  writeLines(layout, [`${"Metric".padEnd(22)} ${"Target".padStart(12)} ${"Actual".padStart(12)} ${"Var".padStart(8)}`], 10, true);
+  sections.financialRows.forEach((row) => {
+    const varStr = `${row.variance >= 0 ? "+" : ""}${row.variance}%`;
+    writeLines(
+      layout,
+      [`${row.metric.padEnd(22)} ${row.target.padStart(12)} ${row.actual.padStart(12)} ${varStr.padStart(8)}`],
+      10,
+    );
+  });
+
+  writeSectionHeading(layout, "Donor Engagement");
+  sections.donorMetrics.forEach((item) => {
+    const detail = item.detail ? ` (${item.detail})` : "";
+    writeLines(layout, [`${item.label}: ${item.value}${detail}`]);
+  });
+
+  writeSectionHeading(layout, "Grant Status");
+  sections.grantRows.forEach((row) => {
+    writeLines(layout, [
+      `${row.grant} — ${row.funder}`,
+      `  Amount: ${row.amount} · Status: ${row.status} · Utilization: ${row.utilization}%`,
+    ]);
+  });
+
+  writeSectionHeading(layout, "Data Health");
+  sections.dataHealth.forEach((item) => {
+    writeLines(layout, [`${item.label}: ${item.value}`]);
+  });
+
+  writeSectionHeading(layout, "AI Agent Activity");
+  const boardAgent = DEMO_AGENTS.find((a) => a.id === "board-reporting");
+  if (boardAgent) {
+    writeLines(layout, [`${boardAgent.name} — Last run: ${boardAgent.lastRun}`]);
+    boardAgent.findings.forEach((f) => {
+      writeLines(layout, [`  • ${f.text} (${f.time})`]);
+    });
+  }
+  DEMO_AGENT_ACTIVITY.filter((run) => run.agentSlug === "board-reporting").forEach((run) => {
+    writeLines(layout, [`  • ${run.action}: ${run.outcome} (${run.timestamp})`]);
+  });
+
+  ensureSpace(layout, LINE_HEIGHT * 2);
+  layout.y += SECTION_GAP;
+  writeLines(
+    layout,
+    ["Data sourced from Salesforce, Stripe, and QuickBooks · Report generated by Nonprofit Control Tower"],
+    9,
+  );
+
+  doc.save(boardReportPdfFilename());
+}
