@@ -42,7 +42,9 @@ export const API = {
   MEETINGS: {
     BASE: "api-v1-meetings",
     SUMMARY: "generate-meeting-summary",
-    SUMMARIZER: "meeting-summarizer",
+    SUMMARY_V2: "generate-meeting-summary-v2",
+    /** Meeting Summarizer agent — uses SUMMARY_V2 paste mode on Lovable Cloud */
+    SUMMARIZER: "generate-meeting-summary-v2",
     CATEGORIZE: "categorize-meeting",
     AUTO_EMBED: "auto-embed-meetings",
     TRANSCRIPT_PROCESS: "zoom-transcript-processing",

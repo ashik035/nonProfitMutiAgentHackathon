@@ -228,6 +228,49 @@ Requires `SUPABASE_SERVICE_ROLE_KEY` or `DATABASE_URL` in `.env` — usually **n
 
 ---
 
+## Meeting Summarizer (flagship AI agent)
+
+**Files:** `MeetingIntelligenceDetail.tsx`, `useMeetingSummarizer.ts`, `supabase/functions/generate-meeting-summary-v2/`
+**Route:** `/agents/meeting-intelligence`
+
+### Lovable Cloud only (no Supabase dashboard)
+
+The Meeting Summarizer calls **`generate-meeting-summary-v2`** — an edge function **already on Lovable Cloud** (same stack as Grant Writer and Event Intelligence). You do **not** need Supabase login or CLI.
+
+After code changes land in `main`:
+
+1. Open the project in **Lovable**.
+2. Click **Publish** (top right) and wait for the build to finish.
+3. Test on the Lovable preview URL **or** localhost (`npm run dev` still talks to Lovable Cloud backend).
+
+`LOVABLE_API_KEY` is managed by Lovable automatically.
+
+### Route map
+
+| Route | Purpose |
+|-------|---------|
+| `/agents` | Meeting Summarizer card under **Meeting AI Team** |
+| `/agents/meeting-intelligence` | Paste transcript + Generate Minutes |
+
+### Step-by-step
+
+1. Lovable **Publish** after merge (see above)
+2. `npm run dev` → http://localhost:8080/login (Quick Login `Demo@123`)
+3. `/agents` → **Meeting AI Team** → **Meeting Summarizer** → **Summarize**
+4. **Load Sample Transcript** → **Generate Minutes**
+5. Confirm: Executive Summary, Attendance, Decisions, Action Items, Key Discussion Points
+
+### Troubleshooting
+
+| Problem | Fix |
+|---------|-----|
+| Failed to send request to Edge Function | Click **Publish** in Lovable again |
+| `meeting_id is required` | Old function still live — Publish latest `main` |
+| AI credits exhausted | Lovable billing / credits |
+| 401 | Re-login at `/login` |
+
+---
+
 ## Template for new features
 
 Copy this block when adding a guide for a new feature:

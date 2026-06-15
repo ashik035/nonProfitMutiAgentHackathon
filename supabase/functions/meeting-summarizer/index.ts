@@ -8,9 +8,41 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { getCorsHeaders } from "../../cors.ts";
-import { validateAuth, authErrorResponse, type AuthError } from "../../auth-middleware.ts";
 import { chatCompletion, logUsage } from "../_shared/ai-provider-routing.ts";
+
+// Inline CORS (bundler cannot resolve imports outside functions/)
+function getCorsHeaders(origin: string | null): Record<string, string> {
+  const isAllowed =
+    origin &&
+    (origin.endsWith(".lovableproject.com") ||
+      origin.endsWith(".lovable.app") ||
+      origin.startsWith("http://localhost:") ||
+      origin.startsWith("http://127.0.0.1:"));
+  return {
+    "Access-Control-Allow-Origin": isAllowed ? origin : "http://localhost:8080",
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type, x-api-key",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+    "Access-Control-Max-Age": "3600",
+    "Access-Control-Allow-Credentials": "true",
+  };
+}
+
+async function validateRequestAuth(
+  req: Request,
+  supabase: ReturnType<typeof createClient>
+): Promise<string> {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
+    throw new Error("Authorization header required");
+  }
+  const token = authHeader.replace("Bearer ", "");
+  const { data: { user }, error } = await supabase.auth.getUser(token);
+  if (error || !user) {
+    throw new Error(error?.message || "Invalid or expired token");
+  }
+  return user.id;
+}
 
 const MODEL = "claude-sonnet-4-20250514";
 const MAX_INPUT_CHARS = 12000;
@@ -328,10 +360,10 @@ serve(async (req) => {
 
   let authUserId: string | null = null;
   try {
-    const auth = await validateAuth(req, supabase);
-    authUserId = auth.user.id;
+    authUserId = await validateRequestAuth(req, supabase);
   } catch (error) {
-    return authErrorResponse(error as AuthError, corsHeaders);
+    const message = error instanceof Error ? error.message : "Unauthorized";
+    return jsonResponse({ error: "unauthorized", message }, 401, corsHeaders);
   }
 
   try {
