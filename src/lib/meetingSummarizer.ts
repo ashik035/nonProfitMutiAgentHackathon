@@ -4,7 +4,7 @@
 
 import type { MeetingSummary } from "@/types/meeting-summary";
 
-export const MEETING_SUMMARIZER_MODEL = "anthropic/claude-sonnet-4-20250514";
+export const MEETING_SUMMARIZER_MODEL = "claude-sonnet-4-20250514";
 export const LOVABLE_GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
 const MAX_TRANSCRIPT_CHARS = 12000;

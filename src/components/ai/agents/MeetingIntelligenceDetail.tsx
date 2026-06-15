@@ -263,10 +263,8 @@ export default function MeetingIntelligenceDetail() {
         <AlertTitle>Cloud AI backends</AlertTitle>
         <AlertDescription className="space-y-3">
           <p className="text-sm">
-            Target model: <strong className="font-mono text-xs">{MEETING_SUMMARIZER_MODEL}</strong>.
-            <strong> Lovable Publish updates the website only</strong> — edge functions in{" "}
-            <code className="text-xs">supabase/functions/</code> must be deployed separately (Lovable
-            chat).
+            Target model: <strong className="font-mono text-xs">{MEETING_SUMMARIZER_MODEL}</strong>
+            (via <code className="text-xs">{API.MEETINGS.SUMMARIZER}</code> on Lovable cloud).
           </p>
           {isDev && (
             <p className="text-xs text-muted-foreground">

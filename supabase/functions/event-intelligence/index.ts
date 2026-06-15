@@ -1,4 +1,7 @@
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { chatCompletion, logUsage } from "../_shared/ai-provider-routing.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -27,8 +30,7 @@ const EVENT_SYSTEM_PROMPT = `You are the Event Intelligence Assistant for Bright
 
 Provide concise, actionable recommendations for nonprofit event management. Focus on donor engagement, follow-up prioritization, and volunteer retention. Keep responses under 200 words.`;
 
-/** Lovable gateway model id (deployed on Lovable Cloud). */
-const MEETING_SUMMARIZER_MODEL = "anthropic/claude-sonnet-4-20250514";
+const MEETING_SUMMARIZER_MODEL = "claude-sonnet-4-20250514";
 const EVENT_QA_MODEL = "google/gemini-3-flash-preview";
 const MAX_TRANSCRIPT_CHARS = 12000;
 const LOVABLE_GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
@@ -74,9 +76,8 @@ function parseSummaryContent(content: string): Record<string, unknown> {
   }
 }
 
-async function callLovableGateway(
+async function callLovableGatewayGemini(
   apiKey: string,
-  model: string,
   systemPrompt: string,
   userContent: string,
   maxTokens: number
@@ -88,13 +89,13 @@ async function callLovableGateway(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model,
+      model: EVENT_QA_MODEL,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userContent },
       ],
       max_completion_tokens: maxTokens,
-      temperature: model.includes("claude") || model.includes("anthropic") ? 0.2 : 0.7,
+      temperature: 0.7,
     }),
   });
 
@@ -110,6 +111,54 @@ async function callLovableGateway(
   return data.choices?.[0]?.message?.content ?? "";
 }
 
+async function summarizeMeetingTranscript(
+  supabaseClient: ReturnType<typeof createClient>,
+  transcript: string
+): Promise<{ summary: Record<string, unknown>; model: string; inputTokens: number; outputTokens: number }> {
+  const clipped =
+    transcript.length > MAX_TRANSCRIPT_CHARS
+      ? transcript.slice(0, MAX_TRANSCRIPT_CHARS)
+      : transcript;
+
+  const userMessage = `Analyze this meeting transcript and produce structured minutes:\n\n${clipped}`;
+
+  try {
+    const { data: sonnetModel } = await supabaseClient
+      .from("ai_models")
+      .select("id")
+      .eq("model_id", MEETING_SUMMARIZER_MODEL)
+      .eq("enabled", true)
+      .maybeSingle();
+
+    const result = await chatCompletion(
+      supabaseClient,
+      {
+        messages: [
+          { role: "system", content: MEETING_SUMMARIZER_SYSTEM_PROMPT },
+          { role: "user", content: userMessage },
+        ],
+        temperature: 0.2,
+        max_tokens: 3000,
+        model: MEETING_SUMMARIZER_MODEL,
+      },
+      sonnetModel?.id
+    );
+
+    return {
+      summary: parseSummaryContent(result.content),
+      model: result.model || MEETING_SUMMARIZER_MODEL,
+      inputTokens: result.input_tokens,
+      outputTokens: result.output_tokens,
+    };
+  } catch (routingError) {
+    console.warn(
+      "[event-intelligence] chatCompletion failed for meeting_summary:",
+      routingError
+    );
+    throw routingError;
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -120,6 +169,11 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
     if (mode === "meeting_summary") {
       const transcript: string = body.transcript ?? "";
       if (!transcript.trim()) {
@@ -129,29 +183,27 @@ serve(async (req) => {
         });
       }
 
-      const clipped =
-        transcript.length > MAX_TRANSCRIPT_CHARS
-          ? transcript.slice(0, MAX_TRANSCRIPT_CHARS)
-          : transcript;
-
-      const content = await callLovableGateway(
-        LOVABLE_API_KEY,
-        MEETING_SUMMARIZER_MODEL,
-        MEETING_SUMMARIZER_SYSTEM_PROMPT,
-        `Analyze this meeting transcript and produce structured minutes:\n\n${clipped}`,
-        3000
+      const { summary, model, inputTokens, outputTokens } = await summarizeMeetingTranscript(
+        supabaseClient,
+        transcript.trim()
       );
 
-      if (!content) {
-        throw new Error("Empty response from AI service");
-      }
+      await logUsage(
+        supabaseClient,
+        null,
+        null,
+        "event-intelligence",
+        inputTokens,
+        outputTokens,
+        0,
+        0
+      );
 
-      const summary = parseSummaryContent(content);
       return new Response(
         JSON.stringify({
           ...summary,
-          model: MEETING_SUMMARIZER_MODEL,
-          provider: "lovable",
+          model,
+          provider: "ai-provider-routing",
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
@@ -165,9 +217,8 @@ serve(async (req) => {
       });
     }
 
-    const content = await callLovableGateway(
+    const content = await callLovableGatewayGemini(
       LOVABLE_API_KEY,
-      EVENT_QA_MODEL,
       EVENT_SYSTEM_PROMPT,
       question,
       800

@@ -1,8 +1,8 @@
 /**
  * Meeting Summarizer Hook — Claude Sonnet 4 via Lovable gateway.
  *
- * Priority: optional client key → generate-meeting-summary-v2 (v2 PR) →
- * meeting-summarizer → event-intelligence Sonnet mode.
+ * Priority: optional client key → generate-meeting-summary-v2 (Sonnet) →
+ * meeting-summarizer → event-intelligence Sonnet → Gemini Q&A fallback.
  */
 
 import { useMutation } from "@tanstack/react-query";
@@ -194,16 +194,14 @@ export function useMeetingSummarizer() {
         attempts.push({ name: "lovable-client", fn: () => tryClientSonnet(trimmed) });
       }
 
-      // Gemini Q&A path works on current Lovable cloud (Sonnet edge code not deployed yet)
-      attempts.push({
-        name: "event-intelligence-gemini-fallback",
-        fn: () => tryEventIntelligenceGeminiFallback(trimmed),
-      });
-
       attempts.push(
         { name: API.MEETINGS.SUMMARIZER, fn: () => trySummaryV2(trimmed) },
         { name: DEDICATED_SUMMARIZER_FN, fn: () => tryMeetingSummarizerEdge(trimmed) },
         { name: API.AI.EVENT_INTELLIGENCE, fn: () => tryEventIntelligenceSonnet(trimmed) },
+        {
+          name: "event-intelligence-gemini-fallback",
+          fn: () => tryEventIntelligenceGeminiFallback(trimmed),
+        },
       );
 
       const errors: string[] = [];
