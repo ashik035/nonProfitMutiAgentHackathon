@@ -10,6 +10,7 @@ import AITeamsDashboardCard from "@/components/dashboards/AITeamsDashboardCard";
 import AIActivityWidget from "@/components/dashboard/AIActivityWidget";
 import OrgHealthScore from "@/components/dashboard/OrgHealthScore";
 import SinceYouWereAway from "@/components/dashboard/SinceYouWereAway";
+import AgentROIHeroCard from "@/components/dashboard/AgentROIHeroCard";
 import QuickStatsRow from "@/components/dashboard/QuickStatsRow";
 import {
   DEMO_DATA_HEALTH,
@@ -35,6 +36,7 @@ function DashboardSkeleton() {
       </div>
       <Skeleton className="h-36 w-full rounded-xl" />
       <Skeleton className="h-28 w-full rounded-xl" />
+      <Skeleton className="h-32 w-full rounded-xl" />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[1, 2, 3, 4].map((i) => (
           <Skeleton key={i} className="h-24 rounded-xl" />
@@ -93,6 +95,8 @@ export default function ExecutiveDirectorDashboard() {
           { label: "Review transaction →", href: "/agents/reconciliation-fund-accounting" },
         ]}
       />
+
+      <AgentROIHeroCard role="executive_director" />
 
       {/* Quick Stats */}
       <QuickStatsRow

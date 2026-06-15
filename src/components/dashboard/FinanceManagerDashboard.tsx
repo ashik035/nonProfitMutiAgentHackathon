@@ -8,6 +8,7 @@ import { ArrowLeftRight, AlertTriangle, BarChart3, Sparkles, X } from "lucide-re
 import AITeamsDashboardCard from "@/components/dashboards/AITeamsDashboardCard";
 import OrgHealthScore from "@/components/dashboard/OrgHealthScore";
 import SinceYouWereAway from "@/components/dashboard/SinceYouWereAway";
+import AgentROIHeroCard from "@/components/dashboard/AgentROIHeroCard";
 import QuickStatsRow from "@/components/dashboard/QuickStatsRow";
 import {
   DEMO_RECONCILIATION,
@@ -36,6 +37,7 @@ function DashboardSkeleton() {
       </div>
       <Skeleton className="h-36 w-full rounded-xl" />
       <Skeleton className="h-28 w-full rounded-xl" />
+      <Skeleton className="h-32 w-full rounded-xl" />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[1, 2, 3, 4].map((i) => (
           <Skeleton key={i} className="h-24 rounded-xl" />
@@ -92,6 +94,8 @@ export default function FinanceManagerDashboard() {
           { label: "View reconciliation →", href: "/reconciliation" },
         ]}
       />
+
+      <AgentROIHeroCard role="finance_manager" />
 
       {/* Quick Stats */}
       <QuickStatsRow
