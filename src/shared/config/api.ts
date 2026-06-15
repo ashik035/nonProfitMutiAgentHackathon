@@ -42,6 +42,7 @@ export const API = {
   MEETINGS: {
     BASE: "api-v1-meetings",
     SUMMARY: "generate-meeting-summary",
+    SUMMARIZER: "meeting-summarizer",
     CATEGORIZE: "categorize-meeting",
     AUTO_EMBED: "auto-embed-meetings",
     TRANSCRIPT_PROCESS: "zoom-transcript-processing",

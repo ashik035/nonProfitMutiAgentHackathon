@@ -228,6 +228,43 @@ export const agentTeams: Record<string, AgentTeamDef> = {
       },
     ],
   },
+  meetings: {
+    id: "meetings",
+    name: "Meeting AI Team",
+    tagline: "AI agents that turn meeting transcripts into actionable intelligence",
+    accentColor: "border-b-violet-500",
+    gradientFrom: "262 83% 58%",
+    gradientTo: "239 84% 67%",
+    agents: [
+      {
+        name: "Meeting Summarizer",
+        slug: "meeting-intelligence",
+        description:
+          "Paste a board meeting transcript and get structured minutes — decisions, action items with owners and deadlines, attendance, and key discussion points — in under 30 seconds.",
+        icon: "FileText",
+        operational: {
+          lastFinding:
+            "Q2 board meeting transcript ready — paste or load sample to generate minutes instantly",
+          itemsToReview: 0,
+          timeSavedHrs: 1.5,
+        },
+        capabilities: [
+          "Extract formal board decisions from raw transcripts",
+          "Identify action items with owner names and deadlines",
+          "Record attendance from roll call and speaker presence",
+          "Summarize key discussion points without decisions",
+          "Produce a three-sentence executive summary for the ED",
+        ],
+        howToUse: [
+          "Navigate to Meeting Summarizer on the AI Agents page",
+          "Load the sample transcript or paste your own board meeting transcript",
+          "Click Generate Minutes and review structured output",
+          "Copy sections into your board packet or CRM notes",
+        ],
+        whereToFind: { label: "Meeting Summarizer", path: "/agents/meeting-intelligence" },
+      },
+    ],
+  },
 };
 
 export const allTeams: AgentTeamDef[] = Object.values(agentTeams);
@@ -258,6 +295,7 @@ export const AGENT_ICON_MAP: Record<string, string> = {
   "grant-budget-watcher": "AlertTriangle",
   "integration-health-monitor": "Plug",
   "onboarding-checklist-ai": "ClipboardList",
+  "meeting-intelligence": "FileText",
 };
 
 /** Category color map keyed by team id */
@@ -271,5 +309,10 @@ export const CATEGORY_COLORS: Record<string, { from: string; to: string; badge: 
     from: "199 89% 48%",
     to: "187 100% 42%",
     badge: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300",
+  },
+  meetings: {
+    from: "262 83% 58%",
+    to: "239 84% 67%",
+    badge: "bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300",
   },
 };

@@ -24,6 +24,7 @@ import { useNonprofitRolePermissions } from "@/hooks/useNonprofitRolePermissions
 /* ── activity banner messages ── */
 
 const BANNER_MESSAGES = [
+  "Meeting Summarizer: paste a board transcript and get structured minutes in under 30 seconds",
   "CRM Data Integrity Agent found 3 potential duplicate records — Sarah Chen and Michael Torres flagged",
   "Grant Compliance Agent: Kresge Foundation report due in 8 days — utilization at 61%",
   "Board Reporting Agent: Q1 Board Report draft ready — 3 KPIs need ED approval before export",
@@ -31,6 +32,7 @@ const BANNER_MESSAGES = [
 
 /* ── Core agent last-run times (dynamic) ── */
 const CORE_LAST_RUN: Record<string, string> = {
+  "meeting-intelligence": hoursAgo(0, 45),
   "crm-data-integrity": hoursAgo(1, 3),
   "reconciliation-fund-accounting": hoursAgo(3, 5),
   "grant-compliance": hoursAgo(2, 4),
@@ -117,14 +119,22 @@ function BrowseSkeleton() {
   );
 }
 
+function getTeamBadgeLabel(teamId: string): string {
+  if (teamId === "nonprofit-ops") return "Core Ops";
+  if (teamId === "meetings") return "Meetings";
+  return teamId;
+}
+
 function AgentBrowseCard({
   agent,
   teamId,
+  teamBadgeLabel,
   gradientFrom,
   gradientTo,
 }: {
   agent: AgentTeamAgent;
   teamId: string;
+  teamBadgeLabel: string;
   gradientFrom: string;
   gradientTo: string;
 }) {
@@ -142,6 +152,10 @@ function AgentBrowseCard({
 
   const handleRunNow = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (agent.slug === "meeting-intelligence") {
+      navigate(`/agents/${agent.slug}`);
+      return;
+    }
     if (running) return;
     setRunning(true);
     setTimeout(() => {
@@ -168,7 +182,7 @@ function AgentBrowseCard({
             cat.badge
           )}
         >
-          Core Ops
+          {teamBadgeLabel}
         </Badge>
         <div className="absolute -bottom-7 left-4 z-20 w-14 h-14 rounded-full flex items-center justify-center bg-slate-900 ring-4 ring-background shadow-md">
           <Icon className="h-6 w-6 text-white" />
@@ -226,7 +240,9 @@ function AgentBrowseCard({
             }}
           >
             <Eye className="h-3 w-3 shrink-0" />
-            <span className="truncate">View Findings</span>
+            <span className="truncate">
+              {agent.slug === "meeting-intelligence" ? "Summarize" : "View Findings"}
+            </span>
           </Button>
           <Button
             size="sm"
@@ -260,12 +276,20 @@ export default function AgentsBrowse() {
     return () => clearTimeout(t);
   }, []);
 
-  const team = allTeams[0];
+  const teamsWithAgents = useMemo(() => {
+    return allTeams
+      .map((team) => ({
+        team,
+        agents: team.agents.filter(
+          (a) => !a.permissionKey || hasAgentPermission(a.permissionKey)
+        ),
+      }))
+      .filter((entry) => entry.agents.length > 0);
+  }, [hasAgentPermission]);
 
-  // Filter agents based on role permissions (agents without permissionKey always show)
-  const visibleAgents = useMemo(
-    () => team.agents.filter((a) => !a.permissionKey || hasAgentPermission(a.permissionKey)),
-    [team.agents, hasAgentPermission]
+  const totalVisibleAgents = useMemo(
+    () => teamsWithAgents.reduce((sum, { agents }) => sum + agents.length, 0),
+    [teamsWithAgents]
   );
 
   if (isLoading) return <BrowseSkeleton />;
@@ -279,24 +303,33 @@ export default function AgentsBrowse() {
         <div>
           <h1 className="text-3xl font-bold text-foreground">AI Agents</h1>
           <p className="text-sm text-muted-foreground">
-            {visibleAgents.length} agents actively monitoring your operations
+            {totalVisibleAgents} agents actively monitoring your operations
           </p>
         </div>
       </div>
 
       <ActivityBanner />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {visibleAgents.map((agent) => (
-          <AgentBrowseCard
-            key={agent.slug}
-            agent={agent}
-            teamId={team.id}
-            gradientFrom={team.gradientFrom}
-            gradientTo={team.gradientTo}
-          />
-        ))}
-      </div>
+      {teamsWithAgents.map(({ team, agents }) => (
+        <section key={team.id} className="space-y-4">
+          <div>
+            <h2 className="text-lg font-semibold text-foreground">{team.name}</h2>
+            <p className="text-sm text-muted-foreground">{team.tagline}</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {agents.map((agent) => (
+              <AgentBrowseCard
+                key={agent.slug}
+                agent={agent}
+                teamId={team.id}
+                teamBadgeLabel={getTeamBadgeLabel(team.id)}
+                gradientFrom={team.gradientFrom}
+                gradientTo={team.gradientTo}
+              />
+            ))}
+          </div>
+        </section>
+      ))}
     </div>
   );
 }

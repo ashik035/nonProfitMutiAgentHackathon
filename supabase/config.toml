@@ -337,4 +337,7 @@ verify_jwt = false
 [functions.extract-meeting-action-items]
 verify_jwt = false
 
+[functions.meeting-summarizer]
+verify_jwt = false
+
 

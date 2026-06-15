@@ -145,6 +145,28 @@ Use this table to quickly find functions by category:
 
 ---
 
+### `meeting-summarizer`
+**Purpose:** Generate structured board minutes from a pasted meeting transcript (flagship agent demo)
+
+**Required Secrets:**
+- `ANTHROPIC_API_KEY` (optional — also resolved from Integrations / `app_config`)
+- `LOVABLE_API_KEY` (Lovable Cloud — routes Claude Sonnet via AI gateway)
+
+**Auth:** Bearer JWT validated inside function (`verify_jwt = false` in config)
+
+**Model:** `claude-sonnet-4-20250514`
+
+**Endpoints:**
+- `POST /meeting-summarizer` — body: `{ transcript: string }`
+
+**Response:** `MeetingSummary` JSON — `executive_summary`, `decisions`, `action_items`, `attendance`, `key_discussion_points`
+
+**Related Files:**
+- `src/hooks/useMeetingSummarizer.ts`
+- `src/components/ai/agents/MeetingIntelligenceDetail.tsx`
+
+---
+
 ### `categorize-meeting`
 **Purpose:** Auto-categorize meetings based on content
 

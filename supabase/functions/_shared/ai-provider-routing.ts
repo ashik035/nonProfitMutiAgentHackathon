@@ -52,24 +52,71 @@ export interface EmbeddingResponse {
   model: string
 }
 
-// Get API key from environment or app_config
+// Get API key from environment, app_config, or organization_integrations
 async function getApiKey(
   supabase: SupabaseClient,
   secretName: string
 ): Promise<string | null> {
-  // First try environment variable
   const envKey = Deno.env.get(secretName)
   if (envKey) return envKey
 
-  // Fallback to app_config
-  const { data, error } = await supabase
-    .from('app_config')
-    .select('value')
-    .eq('key', `integrations.${secretName.toLowerCase()}`)
-    .single()
+  const configKeys = [`integrations.${secretName.toLowerCase()}`]
+  if (secretName === 'ANTHROPIC_API_KEY') {
+    configKeys.push('integrations.anthropic.api_key')
+  }
+  if (secretName === 'OPENAI_API_KEY') {
+    configKeys.push('integrations.openai.api_key')
+  }
 
-  if (error || !data) return null
-  return data.value
+  for (const configKey of configKeys) {
+    const { data, error } = await supabase
+      .from('app_config')
+      .select('value')
+      .eq('key', configKey)
+      .maybeSingle()
+
+    if (!error && data?.value) {
+      const value = data.value
+      if (typeof value === 'string' && value.trim()) return value
+      if (typeof value === 'object' && value !== null) {
+        const record = value as Record<string, unknown>
+        if (typeof record.api_key === 'string' && record.api_key.trim()) {
+          return record.api_key
+        }
+      }
+    }
+  }
+
+  // organization_integrations (admin-configured provider keys)
+  const providerSlug =
+    secretName === 'ANTHROPIC_API_KEY'
+      ? 'anthropic'
+      : secretName === 'OPENAI_API_KEY'
+        ? 'openai'
+        : null
+
+  if (providerSlug) {
+    const { data: aiProvider } = await supabase
+      .from('ai_providers')
+      .select('integration_provider_id')
+      .eq('slug', providerSlug)
+      .maybeSingle()
+
+    if (aiProvider?.integration_provider_id) {
+      const { data: orgIntegration } = await supabase
+        .from('organization_integrations')
+        .select('config')
+        .eq('provider_id', aiProvider.integration_provider_id)
+        .maybeSingle()
+
+      const orgApiKey = orgIntegration?.config?.api_key
+      if (typeof orgApiKey === 'string' && orgApiKey.trim()) {
+        return orgApiKey
+      }
+    }
+  }
+
+  return null
 }
 
 // Get model by ID or get default model for category

@@ -20,6 +20,7 @@ import ReconciliationDetail from "@/components/ai/agents/ReconciliationDetail";
 import GrantComplianceDetail from "@/components/ai/agents/GrantComplianceDetail";
 import EventIntelligenceDetail from "@/components/ai/agents/EventIntelligenceDetail";
 import BoardReportingDetail from "@/components/ai/agents/BoardReportingDetail";
+import MeetingIntelligenceDetail from "@/components/ai/agents/MeetingIntelligenceDetail";
 
 function getIcon(name: string) {
   return (icons as Record<string, React.ComponentType<{ className?: string }>>)[name] ?? Bot;
@@ -143,6 +144,8 @@ export default function AgentDetail() {
         <EventIntelligenceDetail />
       ) : slug === "board-reporting" ? (
         <BoardReportingDetail />
+      ) : slug === "meeting-intelligence" ? (
+        <MeetingIntelligenceDetail />
       ) : slug === "mid-donor-upgrade" ? (
         <MidDonorUpgradeDetail />
       ) : slug === "donor-lapse-detection" ? (
