@@ -12,6 +12,7 @@ import {
   DEMO_CAMPAIGNS,
   DEMO_DONATIONS_RECENT,
   DEMO_MANAGED_EVENTS,
+  DEMO_PROGRAMS,
 } from "../src/shared/data/nonprofitDemoData.ts";
 import { seedUuid } from "./generate-nonprofit-seed.ts";
 
@@ -98,6 +99,7 @@ async function main(): Promise<void> {
   const ticketIds = DEMO_MANAGED_EVENTS.flatMap((e) =>
     e.ticketTypes.map((t, i) => seedUuid(`${e.id}:ticket:${i}:${t.tier}`))
   );
+  const programIds = DEMO_PROGRAMS.map((p) => seedUuid(p.id));
 
   await deleteByIds(supabase, "nonprofit_event_registrants", registrantIds);
   await deleteByIds(supabase, "nonprofit_event_agenda_items", agendaIds);
@@ -109,6 +111,7 @@ async function main(): Promise<void> {
   await deleteByIds(supabase, "nonprofit_volunteer_shifts", shiftIds);
   await deleteByIds(supabase, "nonprofit_volunteers", volunteerIds);
   await deleteByIds(supabase, "nonprofit_members", memberIds);
+  await deleteByIds(supabase, "nonprofit_programs", programIds);
 
   console.log("Inserting members...");
   await upsert(
@@ -271,11 +274,33 @@ async function main(): Promise<void> {
     )
   );
 
+  console.log("Inserting programs...");
+  await upsert(
+    supabase,
+    "nonprofit_programs",
+    DEMO_PROGRAMS.map((p) => ({
+      id: seedUuid(p.id),
+      created_by: createdBy,
+      name: p.name,
+      description: p.description,
+      start_date: parseDemoDate(p.startDate, p.id),
+      status: p.status,
+      lead_staff: p.leadStaff,
+      beneficiary_count: p.metrics.beneficiaryCount,
+      volunteer_hours: p.metrics.volunteerHours,
+      budget_used: p.metrics.budgetUsed,
+      budget_total: p.metrics.budgetTotal,
+      outcomes_achieved: p.metrics.outcomesAchieved,
+      outcomes_target: p.metrics.outcomesTarget,
+    }))
+  );
+
   console.log("Nonprofit seed applied via service role.");
   console.log(`  members: ${DEMO_MEMBERS.length}`);
   console.log(`  volunteers: ${DEMO_VOLUNTEERS.length}`);
   console.log(`  campaigns: ${DEMO_CAMPAIGNS.length}, donations: ${DEMO_DONATIONS_RECENT.length}`);
   console.log(`  events: ${DEMO_MANAGED_EVENTS.length}`);
+  console.log(`  programs: ${DEMO_PROGRAMS.length}`);
 }
 
 main().catch((err) => {

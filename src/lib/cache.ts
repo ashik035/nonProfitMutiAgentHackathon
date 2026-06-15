@@ -204,6 +204,11 @@ export const queryKeys = {
       byCampaign: (campaignId: string) => ["nonprofit", "donations", "campaign", campaignId] as const,
       stats: ["nonprofit", "donations", "stats"] as const,
     },
+    programs: {
+      all: ["nonprofit", "programs"] as const,
+      list: (filters?: Record<string, unknown>) => ["nonprofit", "programs", "list", filters] as const,
+      detail: (id: string) => ["nonprofit", "programs", "detail", id] as const,
+    },
   },
 
   // Dashboard (agency-first)
@@ -343,5 +348,8 @@ export const invalidateKeys = {
   },
   nonprofitDonations: (queryClient: any) => {
     queryClient.invalidateQueries({ queryKey: queryKeys.nonprofit.donations.all });
+  },
+  nonprofitPrograms: (queryClient: any) => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.nonprofit.programs.all });
   },
 };

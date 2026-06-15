@@ -3,13 +3,14 @@
  *
  * Program cards with metrics, AI-generated impact narratives,
  * and "Add to Grant Report" button.
+ * Backed by Supabase nonprofit_programs table.
  */
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import {
-  Target, Users, Clock, DollarSign, TrendingUp, Sparkles, FileText, CheckCircle2, BarChart3,
+  Target, Users, Clock, TrendingUp, Sparkles, FileText, BarChart3, Loader2,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +19,8 @@ import { Progress } from "@/components/ui/progress";
 import {
   Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet";
-import { DEMO_PROGRAMS, DEMO_GRANTS, type DemoProgram } from "@/shared/data/nonprofitDemoData";
+import { DEMO_GRANTS } from "@/shared/data/nonprofitDemoData";
+import { usePrograms, type ProgramView } from "@/hooks/usePrograms";
 
 const statusColors = {
   active: "text-green-600 border-green-200 bg-green-50 dark:bg-green-950/20",
@@ -26,24 +28,33 @@ const statusColors = {
   planning: "text-amber-600 border-amber-200 bg-amber-50 dark:bg-amber-950/20",
 };
 
-function generateImpactNarrative(program: DemoProgram): string {
+function generateImpactNarrative(program: ProgramView): string {
   const utilPct = Math.round((program.metrics.budgetUsed / program.metrics.budgetTotal) * 100);
   const outcomePct = Math.round((program.metrics.outcomesAchieved / program.metrics.outcomesTarget) * 100);
   return `The ${program.name} has served ${program.metrics.beneficiaryCount} beneficiaries since its launch, achieving ${outcomePct}% of its target outcomes. With ${program.metrics.volunteerHours.toLocaleString()} volunteer hours contributed and ${utilPct}% of the budget utilized ($${program.metrics.budgetUsed.toLocaleString()} of $${program.metrics.budgetTotal.toLocaleString()}), the program is ${outcomePct >= 90 ? "on track to meet all goals" : outcomePct >= 70 ? "progressing well toward its objectives" : "in early stages with strong growth potential"}. Led by ${program.leadStaff}, the initiative continues to demonstrate measurable community impact.`;
 }
 
 export default function ProgramsPage() {
-  const [detailProgram, setDetailProgram] = useState<DemoProgram | null>(null);
+  const [detailProgram, setDetailProgram] = useState<ProgramView | null>(null);
+  const { data: programs = [], isLoading } = usePrograms();
 
-  const totalBeneficiaries = DEMO_PROGRAMS.reduce((s, p) => s + p.metrics.beneficiaryCount, 0);
-  const totalVolunteerHours = DEMO_PROGRAMS.reduce((s, p) => s + p.metrics.volunteerHours, 0);
-  const activeCount = DEMO_PROGRAMS.filter((p) => p.status === "active").length;
+  const totalBeneficiaries = programs.reduce((s, p) => s + p.metrics.beneficiaryCount, 0);
+  const totalVolunteerHours = programs.reduce((s, p) => s + p.metrics.volunteerHours, 0);
+  const activeCount = programs.filter((p) => p.status === "active").length;
 
-  const handleAddToGrant = (program: DemoProgram) => {
+  const handleAddToGrant = (program: ProgramView) => {
     toast.success(`${program.name} impact data added to grant report`, {
       description: `Linked to ${DEMO_GRANTS.grants[0].name}`,
     });
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[40vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -105,89 +116,92 @@ export default function ProgramsPage() {
               <TrendingUp className="h-5 w-5 text-amber-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{DEMO_PROGRAMS.length}</p>
+              <p className="text-2xl font-bold">{programs.length}</p>
               <p className="text-xs text-muted-foreground">Total Programs</p>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Program Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {DEMO_PROGRAMS.map((program) => {
-          const utilPct = Math.round((program.metrics.budgetUsed / program.metrics.budgetTotal) * 100);
-          const outcomePct = Math.round((program.metrics.outcomesAchieved / program.metrics.outcomesTarget) * 100);
+      {programs.length === 0 ? (
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">
+            No programs found. Apply the nonprofit seed (file 14) in Lovable SQL Editor.
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          {programs.map((program) => {
+            const utilPct = Math.round((program.metrics.budgetUsed / program.metrics.budgetTotal) * 100);
+            const outcomePct = Math.round((program.metrics.outcomesAchieved / program.metrics.outcomesTarget) * 100);
 
-          return (
-            <Card key={program.id} className="overflow-hidden">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
+            return (
+              <Card key={program.id} className="overflow-hidden">
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <CardTitle className="text-base">{program.name}</CardTitle>
+                      <CardDescription className="mt-1">{program.description}</CardDescription>
+                    </div>
+                    <Badge variant="outline" className={`text-xs capitalize ${statusColors[program.status]}`}>
+                      {program.status}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2">
+                    <span>Lead: {program.leadStaff}</span>
+                    <span>•</span>
+                    <span>Started: {program.startDate}</span>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">Beneficiaries:</span>
+                      <span className="font-medium">{program.metrics.beneficiaryCount}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">Vol. Hours:</span>
+                      <span className="font-medium">{program.metrics.volunteerHours.toLocaleString()}</span>
+                    </div>
+                  </div>
+
                   <div>
-                    <CardTitle className="text-base">{program.name}</CardTitle>
-                    <CardDescription className="mt-1">{program.description}</CardDescription>
+                    <div className="flex items-center justify-between text-sm mb-1">
+                      <span className="text-muted-foreground">Budget Utilization</span>
+                      <span className="font-medium">{utilPct}%</span>
+                    </div>
+                    <Progress value={utilPct} className="h-2" />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      ${program.metrics.budgetUsed.toLocaleString()} of ${program.metrics.budgetTotal.toLocaleString()}
+                    </p>
                   </div>
-                  <Badge variant="outline" className={`text-xs capitalize ${statusColors[program.status]}`}>
-                    {program.status}
-                  </Badge>
-                </div>
-                <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2">
-                  <span>Lead: {program.leadStaff}</span>
-                  <span>•</span>
-                  <span>Started: {program.startDate}</span>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Metrics grid */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">Beneficiaries:</span>
-                    <span className="font-medium">{program.metrics.beneficiaryCount}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">Vol. Hours:</span>
-                    <span className="font-medium">{program.metrics.volunteerHours.toLocaleString()}</span>
-                  </div>
-                </div>
 
-                {/* Budget utilization */}
-                <div>
-                  <div className="flex items-center justify-between text-sm mb-1">
-                    <span className="text-muted-foreground">Budget Utilization</span>
-                    <span className="font-medium">{utilPct}%</span>
+                  <div>
+                    <div className="flex items-center justify-between text-sm mb-1">
+                      <span className="text-muted-foreground">Outcomes Achieved</span>
+                      <span className="font-medium">{program.metrics.outcomesAchieved}/{program.metrics.outcomesTarget}</span>
+                    </div>
+                    <Progress value={outcomePct} className="h-2" />
                   </div>
-                  <Progress value={utilPct} className="h-2" />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    ${program.metrics.budgetUsed.toLocaleString()} of ${program.metrics.budgetTotal.toLocaleString()}
-                  </p>
-                </div>
 
-                {/* Outcomes */}
-                <div>
-                  <div className="flex items-center justify-between text-sm mb-1">
-                    <span className="text-muted-foreground">Outcomes Achieved</span>
-                    <span className="font-medium">{program.metrics.outcomesAchieved}/{program.metrics.outcomesTarget}</span>
+                  <div className="flex items-center gap-2 pt-2">
+                    <Button size="sm" variant="outline" onClick={() => setDetailProgram(program)}>
+                      <Sparkles className="h-3.5 w-3.5 mr-1" />
+                      Impact Summary
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => handleAddToGrant(program)}>
+                      <FileText className="h-3.5 w-3.5 mr-1" />
+                      Add to Grant Report
+                    </Button>
                   </div>
-                  <Progress value={outcomePct} className="h-2" />
-                </div>
-
-                {/* Actions */}
-                <div className="flex items-center gap-2 pt-2">
-                  <Button size="sm" variant="outline" onClick={() => setDetailProgram(program)}>
-                    <Sparkles className="h-3.5 w-3.5 mr-1" />
-                    Impact Summary
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={() => handleAddToGrant(program)}>
-                    <FileText className="h-3.5 w-3.5 mr-1" />
-                    Add to Grant Report
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
 
       {/* Impact narrative sheet */}
       <Sheet open={!!detailProgram} onOpenChange={() => setDetailProgram(null)}>

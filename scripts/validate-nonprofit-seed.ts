@@ -11,6 +11,7 @@ import {
   DEMO_CAMPAIGNS,
   DEMO_DONATIONS_RECENT,
   DEMO_MANAGED_EVENTS,
+  DEMO_PROGRAMS,
 } from "../src/shared/data/nonprofitDemoData.ts";
 import { seedUuid } from "./generate-nonprofit-seed.ts";
 
@@ -41,6 +42,7 @@ const membersSql = readFileSync(join(SEED_DIR, "10-nonprofit-members.sql"), "utf
 const volunteersSql = readFileSync(join(SEED_DIR, "11-nonprofit-volunteers.sql"), "utf8");
 const donationsSql = readFileSync(join(SEED_DIR, "12-nonprofit-donations.sql"), "utf8");
 const eventsSql = readFileSync(join(SEED_DIR, "13-nonprofit-events.sql"), "utf8");
+const programsSql = readFileSync(join(SEED_DIR, "14-nonprofit-programs.sql"), "utf8");
 
 assert(countInsertRows(membersSql, "nonprofit_members") === DEMO_MEMBERS.length, "Member row count mismatch");
 assert(countInsertRows(volunteersSql, "nonprofit_volunteers") === DEMO_VOLUNTEERS.length, "Volunteer row count mismatch");
@@ -52,6 +54,7 @@ assert(countInsertRows(eventsSql, "nonprofit_event_registrants") === registrantC
 assert(countInsertRows(eventsSql, "nonprofit_event_ticket_types") === ticketCount, "Ticket type row count mismatch");
 assert(countInsertRows(eventsSql, "nonprofit_event_speakers") === speakerCount, "Speaker row count mismatch");
 assert(countInsertRows(eventsSql, "nonprofit_event_agenda_items") === agendaCount, "Agenda row count mismatch");
+assert(countInsertRows(programsSql, "nonprofit_programs") === DEMO_PROGRAMS.length, "Program row count mismatch");
 
 for (const d of DEMO_DONATIONS_RECENT) {
   assert(donationsSql.includes(`'${seedUuid(d.campaignId)}'`), `Missing campaign FK for donation ${d.id}`);
@@ -62,3 +65,4 @@ console.log(`  members: ${DEMO_MEMBERS.length}`);
 console.log(`  volunteers: ${DEMO_VOLUNTEERS.length}, shifts: ${shiftCount}`);
 console.log(`  campaigns: ${DEMO_CAMPAIGNS.length}, donations: ${DEMO_DONATIONS_RECENT.length}`);
 console.log(`  events: ${DEMO_MANAGED_EVENTS.length}, registrants: ${registrantCount}`);
+console.log(`  programs: ${DEMO_PROGRAMS.length}`);

@@ -31,7 +31,15 @@ Use this guide when the project runs on **Lovable Cloud** (integrated Supabase) 
    - In Lovable → **Database** → **Tables**, confirm you see `nonprofit_members`, `nonprofit_volunteers`, etc.
    - If missing, apply migrations from `supabase/migrations/` via SQL Editor first (or ask dev to run `npm run migrations:run` on a machine with Supabase CLI access)
 
-### Run the seed (4 files, in order)
+### Before seed files 10→14
+
+Run the **migration** once in Lovable SQL Editor if `nonprofit_programs` does not exist yet:
+
+- Copy all of `supabase/migrations/20260615120000_nonprofit_programs.sql` → Run
+
+Then run seed files 10→14 in order (see table above).
+
+### Run the seed (5 files, in order)
 
 Open your project in **Cursor** (or GitHub) — the SQL files live in the repo:
 
@@ -41,6 +49,7 @@ Open your project in **Cursor** (or GitHub) — the SQL files live in the repo:
 | 2 | `supabase/seed/11-nonprofit-volunteers.sql` | 15 volunteers + 30 shifts |
 | 3 | `supabase/seed/12-nonprofit-donations.sql` | 3 campaigns + 20 donations |
 | 4 | `supabase/seed/13-nonprofit-events.sql` | 5 events + tickets, speakers, agenda, registrants |
+| 5 | `supabase/seed/14-nonprofit-programs.sql` | 5 programs with metrics |
 
 **For each file:**
 
@@ -54,7 +63,7 @@ Open your project in **Cursor** (or GitHub) — the SQL files live in the repo:
 
 ### Verify in Lovable (SQL Editor)
 
-Run this after all four files:
+Run this after all seed files (10→14):
 
 ```sql
 SELECT 'nonprofit_members' AS tbl, COUNT(*) AS n FROM nonprofit_members
@@ -63,7 +72,8 @@ UNION ALL SELECT 'nonprofit_volunteer_shifts', COUNT(*) FROM nonprofit_volunteer
 UNION ALL SELECT 'nonprofit_campaigns', COUNT(*) FROM nonprofit_campaigns
 UNION ALL SELECT 'nonprofit_donations', COUNT(*) FROM nonprofit_donations
 UNION ALL SELECT 'nonprofit_events', COUNT(*) FROM nonprofit_events
-UNION ALL SELECT 'nonprofit_event_registrants', COUNT(*) FROM nonprofit_event_registrants;
+UNION ALL SELECT 'nonprofit_event_registrants', COUNT(*) FROM nonprofit_event_registrants
+UNION ALL SELECT 'nonprofit_programs', COUNT(*) FROM nonprofit_programs;
 ```
 
 **Expected counts (seed only — minimum):**
@@ -77,6 +87,7 @@ UNION ALL SELECT 'nonprofit_event_registrants', COUNT(*) FROM nonprofit_event_re
 | nonprofit_donations | 20 |
 | nonprofit_events | 5 |
 | nonprofit_event_registrants | 18 |
+| nonprofit_programs | 5 |
 
 **Totals may be higher** if Lovable already had rows in these tables before you ran the seed. The seed only upserts 20 fixed demo members (and likewise for other tables) — it does **not** wipe the whole table.
 
@@ -126,6 +137,7 @@ Click **Confirm / Run anyway** in Lovable if you chose to reset. Then paste and 
    - `/volunteers` — demo volunteers visible
    - `/donations` — campaigns + gifts visible
    - `/events?tab=manage` — demo events visible
+   - `/programs` — 5 programs with metrics (Youth Mentorship Program, etc.)
 
    Row counts in the UI may exceed seed totals if the database had prior rows.
 

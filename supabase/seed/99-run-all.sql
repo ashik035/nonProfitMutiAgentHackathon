@@ -23,7 +23,8 @@
 --     -f supabase/seed/10-nonprofit-members.sql \
 --     -f supabase/seed/11-nonprofit-volunteers.sql \
 --     -f supabase/seed/12-nonprofit-donations.sql \
---     -f supabase/seed/13-nonprofit-events.sql
+--     -f supabase/seed/13-nonprofit-events.sql \
+--     -f supabase/seed/14-nonprofit-programs.sql
 --
 -- Prerequisites:
 --   1. At least one user in auth.users (sign up via the app).
@@ -34,8 +35,8 @@
 --   5. 03b-meetings-extended.sql runs AFTER 03-meetings.sql and 06-business-dev.sql
 --      (needs contacts, deals, and base meetings to exist).
 --   6. 09-feedback-bugs.sql seeds three Sales & CRM bug reports for the Feedback dashboard.
---   7. 10-13 nonprofit seed files populate live DB pages (membership, volunteers,
---      donations, events). Run `npm run seed:nonprofit` or apply 10→13 in SQL Editor.
+--   7. 10-14 nonprofit seed files populate live DB pages (membership, volunteers,
+--      donations, events, programs). Run `npm run seed:nonprofit` or apply 10→14 in SQL Editor.
 --      Requires at least one auth.users row. Source: nonprofitDemoData.ts.
 --
 -- Notes:
