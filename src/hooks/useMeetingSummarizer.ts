@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { API } from "@/shared/config/api";
 import {
   MEETING_SUMMARIZER_MODEL,
+  buildMeetingSummarizerQuestion,
   parseMeetingSummaryResponse,
   summarizeMeetingWithClaudeSonnet,
 } from "@/lib/meetingSummarizer";
@@ -21,10 +22,12 @@ export interface MeetingSummarizerResult {
   latencyMs: number;
   model: string;
   provider: string;
+  /** True when cloud edge functions are stale and Gemini Q&A fallback was used. */
+  isGeminiFallback?: boolean;
 }
 
-const LOVABLE_PUBLISH_HINT =
-  "In Lovable, click Publish (top right) so the updated edge function is deployed to Lovable Cloud, then try again.";
+const LOVABLE_EDGE_DEPLOY_HINT =
+  "Lovable Publish updates the website only. Edge functions must be deployed separately — in Lovable chat ask: \"Deploy generate-meeting-summary-v2 and event-intelligence from GitHub main.\"";
 
 const DEDICATED_SUMMARIZER_FN = "meeting-summarizer";
 
@@ -40,10 +43,10 @@ function extractErrorMessage(error: unknown, data: unknown): string {
   if (error instanceof Error) {
     const msg = error.message;
     if (msg.includes("Failed to send a request to the Edge Function")) {
-      return `Could not reach the AI service. ${LOVABLE_PUBLISH_HINT}`;
+      return `Could not reach the AI service. ${LOVABLE_EDGE_DEPLOY_HINT}`;
     }
     if (msg.includes("NOT_FOUND") || msg.includes("non-2xx")) {
-      return `AI backend not available on cloud. ${LOVABLE_PUBLISH_HINT}`;
+      return `AI backend not available on cloud. ${LOVABLE_EDGE_DEPLOY_HINT}`;
     }
     return msg;
   }
@@ -161,6 +164,26 @@ async function tryClientSonnet(transcript: string): Promise<MeetingSummarizerRes
   };
 }
 
+const GEMINI_EVENT_MODEL = "google/gemini-3-flash-preview";
+
+async function tryEventIntelligenceGeminiFallback(
+  transcript: string
+): Promise<MeetingSummarizerResult> {
+  const start = Date.now();
+  const data = await invokeEdgeFunction(API.AI.EVENT_INTELLIGENCE, {
+    question: buildMeetingSummarizerQuestion(transcript),
+  });
+  const summary = summaryFromEdgePayload(data);
+
+  return {
+    summary,
+    latencyMs: Date.now() - start,
+    model: GEMINI_EVENT_MODEL,
+    provider: "event-intelligence-gemini-fallback",
+    isGeminiFallback: true,
+  };
+}
+
 export function useMeetingSummarizer() {
   return useMutation({
     mutationFn: async (transcript: string): Promise<MeetingSummarizerResult> => {
@@ -170,6 +193,12 @@ export function useMeetingSummarizer() {
       if (import.meta.env.VITE_LOVABLE_API_KEY) {
         attempts.push({ name: "lovable-client", fn: () => tryClientSonnet(trimmed) });
       }
+
+      // Gemini Q&A path works on current Lovable cloud (Sonnet edge code not deployed yet)
+      attempts.push({
+        name: "event-intelligence-gemini-fallback",
+        fn: () => tryEventIntelligenceGeminiFallback(trimmed),
+      });
 
       attempts.push(
         { name: API.MEETINGS.SUMMARIZER, fn: () => trySummaryV2(trimmed) },
@@ -189,8 +218,8 @@ export function useMeetingSummarizer() {
 
       throw new Error(
         errors.length > 0
-          ? `Claude Sonnet unavailable. ${errors.join(" | ")}`
-          : `Claude Sonnet unavailable. ${LOVABLE_PUBLISH_HINT}`
+          ? `Meeting minutes unavailable. ${errors.join(" | ")}`
+          : `Meeting minutes unavailable. ${LOVABLE_EDGE_DEPLOY_HINT}`
       );
     },
   });

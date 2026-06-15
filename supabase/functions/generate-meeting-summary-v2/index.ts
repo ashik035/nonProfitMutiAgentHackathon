@@ -178,15 +178,40 @@ serve(async (req) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
+  if (req.method === 'GET') {
+    return new Response(
+      JSON.stringify({
+        ok: true,
+        function: 'generate-meeting-summary-v2',
+        modes: ['transcript', 'meeting_id'],
+      }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+    )
+  }
+
   try {
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     )
 
-    const body = await req.json()
+    let body: Record<string, unknown> = {}
+    try {
+      const parsed = await req.json()
+      body = parsed != null && typeof parsed === 'object' ? parsed : {}
+    } catch {
+      body = {}
+    }
+
+    if (body.ping === true) {
+      return new Response(
+        JSON.stringify({ ok: true, message: 'generate-meeting-summary-v2 is ready' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+      )
+    }
+
     const pastedTranscript =
-      typeof body?.transcript === 'string' ? body.transcript.trim() : ''
+      typeof body.transcript === 'string' ? body.transcript.trim() : ''
 
     // ── Agent demo mode: raw transcript paste (Meeting Summarizer UI) ──
     if (pastedTranscript) {
