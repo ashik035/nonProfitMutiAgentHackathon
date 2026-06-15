@@ -1,0 +1,53 @@
+---
+description: Database seeds, migrations, and SQL apply workflows for Lovable Cloud users without direct Supabase dashboard access.
+alwaysApply: true
+---
+
+# Lovable Cloud database operations
+
+## Detect the user's environment
+
+If the user mentions **Lovable**, **Lovable Cloud**, **no Supabase login**, **can't access supabase.com**, or **SQL Editor in Lovable dashboard** — they are a **Lovable-only operator**.
+
+**Do NOT** lead with:
+- "Add `DATABASE_URL` to `.env`"
+- "Log into Supabase Dashboard"
+- `npm run seed:*` terminal commands (unless they confirm local `.env` secrets)
+
+**DO** lead with:
+- Lovable → Cloud / Database → **SQL Editor**
+- Copy/paste SQL from repo files (`supabase/seed/`, `supabase/migrations/`)
+- Verify via Lovable **Table view** or verification SQL
+- Browser check on Preview / `*.lovable.app` URL
+
+## Authoritative doc
+
+Read and follow **`docs/03-development/lovable-database-operations.md`** for full step-by-step instructions.
+
+## Nonprofit live-data seed (quick reference)
+
+Prerequisite: at least one user signed up via app (`auth.users`).
+
+Run in Lovable SQL Editor **in order**:
+1. `supabase/seed/10-nonprofit-members.sql`
+2. `supabase/seed/11-nonprofit-volunteers.sql`
+3. `supabase/seed/12-nonprofit-donations.sql`
+4. `supabase/seed/13-nonprofit-events.sql`
+
+Verify counts: 20 members, 15 volunteers, 30 shifts, 3 campaigns, 20 donations, 5 events.
+
+Browser QA: `docs/03-development/browser-qa-guides.md` → Nonprofit live data pages.
+
+## Self-host / Supabase dashboard users
+
+If the user **has** Supabase dashboard or `DATABASE_URL` / service role in `.env`, terminal apply via `npm run seed:nonprofit` is valid. See `.env.example` and seed script output.
+
+## Response format
+
+When guiding database/seed tasks, include:
+1. **Which UI** (Lovable SQL Editor vs Supabase vs terminal)
+2. **Exact repo file paths** to copy
+3. **Order** of execution
+4. **Verification SQL or table counts**
+5. **Browser routes** to confirm UI
+6. **Troubleshooting** for common Lovable errors
