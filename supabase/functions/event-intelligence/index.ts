@@ -27,7 +27,9 @@ const EVENT_SYSTEM_PROMPT = `You are the Event Intelligence Assistant for Bright
 
 Provide concise, actionable recommendations for nonprofit event management. Focus on donor engagement, follow-up prioritization, and volunteer retention. Keep responses under 200 words.`;
 
-const MEETING_SUMMARIZER_MODEL = "claude-sonnet-4-20250514";
+/** Lovable gateway model id (deployed on Lovable Cloud). */
+const MEETING_SUMMARIZER_MODEL = "anthropic/claude-sonnet-4-20250514";
+const EVENT_QA_MODEL = "google/gemini-3-flash-preview";
 const MAX_TRANSCRIPT_CHARS = 12000;
 const LOVABLE_GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
@@ -55,6 +57,10 @@ Rules:
 - Be factual; use names from the transcript; flag unclear items with [UNCLEAR] in the relevant field.
 - Return only the JSON object.`;
 
+interface LovableGatewayError extends Error {
+  status?: number;
+}
+
 function parseSummaryContent(content: string): Record<string, unknown> {
   const cleaned = content.replace(/```json|```/g, "").trim();
   try {
@@ -68,11 +74,11 @@ function parseSummaryContent(content: string): Record<string, unknown> {
   }
 }
 
-async function callLovableChat(
+async function callLovableGateway(
   apiKey: string,
   model: string,
-  system: string,
-  user: string,
+  systemPrompt: string,
+  userContent: string,
   maxTokens: number
 ): Promise<string> {
   const response = await fetch(LOVABLE_GATEWAY_URL, {
@@ -84,24 +90,20 @@ async function callLovableChat(
     body: JSON.stringify({
       model,
       messages: [
-        { role: "system", content: system },
-        { role: "user", content: user },
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userContent },
       ],
       max_completion_tokens: maxTokens,
-      temperature: model.includes("claude") ? 0.2 : 0.7,
+      temperature: model.includes("claude") || model.includes("anthropic") ? 0.2 : 0.7,
     }),
   });
 
-  if (response.status === 429) {
-    throw new Error("Rate limit exceeded — please try again shortly.");
-  }
-  if (response.status === 402) {
-    throw new Error("AI credits exhausted — please add funds.");
-  }
   if (!response.ok) {
     const text = await response.text();
     console.error("AI gateway error:", response.status, text);
-    throw new Error("AI gateway error");
+    const err: LovableGatewayError = new Error(`AI gateway error: ${response.status}`);
+    err.status = response.status;
+    throw err;
   }
 
   const data = await response.json();
@@ -112,22 +114,27 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const body = await req.json();
-    const mode = body?.mode as string | undefined;
-    const transcript = body?.transcript as string | undefined;
-    const question = body?.question as string | undefined;
+    const body = await req.json().catch(() => ({}));
+    const mode: string = body.mode ?? "event_question";
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    // Meeting Summarizer — Claude Sonnet structured minutes from pasted transcript
-    if (mode === "meeting_summary" && transcript?.trim()) {
+    if (mode === "meeting_summary") {
+      const transcript: string = body.transcript ?? "";
+      if (!transcript.trim()) {
+        return new Response(JSON.stringify({ error: "transcript is required" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       const clipped =
         transcript.length > MAX_TRANSCRIPT_CHARS
           ? transcript.slice(0, MAX_TRANSCRIPT_CHARS)
           : transcript;
 
-      const content = await callLovableChat(
+      const content = await callLovableGateway(
         LOVABLE_API_KEY,
         MEETING_SUMMARIZER_MODEL,
         MEETING_SUMMARIZER_SYSTEM_PROMPT,
@@ -150,6 +157,7 @@ serve(async (req) => {
       );
     }
 
+    const question: string = body.question ?? "";
     if (!question) {
       return new Response(JSON.stringify({ error: "question is required" }), {
         status: 400,
@@ -157,9 +165,9 @@ serve(async (req) => {
       });
     }
 
-    const content = await callLovableChat(
+    const content = await callLovableGateway(
       LOVABLE_API_KEY,
-      "google/gemini-3-flash-preview",
+      EVENT_QA_MODEL,
       EVENT_SYSTEM_PROMPT,
       question,
       800
@@ -168,15 +176,25 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         response: content || "No response generated.",
-        model: "google/gemini-3-flash-preview",
+        model: EVENT_QA_MODEL,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (e) {
+  } catch (e: unknown) {
     console.error("event-intelligence error:", e);
-    return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    const gatewayErr = e as LovableGatewayError;
+    const status = gatewayErr.status === 429 || gatewayErr.status === 402 ? gatewayErr.status : 500;
+    const message =
+      status === 429
+        ? "Rate limit exceeded — please try again shortly."
+        : status === 402
+          ? "AI credits exhausted — please add funds."
+          : e instanceof Error
+            ? e.message
+            : "Unknown error";
+    return new Response(JSON.stringify({ error: message }), {
+      status,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });
