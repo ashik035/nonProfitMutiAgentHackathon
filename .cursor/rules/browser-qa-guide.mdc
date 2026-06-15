@@ -1,0 +1,39 @@
+---
+description: When the user asks how to verify or test something in the browser, respond with a full step-by-step QA guide (routes, clicks, expected values).
+alwaysApply: true
+---
+
+# Browser QA response format
+
+When the user asks to check, test, verify, preview, or QA something in the browser — including phrases like:
+- "how can I check this on browser?"
+- "how do I test this?"
+- "walk me through verifying this"
+- "what should I click?"
+
+**Do not give a one-line answer.** Always produce a structured guide like a QA handoff.
+
+## Required sections (in order)
+
+1. **Before you start** — dev server URL (`http://localhost:8080` via `npm run dev`), env/auth prerequisites
+2. **Route map** — table of relevant paths from `src/modules/platform/routes.tsx` and feature routes
+3. **Step-by-step** — numbered steps with exact URLs, UI labels, and **onClick actions** (what to click and what happens next)
+4. **What to check** — table of UI elements and expected values (copy, numbers, styling)
+5. **Optional cross-checks** — related routes to validate consistency
+6. **Troubleshooting** — common blockers (wrong role, admin generic dashboard, missing demo users, production Quick Login hidden)
+7. **Quick checklist** — copy-paste QA checklist
+
+## Project defaults (use unless the feature differs)
+
+- **Login / Quick Login**: `/login` — test accounts in `src/pages/Login.tsx` (password `Demo@123`)
+- **Role dashboards**: `/dashboard` routes by `agencyRole` in `src/pages/Dashboard.tsx`
+- **Admin users** see the generic dashboard — **not** role-specific dashboards
+- **Demo role accounts**: ED, DD, FM, OM emails at `@nonprofitai.software`
+
+## Feature-specific guides
+
+Read and follow **`docs/03-development/browser-qa-guides.md`** when it contains a guide for the feature under test.
+
+For **database seeds, migrations, or live table data** when the user uses **Lovable Cloud** (no Supabase dashboard login), read **`docs/03-development/lovable-database-operations.md`** first and guide via Lovable SQL Editor — not `.env` / terminal unless they confirm local secrets.
+
+If no saved guide exists yet, derive routes and clicks from the codebase (`App.tsx`, module `routes.tsx`, relevant page components) before writing the guide.
