@@ -2746,6 +2746,60 @@ export type Database = {
         }
         Relationships: []
       }
+      nonprofit_programs: {
+        Row: {
+          beneficiary_count: number
+          budget_total: number
+          budget_used: number
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          lead_staff: string | null
+          name: string
+          outcomes_achieved: number
+          outcomes_target: number
+          start_date: string | null
+          status: string
+          updated_at: string | null
+          volunteer_hours: number
+        }
+        Insert: {
+          beneficiary_count?: number
+          budget_total?: number
+          budget_used?: number
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          lead_staff?: string | null
+          name: string
+          outcomes_achieved?: number
+          outcomes_target?: number
+          start_date?: string | null
+          status?: string
+          updated_at?: string | null
+          volunteer_hours?: number
+        }
+        Update: {
+          beneficiary_count?: number
+          budget_total?: number
+          budget_used?: number
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          lead_staff?: string | null
+          name?: string
+          outcomes_achieved?: number
+          outcomes_target?: number
+          start_date?: string | null
+          status?: string
+          updated_at?: string | null
+          volunteer_hours?: number
+        }
+        Relationships: []
+      }
       nonprofit_role_permissions: {
         Row: {
           created_at: string

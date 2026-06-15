@@ -14,6 +14,7 @@ import {
   DEMO_CAMPAIGNS,
   DEMO_DONATIONS_RECENT,
   DEMO_MANAGED_EVENTS,
+  DEMO_PROGRAMS,
 } from "../src/shared/data/nonprofitDemoData.ts";
 
 const SEED_DIR = join(import.meta.dirname, "../supabase/seed");
@@ -456,11 +457,65 @@ function generateEventsSql(): string {
   return lines.join("\n");
 }
 
+function generateProgramsSql(): string {
+  const ids = DEMO_PROGRAMS.map((p) => seedUuid(p.id));
+  const lines: string[] = [
+    fileHeader("Nonprofit Programs"),
+    `DELETE FROM public.nonprofit_programs WHERE id IN (${ids.map((id) => `'${id}'`).join(", ")});`,
+    "",
+    "INSERT INTO public.nonprofit_programs (",
+    "  id, created_by, name, description, start_date, status, lead_staff,",
+    "  beneficiary_count, volunteer_hours, budget_used, budget_total, outcomes_achieved, outcomes_target",
+    ") VALUES",
+  ];
+
+  const rows = DEMO_PROGRAMS.map((p, i) => {
+    const m = p.metrics;
+    const parts = [
+      `'${seedUuid(p.id)}'`,
+      "(SELECT id FROM auth.users ORDER BY created_at LIMIT 1)",
+      sqlStr(p.name),
+      sqlStr(p.description),
+      sqlStr(parseDemoDate(p.startDate, p.id)),
+      sqlStr(p.status),
+      sqlStr(p.leadStaff),
+      sqlNum(m.beneficiaryCount),
+      sqlNum(m.volunteerHours),
+      sqlNum(m.budgetUsed),
+      sqlNum(m.budgetTotal),
+      sqlNum(m.outcomesAchieved),
+      sqlNum(m.outcomesTarget),
+    ];
+    const suffix = i < DEMO_PROGRAMS.length - 1 ? "," : "";
+    return `  (${parts.join(", ")})${suffix}`;
+  });
+
+  lines.push(...rows);
+  lines.push(
+    "ON CONFLICT (id) DO UPDATE SET",
+    "  name = EXCLUDED.name,",
+    "  description = EXCLUDED.description,",
+    "  start_date = EXCLUDED.start_date,",
+    "  status = EXCLUDED.status,",
+    "  lead_staff = EXCLUDED.lead_staff,",
+    "  beneficiary_count = EXCLUDED.beneficiary_count,",
+    "  volunteer_hours = EXCLUDED.volunteer_hours,",
+    "  budget_used = EXCLUDED.budget_used,",
+    "  budget_total = EXCLUDED.budget_total,",
+    "  outcomes_achieved = EXCLUDED.outcomes_achieved,",
+    "  outcomes_target = EXCLUDED.outcomes_target,",
+    "  updated_at = now();",
+    ""
+  );
+  return lines.join("\n");
+}
+
 const files: Record<string, string> = {
   "10-nonprofit-members.sql": generateMembersSql(),
   "11-nonprofit-volunteers.sql": generateVolunteersSql(),
   "12-nonprofit-donations.sql": generateDonationsSql(),
   "13-nonprofit-events.sql": generateEventsSql(),
+  "14-nonprofit-programs.sql": generateProgramsSql(),
 };
 
 export function writeNonprofitSeedFiles(): void {

@@ -19,6 +19,7 @@ SEED_FILES=(
   "supabase/seed/11-nonprofit-volunteers.sql"
   "supabase/seed/12-nonprofit-donations.sql"
   "supabase/seed/13-nonprofit-events.sql"
+  "supabase/seed/14-nonprofit-programs.sql"
 )
 
 if [[ -f .env ]]; then

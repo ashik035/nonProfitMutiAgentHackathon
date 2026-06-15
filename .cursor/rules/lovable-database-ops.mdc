@@ -33,10 +33,13 @@ Run in Lovable SQL Editor **in order**:
 2. `supabase/seed/11-nonprofit-volunteers.sql`
 3. `supabase/seed/12-nonprofit-donations.sql`
 4. `supabase/seed/13-nonprofit-events.sql`
+5. `supabase/seed/14-nonprofit-programs.sql`
 
-Verify counts: 20 members, 15 volunteers, 30 shifts, 3 campaigns, 20 donations, 5 events.
+Verify counts: 20 members, 15 volunteers, 30 shifts, 3 campaigns, 20 donations, 5 events, 5 programs.
 
 Browser QA: `docs/03-development/browser-qa-guides.md` → Nonprofit live data pages.
+
+**First time only:** run `supabase/migrations/20260615120000_nonprofit_programs.sql` before file 14 if `nonprofit_programs` table is missing.
 
 ## Self-host / Supabase dashboard users
 

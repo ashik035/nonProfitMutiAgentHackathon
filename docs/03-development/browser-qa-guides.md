@@ -128,7 +128,10 @@ When you ask *"how can I check this in the browser?"*, the agent should follow `
    - `supabase/seed/11-nonprofit-volunteers.sql`
    - `supabase/seed/12-nonprofit-donations.sql`
    - `supabase/seed/13-nonprofit-events.sql`
+   - `supabase/seed/14-nonprofit-programs.sql`
 4. Verify counts in Table view or with verification SQL in [lovable-database-operations.md](./lovable-database-operations.md)
+
+**First time only:** run migration `supabase/migrations/20260615120000_nonprofit_programs.sql` before file 14 if the table is missing.
 
 #### Terminal (optional — requires secrets in local `.env`)
 
