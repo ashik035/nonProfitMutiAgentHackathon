@@ -29,6 +29,26 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useEffect } from 'react';
+import {
+  getPresetModuleStates,
+  MODULE_PRICING_TIER_SETTING_KEY,
+  PRICING_PRESET_LIST,
+  type PricingTierId,
+} from '@/shared/config/pricingPresets';
+import {
+  getNonprofitModules,
+  MODULE_REGISTRY,
+  type NonprofitModuleId,
+} from '@/shared/config/modules';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import { ChevronDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { queryKeys } from '@/lib/cache';
+import { upsertSystemSetting } from '@/lib/systemSettings';
 
 interface WizardStep {
   id: string;
@@ -90,6 +110,9 @@ interface OnboardingData {
   enableMeetings: boolean;
   enableTasks: boolean;
   enableAIAgents: boolean;
+  // Nonprofit module preset
+  pricingTier: PricingTierId;
+  nonprofitModules: Record<NonprofitModuleId, boolean>;
   // Data seeding
   seedAIAgents: boolean;
   seedKnowledgeCategories: boolean;
@@ -107,6 +130,8 @@ const defaultData: OnboardingData = {
   enableMeetings: true,
   enableTasks: true,
   enableAIAgents: true,
+  pricingTier: 'growth',
+  nonprofitModules: getPresetModuleStates('growth'),
   seedAIAgents: true,
   seedKnowledgeCategories: true,
   seedSampleData: false,
@@ -279,10 +304,33 @@ export default function OnboardingWizard() {
         if (error) throw error;
       }
 
+      // Apply nonprofit module configuration
+      await Promise.all(
+        Object.entries(data.nonprofitModules).map(async ([slug, enabled]) => {
+          const mod = MODULE_REGISTRY[slug as NonprofitModuleId];
+          if (!mod || mod.isCore) return;
+
+          const { error } = await supabase
+            .from('app_modules')
+            .update({ is_active: enabled, updated_at: new Date().toISOString() })
+            .eq('slug', slug);
+
+          if (error) throw error;
+        })
+      );
+
+      await upsertSystemSetting(
+        MODULE_PRICING_TIER_SETTING_KEY,
+        data.pricingTier,
+        'Active nonprofit module pricing tier preset'
+      );
+
       return true;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['app-config'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.appModules.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.appModules.pricingTier });
       toast.success('Setup completed successfully!');
     },
     onError: (error: Error) => {
@@ -400,28 +448,96 @@ export default function OnboardingWizard() {
 
       case 'features':
         return (
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground mb-4">
-              Enable or disable features based on your needs. You can change these later.
-            </p>
-            {[
-              { key: 'enableAIChat', label: 'AI Chat Assistant', description: 'Chat with AI for quick answers' },
-              { key: 'enableKnowledgeBase', label: 'Knowledge Base', description: 'Document storage and search' },
-              { key: 'enableMeetings', label: 'Meetings', description: 'Meeting scheduling and transcripts' },
-              { key: 'enableTasks', label: 'Task Management', description: 'Track and assign tasks' },
-              { key: 'enableAIAgents', label: 'AI Agents', description: 'Automated AI workflows' },
-            ].map((feature) => (
-              <div key={feature.key} className="flex items-center justify-between p-4 border rounded-lg">
-                <div>
-                  <p className="font-medium">{feature.label}</p>
-                  <p className="text-sm text-muted-foreground">{feature.description}</p>
-                </div>
-                <Switch
-                  checked={data[feature.key as keyof OnboardingData] as boolean}
-                  onCheckedChange={(checked) => updateData({ [feature.key]: checked })}
-                />
+          <div className="space-y-6">
+            <div>
+              <p className="text-sm font-medium mb-3">Pricing tier preset</p>
+              <p className="text-sm text-muted-foreground mb-4">
+                Choose a module bundle for this organization. You can override individual modules below.
+              </p>
+              <div className="grid gap-3 sm:grid-cols-3">
+                {PRICING_PRESET_LIST.map((preset) => {
+                  const selected = data.pricingTier === preset.id;
+                  return (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      className={cn(
+                        'rounded-lg border p-3 text-left transition-colors',
+                        selected && 'border-primary ring-1 ring-primary/30 bg-primary/5'
+                      )}
+                      onClick={() =>
+                        updateData({
+                          pricingTier: preset.id,
+                          nonprofitModules: getPresetModuleStates(preset.id),
+                        })
+                      }
+                    >
+                      <p className="font-medium text-sm">{preset.name}</p>
+                      <p className="text-lg font-bold">
+                        {preset.price}
+                        <span className="text-xs font-normal text-muted-foreground">
+                          {preset.priceNote}
+                        </span>
+                      </p>
+                    </button>
+                  );
+                })}
               </div>
-            ))}
+            </div>
+
+            <Collapsible>
+              <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium">
+                <ChevronDown className="h-4 w-4" />
+                Advanced: override individual nonprofit modules
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-2 mt-3">
+                {getNonprofitModules().map((mod) => (
+                  <div
+                    key={mod.id}
+                    className="flex items-center justify-between p-3 border rounded-lg"
+                  >
+                    <div>
+                      <p className="font-medium text-sm">{mod.name}</p>
+                      <p className="text-xs text-muted-foreground">{mod.description}</p>
+                    </div>
+                    <Switch
+                      checked={data.nonprofitModules[mod.id as NonprofitModuleId]}
+                      disabled={mod.isCore}
+                      onCheckedChange={(checked) =>
+                        updateData({
+                          nonprofitModules: {
+                            ...data.nonprofitModules,
+                            [mod.id]: checked,
+                          },
+                        })
+                      }
+                    />
+                  </div>
+                ))}
+              </CollapsibleContent>
+            </Collapsible>
+
+            <div className="border-t pt-4">
+              <p className="text-sm font-medium mb-3">Platform features</p>
+              {[
+                { key: 'enableAIChat', label: 'AI Chat Assistant', description: 'Chat with AI for quick answers' },
+                { key: 'enableKnowledgeBase', label: 'Knowledge Base', description: 'Document storage and search' },
+                { key: 'enableMeetings', label: 'Meetings', description: 'Meeting scheduling and transcripts' },
+                { key: 'enableTasks', label: 'Task Management', description: 'Track and assign tasks' },
+                { key: 'enableAIAgents', label: 'AI Agents', description: 'Automated AI workflows' },
+              ].map((feature) => (
+                <div key={feature.key} className="flex items-center justify-between p-4 border rounded-lg mb-2">
+                  <div>
+                    <p className="font-medium">{feature.label}</p>
+                    <p className="text-sm text-muted-foreground">{feature.description}</p>
+                  </div>
+                  <Switch
+                    checked={data[feature.key as keyof OnboardingData] as boolean}
+                    onCheckedChange={(checked) => updateData({ [feature.key]: checked })}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         );
 

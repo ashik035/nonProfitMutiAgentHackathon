@@ -15,12 +15,17 @@ import { useBranding } from "@/contexts/BrandingContext";
 import { AIIndicator, AIGradientText } from "@/components/ui/ai-indicator";
 import { Footer } from "@/components/landing/Footer";
 import { cn } from "@/lib/utils";
+import {
+  PRICING_PRESET_LIST,
+  getPresetModuleLabels,
+  type PricingTierId,
+} from "@/shared/config/pricingPresets";
 
 const DEMO_BOOKING_URL = "https://nonprofitai.software/try-demo";
 const CONTACT_SALES_URL = "https://nonprofitai.software/contact";
 
 interface PricingTier {
-  id: string;
+  id: PricingTierId;
   name: string;
   price: string;
   priceNote: string;
@@ -33,75 +38,40 @@ interface PricingTier {
   popular?: boolean;
 }
 
-const PRICING_TIERS: PricingTier[] = [
-  {
-    id: "starter",
-    name: "Starter",
-    price: "$299",
-    priceNote: "/month",
+const TIER_META: Record<
+  PricingTierId,
+  Pick<PricingTier, "budgetGuidance" | "aiRunsPerMonth" | "ctaLabel" | "ctaHref" | "popular">
+> = {
+  starter: {
     budgetGuidance: "For organizations under $500K annual budget",
-    description:
-      "Essential operational intelligence for smaller nonprofits getting started with AI-assisted workflows.",
-    modules: [
-      "Role-based dashboards (ED, DD, FM, OM)",
-      "Grants management",
-      "Events hub",
-      "Board reports",
-      "Data health monitoring",
-      "Core AI agent team (4 agents)",
-    ],
     aiRunsPerMonth: "1,000",
     ctaLabel: "Book a Demo",
     ctaHref: DEMO_BOOKING_URL,
   },
-  {
-    id: "growth",
-    name: "Growth",
-    price: "$599",
-    priceNote: "/month",
+  growth: {
     budgetGuidance: "For organizations with $500K–$2M annual budget",
-    description:
-      "Full fundraising and people operations for mid-size nonprofits ready to scale donor engagement.",
-    modules: [
-      "Everything in Starter",
-      "Donation center & campaigns",
-      "Membership management",
-      "Volunteer management",
-      "Donor pipeline & retention",
-      "Communications hub",
-      "Knowledge base & semantic search",
-      "Meetings with AI summaries",
-      "Task & action management",
-      "Full AI agent teams (16 agents)",
-    ],
     aiRunsPerMonth: "5,000",
     ctaLabel: "Book a Demo",
     ctaHref: DEMO_BOOKING_URL,
     popular: true,
   },
-  {
-    id: "enterprise",
-    name: "Enterprise",
-    price: "Custom",
-    priceNote: "pricing",
+  enterprise: {
     budgetGuidance: "For organizations with $2M+ annual budget",
-    description:
-      "Advanced CRM, projects, custom integrations, and dedicated support for complex organizations.",
-    modules: [
-      "Everything in Growth",
-      "CRM & business development",
-      "Projects & milestones",
-      "Impact dashboard",
-      "Custom integrations & API access",
-      "SSO & advanced security",
-      "Dedicated success manager",
-      "Custom AI agent configuration",
-    ],
     aiRunsPerMonth: "Custom",
     ctaLabel: "Talk to Sales",
     ctaHref: CONTACT_SALES_URL,
   },
-];
+};
+
+const PRICING_TIERS: PricingTier[] = PRICING_PRESET_LIST.map((preset) => ({
+  id: preset.id,
+  name: preset.name,
+  price: preset.price,
+  priceNote: preset.priceNote,
+  description: preset.description,
+  modules: getPresetModuleLabels(preset.id),
+  ...TIER_META[preset.id],
+}));
 
 type ComparisonValue = boolean | string;
 
@@ -153,43 +123,49 @@ const COMPARISON_ROWS: ComparisonRow[] = [
     enterprise: true,
   },
   {
-    feature: "Events & data health",
+    feature: "Donor pipeline",
     starter: true,
     growth: true,
     enterprise: true,
   },
   {
-    feature: "Donations & campaigns",
+    feature: "Data health & reconciliation",
     starter: false,
     growth: true,
     enterprise: true,
   },
   {
-    feature: "Membership & volunteers",
+    feature: "Events & voice notes",
     starter: false,
     growth: true,
     enterprise: true,
   },
   {
-    feature: "Donor pipeline & retention",
+    feature: "Integration center",
     starter: false,
     growth: true,
     enterprise: true,
   },
   {
-    feature: "Knowledge base",
+    feature: "Donor retention & programs",
     starter: false,
     growth: true,
     enterprise: true,
   },
   {
-    feature: "Meetings & AI summaries",
+    feature: "Donations & membership",
     starter: false,
-    growth: true,
+    growth: false,
     enterprise: true,
   },
   {
-    feature: "CRM & projects",
+    feature: "Volunteers & communications",
+    starter: false,
+    growth: false,
+    enterprise: true,
+  },
+  {
+    feature: "Grant writer & impact dashboard",
     starter: false,
     growth: false,
     enterprise: true,

@@ -101,43 +101,71 @@ export const coreProtectedRoutes = (
     {/* Personal knowledge */}
     <Route path="/personal-knowledge" element={<PersonalKnowledge />} />
 
-    {/* Nonprofit pages */}
-    <Route path="/data-health" element={<DataHealthPage />} />
-    <Route path="/donor-pipeline" element={<DonorPipelinePage />} />
-    <Route path="/reconciliation" element={<ReconciliationPage />} />
-    <Route path="/events" element={<EventsHubPage />} />
-    <Route path="/grants" element={<GrantsPage />} />
-    <Route path="/board-reports" element={<BoardReportsPage />} />
-    <Route path="/ai-agents" element={<AIAgentsPage />} />
-    <Route path="/ai-agents/:id" element={<AIAgentDetailPage />} />
-    <Route path="/ai-agents/:id/settings" element={<AIAgentSettingsPage />} />
-    <Route path="/integration-center" element={<IntegrationCenterPage />} />
-    <Route path="/integrations" element={<IntegrationCenterPage />} />
-
-    {/* Agent discovery pages */}
-    <Route path="/agents" element={<AgentsBrowse />} />
-    <Route path="/agents/activity" element={<AgentActivityFeed />} />
-    <Route path="/agents/:slug" element={<AgentDetail />} />
-
-    {/* New nonprofit pages */}
-    <Route path="/donor-retention" element={<DonorRetentionPage />} />
-    <Route path="/programs" element={<ProgramsPage />} />
-    <Route path="/communications" element={<CommunicationsPage />} />
-
-    {/* Voice Notes */}
-    <Route path="/voice-notes" element={<VoiceNotesPage />} />
-
-    {/* Grant Writer */}
-    <Route path="/grant-writer" element={<GrantWriterPage />} />
-
-    {/* Tier 1 new pages */}
-    <Route path="/membership" element={<MembershipPage />} />
-    <Route path="/volunteers" element={<VolunteersPage />} />
-    <Route path="/event-management" element={<Navigate to="/events?tab=manage" replace />} />
-    <Route path="/donations" element={<DonationCenterPage />} />
-    <Route path="/public-presence" element={<PublicPresencePage />} />
-    <Route path="/impact-dashboard" element={<ImpactDashboardPage />} />
-    <Route path="/engagement-scoring" element={<AIEngagementScoringPage />} />
+    {/* Nonprofit pages — installation-level module gates */}
+    <Route element={<ModuleRoute module="data-health" />}>
+      <Route path="/data-health" element={<DataHealthPage />} />
+    </Route>
+    <Route element={<ModuleRoute module="donor-pipeline" />}>
+      <Route path="/donor-pipeline" element={<DonorPipelinePage />} />
+    </Route>
+    <Route element={<ModuleRoute module="reconciliation" />}>
+      <Route path="/reconciliation" element={<ReconciliationPage />} />
+    </Route>
+    <Route element={<ModuleRoute module="events" />}>
+      <Route path="/events" element={<EventsHubPage />} />
+      <Route path="/event-management" element={<Navigate to="/events?tab=manage" replace />} />
+    </Route>
+    <Route element={<ModuleRoute module="grants" />}>
+      <Route path="/grants" element={<GrantsPage />} />
+    </Route>
+    <Route element={<ModuleRoute module="board-reports" />}>
+      <Route path="/board-reports" element={<BoardReportsPage />} />
+    </Route>
+    <Route element={<ModuleRoute module="ai-agents" />}>
+      <Route path="/ai-agents" element={<AIAgentsPage />} />
+      <Route path="/ai-agents/:id" element={<AIAgentDetailPage />} />
+      <Route path="/ai-agents/:id/settings" element={<AIAgentSettingsPage />} />
+      <Route path="/agents" element={<AgentsBrowse />} />
+      <Route path="/agents/activity" element={<AgentActivityFeed />} />
+      <Route path="/agents/:slug" element={<AgentDetail />} />
+    </Route>
+    <Route element={<ModuleRoute module="integration-center" />}>
+      <Route path="/integration-center" element={<IntegrationCenterPage />} />
+      <Route path="/integrations" element={<IntegrationCenterPage />} />
+    </Route>
+    <Route element={<ModuleRoute module="donor-retention" />}>
+      <Route path="/donor-retention" element={<DonorRetentionPage />} />
+    </Route>
+    <Route element={<ModuleRoute module="programs" />}>
+      <Route path="/programs" element={<ProgramsPage />} />
+    </Route>
+    <Route element={<ModuleRoute module="communications" />}>
+      <Route path="/communications" element={<CommunicationsPage />} />
+    </Route>
+    <Route element={<ModuleRoute module="voice-notes" />}>
+      <Route path="/voice-notes" element={<VoiceNotesPage />} />
+    </Route>
+    <Route element={<ModuleRoute module="grant-writer" />}>
+      <Route path="/grant-writer" element={<GrantWriterPage />} />
+    </Route>
+    <Route element={<ModuleRoute module="membership" />}>
+      <Route path="/membership" element={<MembershipPage />} />
+    </Route>
+    <Route element={<ModuleRoute module="volunteers" />}>
+      <Route path="/volunteers" element={<VolunteersPage />} />
+    </Route>
+    <Route element={<ModuleRoute module="donations" />}>
+      <Route path="/donations" element={<DonationCenterPage />} />
+    </Route>
+    <Route element={<ModuleRoute module="public-presence" />}>
+      <Route path="/public-presence" element={<PublicPresencePage />} />
+    </Route>
+    <Route element={<ModuleRoute module="impact-dashboard" />}>
+      <Route path="/impact-dashboard" element={<ImpactDashboardPage />} />
+    </Route>
+    <Route element={<ModuleRoute module="engagement-scoring" />}>
+      <Route path="/engagement-scoring" element={<AIEngagementScoringPage />} />
+    </Route>
   </>
 );
 

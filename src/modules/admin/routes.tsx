@@ -15,6 +15,7 @@ import ActivityLogs from "@/pages/admin/ActivityLogs";
 import SystemSettings from "@/pages/admin/SystemSettings";
 import ProjectStatusSettings from "@/pages/admin/ProjectStatusSettings";
 import ProjectModules from "@/pages/admin/ProjectModules";
+import ModuleManagement from "@/pages/admin/ModuleManagement";
 
 import Integrations from "@/pages/admin/Integrations";
 import SendGrid from "@/pages/admin/integrations/SendGrid";
@@ -117,6 +118,7 @@ export const adminRoutes = (
     <Route path="/admin/settings" element={<SystemSettings />} />
     <Route path="/admin/settings/project-statuses" element={<ProjectStatusSettings />} />
     <Route path="/admin/settings/project-modules" element={<ProjectModules />} />
+    <Route path="/admin/modules" element={<ModuleManagement />} />
     <Route path="/admin/settings/dashboard-widgets" element={<DashboardWidgets />} />
     <Route path="/admin/settings/agency-roles" element={<AgencyRoles />} />
     <Route path="/admin/organization-settings" element={<OrganizationSettings />} />

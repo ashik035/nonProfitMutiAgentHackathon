@@ -7,6 +7,7 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useModuleAccess } from "@/shared/hooks/useModuleAccess";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -73,6 +74,8 @@ type MemberForm = z.infer<typeof memberSchema>;
 
 export default function MembershipPage() {
   const { user } = useAuth();
+  const { hasModule } = useModuleAccess();
+  const showEngagementScoring = hasModule("engagement-scoring");
   const [searchQuery, setSearchQuery] = useState("");
   const [tierFilter, setTierFilter] = useState<MemberTier | "All">("All");
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
@@ -128,11 +131,13 @@ export default function MembershipPage() {
             Track members, manage renewals, and grow your membership base
           </p>
         </div>
-        <Button variant="outline" asChild>
-          <Link to="/engagement-scoring">
-            <Sparkles className="h-4 w-4 mr-2" /> Member Engagement
-          </Link>
-        </Button>
+        {showEngagementScoring && (
+          <Button variant="outline" asChild>
+            <Link to="/engagement-scoring">
+              <Sparkles className="h-4 w-4 mr-2" /> Member Engagement
+            </Link>
+          </Button>
+        )}
       </div>
 
       {/* KPI Cards */}

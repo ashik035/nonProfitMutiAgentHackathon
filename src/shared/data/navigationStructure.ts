@@ -50,6 +50,7 @@ export const dashboardItem: NavItem = {
   title: "Dashboard",
   href: "/dashboard",
   icon: "LayoutDashboard",
+  module: "dashboard",
 };
 
 /**
@@ -61,9 +62,9 @@ export const navigationGroups: NavGroup[] = [
     title: "Fundraising",
     icon: "BadgeDollarSign",
     items: [
-      { title: "Donor Pipeline", href: "/donor-pipeline", icon: "Users", requiredPermission: { type: "module", key: "donor-pipeline" } },
-      { title: "Donor Retention", href: "/donor-retention", icon: "Heart", requiredPermission: { type: "module", key: "donor-retention" } },
-      { title: "Donation Center", href: "/donations", icon: "BadgeDollarSign", requiredPermission: { type: "module", key: "donations" } },
+      { title: "Donor Pipeline", href: "/donor-pipeline", icon: "Users", module: "donor-pipeline", requiredPermission: { type: "module", key: "donor-pipeline" } },
+      { title: "Donor Retention", href: "/donor-retention", icon: "Heart", module: "donor-retention", requiredPermission: { type: "module", key: "donor-retention" } },
+      { title: "Donation Center", href: "/donations", icon: "BadgeDollarSign", module: "donations", requiredPermission: { type: "module", key: "donations" } },
     ],
   },
   {
@@ -71,8 +72,8 @@ export const navigationGroups: NavGroup[] = [
     title: "Grants",
     icon: "FileText",
     items: [
-      { title: "Grants Management", href: "/grants", icon: "FileText", requiredPermission: { type: "module", key: "grants" } },
-      { title: "Grant Writer", href: "/grant-writer", icon: "PenTool", requiredPermission: { type: "module", key: "grant-writer" } },
+      { title: "Grants Management", href: "/grants", icon: "FileText", module: "grants", requiredPermission: { type: "module", key: "grants" } },
+      { title: "Grant Writer", href: "/grant-writer", icon: "PenTool", module: "grant-writer", requiredPermission: { type: "module", key: "grant-writer" } },
     ],
   },
   {
@@ -80,9 +81,10 @@ export const navigationGroups: NavGroup[] = [
     title: "People",
     icon: "Users",
     items: [
-      { title: "Membership", href: "/membership", icon: "CreditCard", requiredPermission: { type: "module", key: "membership" } },
-      { title: "Volunteers", href: "/volunteers", icon: "HandHeart", requiredPermission: { type: "module", key: "volunteers" } },
-      { title: "Communications", href: "/communications", icon: "Mail", requiredPermission: { type: "module", key: "communications" } },
+      { title: "Membership", href: "/membership", icon: "CreditCard", module: "membership", requiredPermission: { type: "module", key: "membership" } },
+      { title: "Volunteers", href: "/volunteers", icon: "HandHeart", module: "volunteers", requiredPermission: { type: "module", key: "volunteers" } },
+      { title: "Communications", href: "/communications", icon: "Mail", module: "communications", requiredPermission: { type: "module", key: "communications" } },
+      { title: "Engagement Scoring", href: "/engagement-scoring", icon: "Sparkles", module: "engagement-scoring", requiredPermission: { type: "module", key: "engagement-scoring" } },
     ],
   },
   {
@@ -90,7 +92,7 @@ export const navigationGroups: NavGroup[] = [
     title: "Events",
     icon: "Calendar",
     items: [
-      { title: "Events", href: "/events", icon: "Calendar", requiredPermission: { type: "module", key: "events" } },
+      { title: "Events", href: "/events", icon: "Calendar", module: "events", requiredPermission: { type: "module", key: "events" } },
     ],
   },
   {
@@ -98,11 +100,11 @@ export const navigationGroups: NavGroup[] = [
     title: "Reporting",
     icon: "BarChart2",
     items: [
-      { title: "Board Reports", href: "/board-reports", icon: "BarChart2", requiredPermission: { type: "module", key: "board-reports" } },
-      { title: "Programs", href: "/programs", icon: "Target", requiredPermission: { type: "module", key: "programs" } },
-      { title: "Impact Dashboard", href: "/impact-dashboard", icon: "BarChart3", requiredPermission: { type: "module", key: "impact-dashboard" } },
-      { title: "Data Health", href: "/data-health", icon: "ShieldCheck", requiredPermission: { type: "module", key: "data-health" } },
-      { title: "Financial Reconciliation", href: "/reconciliation", icon: "ArrowLeftRight", requiredPermission: { type: "module", key: "reconciliation" } },
+      { title: "Board Reports", href: "/board-reports", icon: "BarChart2", module: "board-reports", requiredPermission: { type: "module", key: "board-reports" } },
+      { title: "Programs", href: "/programs", icon: "Target", module: "programs", requiredPermission: { type: "module", key: "programs" } },
+      { title: "Impact Dashboard", href: "/impact-dashboard", icon: "BarChart3", module: "impact-dashboard", requiredPermission: { type: "module", key: "impact-dashboard" } },
+      { title: "Data Health", href: "/data-health", icon: "ShieldCheck", module: "data-health", requiredPermission: { type: "module", key: "data-health" } },
+      { title: "Financial Reconciliation", href: "/reconciliation", icon: "ArrowLeftRight", module: "reconciliation", requiredPermission: { type: "module", key: "reconciliation" } },
     ],
   },
   {
@@ -111,10 +113,10 @@ export const navigationGroups: NavGroup[] = [
     icon: "Bot",
     isAI: true,
     items: [
-      { title: "AI Agents", href: "/agents", icon: "Bot", isAI: true },
-      { title: "Agent Activity", href: "/agents/activity", icon: "Activity", isAI: true, requiredPermission: { type: "module", key: "agent-activity" } },
+      { title: "AI Agents", href: "/agents", icon: "Bot", isAI: true, module: "ai-agents" },
+      { title: "Agent Activity", href: "/agents/activity", icon: "Activity", isAI: true, module: "ai-agents", requiredPermission: { type: "module", key: "agent-activity" } },
       { title: "AI Chat", href: "/ai-chat", icon: "MessageSquare", isAI: true },
-      { title: "Voice Notes", href: "/voice-notes", icon: "Mic", isAI: true },
+      { title: "Voice Notes", href: "/voice-notes", icon: "Mic", isAI: true, module: "voice-notes" },
     ],
   },
   {
@@ -131,8 +133,8 @@ export const navigationGroups: NavGroup[] = [
     icon: "Settings",
     position: "bottom",
     items: [
-      { title: "Public Presence", href: "/public-presence", icon: "Globe", requiredPermission: { type: "module", key: "public-presence" } },
-      { title: "Integrations", href: "/integrations", icon: "Plug" },
+      { title: "Public Presence", href: "/public-presence", icon: "Globe", module: "public-presence", requiredPermission: { type: "module", key: "public-presence" } },
+      { title: "Integrations", href: "/integrations", icon: "Plug", module: "integration-center" },
       { title: "Help & Support", href: "/help", icon: "HelpCircle" },
       { title: "Settings", href: "/settings", icon: "Settings" },
     ],
@@ -293,6 +295,7 @@ export const adminNavigation: NavGroup[] = [
     title: "SYSTEM",
     icon: "Settings",
     items: [
+      { title: "Module Management", href: "/admin/modules", icon: "Layers" },
       { title: "System Settings", href: "/admin/settings", icon: "Settings" },
       { title: "Organization Settings", href: "/admin/organization-settings", icon: "Building2" },
       { title: "Integrations", href: "/admin/integrations", icon: "Zap" },

@@ -10,6 +10,12 @@ export const queryKeys = {
     session: ["auth", "session"] as const,
   },
 
+  // App modules (installation-level toggles)
+  appModules: {
+    all: ["app_modules"] as const,
+    pricingTier: ["system_settings", "modulePricingTier"] as const,
+  },
+
   // Clients
   clients: {
     all: ["clients"] as const,
