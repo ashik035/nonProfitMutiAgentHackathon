@@ -248,8 +248,16 @@ export const adminNavigation: NavGroup[] = [
     title: "USERS & ACCESS",
     icon: "Users",
     items: [
-      { title: "User Management", href: "/admin/users", icon: "Users" },
-      { title: "Role Management", href: "/admin/roles", icon: "Shield" },
+      {
+        title: "User Management",
+        href: "/admin/users",
+        icon: "Users",
+        headerOnly: true,
+        children: [
+          { title: "People & Invites", href: "/admin/users", icon: "Users" },
+          { title: "Roles & Permissions", href: "/admin/users/roles", icon: "Shield" },
+        ],
+      },
       { title: "Activity Logs", href: "/admin/logs", icon: "Activity" },
     ],
   },
