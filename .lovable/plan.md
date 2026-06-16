@@ -1,131 +1,133 @@
-# Replicate `/events` Hub into Another Lovable Project
+# Replicate `/membership` Page into Another Lovable Project
 
-This is a copy-paste-ready brief you can drop into your other Lovable project's chat. It captures the exact schema, hooks, routes, and UI structure of the current `/events` page so the target project rebuilds it 1:1.
+Copy-paste-ready brief for rebuilding the Membership Management page 1:1 in another Lovable project.
 
 ---
 
-## What `/events` actually is (so you know what you're replicating)
+## What `/membership` actually is
 
-A single tabbed hub at route `/events` (with `/event-management` redirecting to `/events?tab=manage`):
+A member directory backed by the `nonprofit_members` Supabase table.
 
-- **Tab 1 — Manage** (`EventLifecycleTab`): full event lifecycle backed by live Supabase tables
-  - Create / edit events (title, date, location, capacity, status)
-  - Status pills: `Upcoming` / `Active` / `Past`
-  - Registrants list with check-in toggle
-  - Ticket types, speakers, agenda items per event
-- **Tab 2 — Post-Event Intelligence** (`PostEventIntelligenceTab`): engagement scoring + AI follow-up insights (demo data)
+- **KPI strip** — Total Members, Active, Expiring Soon, Lapsed
+- **Directory tab** — searchable table (name / email / employer), tier filter chips (All / General / Professional / Board / Honorary), status badge per row, click row → side sheet with full profile
+- **Add Member tab** — react-hook-form + zod (name, email, tier); creates row with status `Active`
+- **Renewals callouts** — lists of expiring + lapsed members
+- Tier and status colored badges; dates formatted `MMM d, yyyy`
 
-Deep-linkable tabs via `?tab=manage | ?tab=post-event`.
-
-## Database (6 tables)
+## Database (1 table)
 
 ```text
-nonprofit_events
-  ├── nonprofit_event_ticket_types   (event_id FK)
-  ├── nonprofit_event_speakers       (event_id FK, display_order)
-  ├── nonprofit_event_agenda_items   (event_id FK, display_order)
-  └── nonprofit_event_registrants    (event_id FK, checked_in bool)
+nonprofit_members
+  id uuid pk
+  created_by uuid references auth.users
+  name text not null
+  email text not null
+  phone text
+  tier text check in ('General','Professional','Board','Honorary') default 'General'
+  status text check in ('Active','Expiring','Lapsed','Pending') default 'Active'
+  join_date date default current_date
+  renewal_date date
+  employer text
+  interests text[]
+  created_at, updated_at timestamptz
 ```
 
-All tables: RLS enabled, `authenticated`-only policies, `updated_at` trigger, GRANTs for `authenticated` + `service_role`.
+RLS on, `FOR ALL TO authenticated USING (true) WITH CHECK (true)`, GRANT to `authenticated` + `service_role`, `updated_at` trigger.
 
-## File layout to create in the target project
+## File layout to create
 
 ```text
 src/
-  pages/EventsHubPage.tsx                       # tabbed shell, reads ?tab=
-  components/events/
-    EventLifecycleTab.tsx                       # Manage tab
-    PostEventIntelligenceTab.tsx                # Post-event tab (demo)
-    EventForm.tsx                               # create/edit dialog
-    EventCard.tsx, EventDetailPanel.tsx         # list + detail UI
-    RegistrantsTable.tsx                        # with check-in toggle
-  hooks/useNonprofitEvents.ts                   # all React Query hooks
-  lib/cache.ts                                  # queryKeys.nonprofit.events.*
-supabase/migrations/<ts>_events_hub.sql         # 6 tables + RLS + GRANTs
+  pages/MembershipPage.tsx
+  hooks/useMembers.ts            # React Query CRUD hooks
+supabase/migrations/<ts>_nonprofit_members.sql
 ```
 
-Add route in the target project's router:
+Add route:
 ```tsx
-<Route path="/events" element={<EventsHubPage />} />
-<Route path="/event-management" element={<Navigate to="/events?tab=manage" replace />} />
+<Route path="/membership" element={<MembershipPage />} />
 ```
 
 ## The prompt to paste into the other Lovable project
 
-> Copy everything inside the fenced block below into the other project's chat. It assumes the target project already has Lovable Cloud (Supabase) + shadcn/ui + React Query + React Router. If not, prepend: "First enable Lovable Cloud."
+> Assumes the target project already has Lovable Cloud + shadcn/ui + React Query + React Router + React Hook Form + Zod. If not, prepend: "First enable Lovable Cloud."
 
 ```text
-Build an Events Hub at /events that exactly matches this spec.
+Build a Membership Management page at /membership that exactly matches this spec.
 
-ROUTE
-- /events  → EventsHubPage with two tabs, deep-linkable via ?tab=manage|post-event
-- /event-management → redirect to /events?tab=manage
+DATABASE (one migration, RLS on, GRANT to authenticated + service_role, updated_at trigger)
+- nonprofit_members(
+    id uuid pk default gen_random_uuid(),
+    created_by uuid references auth.users,
+    name text not null,
+    email text not null,
+    phone text,
+    tier text not null default 'General' check (tier in ('General','Professional','Board','Honorary')),
+    status text not null default 'Active' check (status in ('Active','Expiring','Lapsed','Pending')),
+    join_date date default current_date,
+    renewal_date date,
+    employer text,
+    interests text[] default '{}',
+    created_at timestamptz default now(),
+    updated_at timestamptz default now()
+  )
+Policy: FOR ALL TO authenticated USING (true) WITH CHECK (true).
 
-DATABASE (one migration, RLS on, GRANT to authenticated + service_role, updated_at trigger on each)
-- nonprofit_events(id uuid pk, title text not null, description text, date timestamptz not null,
-  location text, capacity int, status text check in ('Upcoming','Active','Past') default 'Upcoming',
-  cover_image_url text, created_by uuid references auth.users, created_at, updated_at)
-- nonprofit_event_ticket_types(id, event_id fk cascade, name text, price numeric, quantity int,
-  description text, created_at)
-- nonprofit_event_speakers(id, event_id fk cascade, name text, title text, bio text,
-  photo_url text, display_order int, created_at)
-- nonprofit_event_agenda_items(id, event_id fk cascade, start_time text, title text,
-  description text, display_order int, created_at)
-- nonprofit_event_registrants(id, event_id fk cascade, name text, email text, ticket_type_id uuid,
-  checked_in bool default false, registered_at timestamptz default now(), created_at)
-Policy on every table: FOR ALL TO authenticated USING (true) WITH CHECK (true).
+HOOKS  src/hooks/useMembers.ts  (React Query, typed off Database)
+- type Member, MemberInsert, MemberUpdate
+- type MemberTier = 'General'|'Professional'|'Board'|'Honorary'
+- type MemberStatus = 'Active'|'Expiring'|'Lapsed'|'Pending'
+- useMembers({ search?, tier?, status? })   // ilike on name/email/employer; eq on tier/status when not 'All'
+- useMemberById(id)
+- useCreateMember, useUpdateMember, useDeleteMember
+All mutations invalidate the list and show a shadcn/sonner toast on success/error.
 
-HOOKS  (src/hooks/useNonprofitEvents.ts, React Query, typed off Database types)
-- useNonprofitEvents({ search?, status? })          → list, filterable
-- useNonprofitEventById(id)
-- useEventRegistrants(eventId)
-- useEventSpeakers(eventId)
-- useEventAgendaItems(eventId)
-- useEventTicketTypes(eventId)
-- useCreateNonprofitEvent, useUpdateNonprofitEvent
-- useCreateRegistrant
-- useToggleCheckin({ id, eventId, checkedIn })
-All mutations invalidate the matching queryKeys and show a shadcn toast on success/error.
+PAGE  src/pages/MembershipPage.tsx
+- Header: Users icon + "Membership" + subtitle
+- KPI cards row (4): Total Members, Active, Expiring Soon, Lapsed (icons: Users, UserCheck, Clock, UserX)
+- Tabs: "Directory" | "Add Member" | "Renewals"
+- Directory tab:
+  * Search input (name / email / employer) + tier filter chips (All, General, Professional, Board, Honorary)
+  * Table columns: Name, Email, Tier (badge), Status (badge), Renewal date, Employer
+  * Row click → Sheet (right) with full member profile: name, email, phone, tier, status, join_date, renewal_date, employer, interests chips
+- Add Member tab:
+  * react-hook-form + zod schema { name: min(2), email: email(), tier: enum }
+  * On submit: createMember.mutateAsync({ ..., status: 'Active', created_by: user.id }), reset form, switch back to Directory
+- Renewals tab:
+  * Two cards: "Expiring Soon" (status='Expiring') and "Lapsed" (status='Lapsed') with member rows + "Send renewal" button (toast only, no email yet)
 
-UI
-- EventsHubPage: <Tabs> with "Manage" and "Post-Event Intelligence". Header: Calendar icon + "Events" + subtitle.
-- EventLifecycleTab:
-  * Top bar: search input, status filter (All/Upcoming/Active/Past), "New event" button (opens EventForm dialog)
-  * Grid of EventCard (title, date formatted, location, capacity, status badge)
-  * Click card → side panel/drawer with: event details, edit button, tabs for Registrants / Speakers / Agenda / Tickets
-  * Registrants tab: table of name/email/ticket/checked-in, toggle switch per row calls useToggleCheckin
-- EventForm: react-hook-form + zod (title required, date required, capacity >= 0, status enum)
-- PostEventIntelligenceTab: static demo placeholder ok (engagement score cards + AI follow-up suggestions list)
+BADGE COLORS
+- Tier: General gray, Professional blue, Board purple, Honorary amber
+- Status: Active green, Expiring amber, Lapsed red, Pending blue
 
 CONVENTIONS
-- shadcn components only (Card, Tabs, Dialog, Sheet, Table, Badge, Button, Input, Select, Switch, Form)
-- date-fns format("PPP p") for display
-- All colors via semantic tokens from index.css — no hardcoded text-white/bg-black
-- Toasts via @/hooks/use-toast
-- No edge functions needed
-- No auth changes
+- shadcn components only (Card, Tabs, Table, Sheet, Badge, Button, Input, Label, Select, Form)
+- Dates: toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' })
+- All colors via semantic tokens from index.css — no raw text-white/bg-black in components other than the badge maps above
+- Toasts via sonner (or @/hooks/use-toast)
+- No edge functions, no auth changes
 ```
 
-## Steps to actually run it
+## Steps to run it
 
 1. Open the other Lovable project's chat.
-2. Paste the prompt block above. Lovable will propose the migration first — approve it.
-3. After types regenerate, Lovable builds the page, tab, hooks, and form.
-4. Smoke test in the preview:
-   - Create an event → appears in list with `Upcoming` status
-   - Open it → add a registrant → toggle check-in → state persists on refresh
-   - Switch tabs via URL `?tab=post-event` → loads directly
+2. Paste the prompt block above. Approve the migration when prompted.
+3. After `src/integrations/supabase/types.ts` regenerates, Lovable builds the page + hook.
+4. Smoke test:
+   - Add a member → appears in directory with `Active` badge
+   - Search by name / employer → filters correctly
+   - Click row → side sheet opens with full profile
+   - Switch to Renewals tab → empty until you flip a row's `status` to `Expiring` / `Lapsed` in the DB
 
-## Optional follow-ups (ask in a second prompt after the base works)
+## Optional follow-ups (second prompt)
 
-- Add `category` enum column to `nonprofit_events` + filter chip
-- Public event detail page (no auth) for sharing
-- CSV export of registrants
-- Cover image upload to Supabase Storage
+- Edit / delete from the side sheet
+- Bulk CSV import
+- "Send renewal" actually emails (Resend edge function)
+- Engagement score column (linked to events / donations)
 
-## Out of scope (intentionally)
+## Out of scope
 
-- Stripe / paid tickets (the schema has `price` but no checkout)
-- Email sending to registrants
-- Calendar (ics) export
+- Payments / dues collection
+- Email sending
+- Public member directory (no auth)
