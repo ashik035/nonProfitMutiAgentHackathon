@@ -8,7 +8,8 @@ import { Route, Navigate } from "react-router-dom";
 
 // Admin pages
 import Admin from "@/pages/Admin";
-import UserManagement from "@/pages/admin/UserManagement";
+import UserManagementHub from "@/pages/admin/UserManagementHub";
+import PeopleWithInvites from "@/components/admin/people/PeopleWithInvites";
 import RoleManagement from "@/pages/admin/RoleManagement";
 import ActivityLogs from "@/pages/admin/ActivityLogs";
 import SystemSettings from "@/pages/admin/SystemSettings";
@@ -104,9 +105,12 @@ export const adminRoutes = (
     <Route path="/admin/memory/user-stats" element={<UserMemoryStats />} />
     <Route path="/admin/memory/search" element={<SemanticSearchAnalytics />} />
 
-    {/* Users & Access */}
-    <Route path="/admin/users" element={<UserManagement />} />
-    <Route path="/admin/roles" element={<RoleManagement />} />
+    {/* Users & Access — consolidated hub with nested sub-routes */}
+    <Route path="/admin/users" element={<UserManagementHub />}>
+      <Route index element={<PeopleWithInvites />} />
+      <Route path="roles" element={<RoleManagement />} />
+    </Route>
+    <Route path="/admin/roles" element={<Navigate to="/admin/users/roles" replace />} />
     <Route path="/admin/logs" element={<ActivityLogs />} />
 
     {/* System */}

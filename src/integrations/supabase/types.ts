@@ -4151,6 +4151,48 @@ export type Database = {
           },
         ]
       }
+      user_invites: {
+        Row: {
+          agency_role: string
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string | null
+          org_id: string | null
+          role: string
+          token: string
+          updated_at: string
+          used_at: string | null
+        }
+        Insert: {
+          agency_role?: string
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          org_id?: string | null
+          role?: string
+          token?: string
+          updated_at?: string
+          used_at?: string | null
+        }
+        Update: {
+          agency_role?: string
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          org_id?: string | null
+          role?: string
+          token?: string
+          updated_at?: string
+          used_at?: string | null
+        }
+        Relationships: []
+      }
       user_knowledge_files: {
         Row: {
           created_at: string
