@@ -340,4 +340,13 @@ verify_jwt = false
 [functions.meeting-summarizer]
 verify_jwt = false
 
+# Copied from SJ Control Tower (verbatim) — references tables not in this project
+[functions.auto-status-transition]
+verify_jwt = true
+
+[functions.deal-classify-cron]
+verify_jwt = false
+
+
+
 
