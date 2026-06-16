@@ -1,29 +1,50 @@
-## Issue
+# Copy 3 cron jobs verbatim from SJ Control Tower
 
-The "Download as PDF" button on the `/grants` Report Draft sheet (line 427 of `src/pages/GrantsPage.tsx`) only shows a success toast — it does not generate or download any file. That's why nothing appears in your Downloads folder. The "Copy Draft" button next to it has the same fake behavior.
+## What gets created
 
-## Fix Plan
+### 1. `auto-status-transition` (every 2 hours)
+- New file: `supabase/functions/auto-status-transition/index.ts` — verbatim copy from source.
+- New file: `supabase/functions/_shared/cors.ts` — copy source's shared CORS helper (the function imports `getCorsHeaders`, `handleCorsPreflight` from `../_shared/cors.ts`).
+- `supabase/config.toml` entry: `verify_jwt = true` (matches source).
+- Cron schedule via `pg_cron` + `pg_net`: every 2 hours, POSTs to `/functions/v1/auto-status-transition`.
 
-Generate a real PDF client-side using `jspdf` (already listed in `package.json`) and trigger a browser download.
+### 2. `deal-daily-classifier` (daily 12:00 UTC)
+- Copy `supabase/functions/deal-classify-cron/index.ts` verbatim from source (this is the function the cron actually calls — `deal-daily-classifier` is just the schedule name).
+- `supabase/config.toml` entry for `deal-classify-cron`.
+- Cron schedule: `0 12 * * *`, POSTs to `/functions/v1/deal-classify-cron`.
 
-### Changes — `src/pages/GrantsPage.tsx`
+### 3. `client-kb-weekly-sync` (Monday 06:00 UTC)
+- Migration: create `public.sync_client_kb_reports()` plpgsql function — verbatim copy of source migration `20260325212101`.
+- Cron schedule: `0 6 * * 1`, runs `SELECT sync_client_kb_reports();` directly in-DB (no HTTP).
 
-1. Add `import { jsPDF } from "jspdf";` at the top.
-2. Replace the inline `onClick` on the Download as PDF button with a handler that:
-   - Builds a `jsPDF` doc (A4, portrait).
-   - Adds the report content: title (`Report Draft — {grant name}`), funder, award amount, period, program officer, fund utilization summary + budget breakdown, completed deliverables, pending deliverables, and deadline note when ≤14 days.
-   - Uses `doc.text` with simple line wrapping (`doc.splitTextToSize`) and page-break handling.
-   - Calls `doc.save(\`grant-report-${slug(reportGrant.name)}.pdf\`)`.
-   - Shows `toast.success("PDF downloaded")` after save; `toast.error(...)` on failure.
-3. Fix the "Copy Draft" button (line 424) to actually copy a plain-text version of the same report content via `navigator.clipboard.writeText(...)`, since it's the same kind of dead stub.
+## Bug fixes applied during copy
 
-### Technical Notes
+The source tickets (#287, #288, #291) called out two real bugs. Per "verbatim copy" I will preserve source behavior, but flag that two specific lines will fail in Nonprofit CT regardless of source-project state:
 
-- Keep it lightweight — pure `jspdf` text rendering, no `html2canvas`, since the sheet content is straightforward text/numbers.
-- No backend or schema changes.
-- No new dependencies (jspdf already present).
+- **`app.settings.supabase_url` / `app.settings.service_role_key`** (tickets #288, #291): Lovable Cloud's Postgres does not have these GUCs set. The cron-call SQL will be rewritten to hardcode the project URL + use `vault.decrypted_secrets` lookup for the service role key the same way Lovable Cloud's standard cron pattern does. This is the only deviation from verbatim — without it the cron statement itself errors before the function is even invoked.
+- **`projects.project_type` missing** (ticket #287): Will be copied verbatim. Will error at runtime as expected — `projects` table doesn't exist here at all.
 
-### Verification
+## File list
 
-- Open `/grants`, click "Draft Report" on any grant card, click "Download as PDF" → a `.pdf` file appears in Downloads and opens with the expected content.
-- Click "Copy Draft" → paste into a text editor shows the formatted draft.
+```
+supabase/functions/_shared/cors.ts                       (new, copied)
+supabase/functions/auto-status-transition/index.ts       (new, copied)
+supabase/functions/deal-classify-cron/index.ts           (new, copied)
+supabase/config.toml                                     (edit — 2 function blocks)
+supabase/migrations/<ts>_copy_3_crons.sql                (new)
+  - CREATE FUNCTION sync_client_kb_reports()
+  - cron.schedule('auto-status-transition-2h', '0 */2 * * *', net.http_post(...))
+  - cron.schedule('deal-daily-classifier',     '0 12 * * *',  net.http_post(...))
+  - cron.schedule('client-kb-weekly-sync',     '0 6 * * 1',   SELECT sync_client_kb_reports())
+  - ensures pg_cron + pg_net extensions
+```
+
+## Expected runtime behavior
+
+| Cron | Will it run? | Will it succeed? |
+|------|--------------|------------------|
+| auto-status-transition-2h | yes | no — references `activecollab_time_records`, `projects` |
+| deal-daily-classifier | yes | no — `deal-classify-cron` references `deals` table |
+| client-kb-weekly-sync | yes | no — references `projects.project_type`, `project_milestones`, etc. |
+
+This matches your "copy verbatim" instruction. After approval I'll deploy and report the actual error each one throws on first run so you have ground truth.
