@@ -10,14 +10,21 @@ export type ActivityAction =
   | "view" 
   | "access";
 
-export type ResourceType = 
-  | "client" 
-  | "meeting" 
-  | "knowledge" 
-  | "task" 
-  | "user" 
-  | "ai_chat" 
+export type ResourceType =
+  | "client"
+  | "meeting"
+  | "knowledge"
+  | "task"
+  | "user"
+  | "ai_chat"
   | "settings"
+  | "nonprofit_member"
+  | "nonprofit_volunteer"
+  | "nonprofit_volunteer_shift"
+  | "nonprofit_event"
+  | "nonprofit_event_registrant"
+  | "nonprofit_campaign"
+  | "nonprofit_donation"
   | null;
 
 interface LogActivityParams {

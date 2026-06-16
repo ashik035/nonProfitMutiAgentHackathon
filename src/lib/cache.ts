@@ -172,21 +172,21 @@ export const queryKeys = {
   nonprofit: {
     members: {
       all: ["nonprofit", "members"] as const,
-      list: (filters?: Record<string, unknown>) => ["nonprofit", "members", "list", filters] as const,
+      list: (filters?: Record<string, any>) => ["nonprofit", "members", "list", filters] as const,
       detail: (id: string) => ["nonprofit", "members", "detail", id] as const,
       stats: ["nonprofit", "members", "stats"] as const,
     },
     volunteers: {
       all: ["nonprofit", "volunteers"] as const,
-      list: (filters?: Record<string, unknown>) => ["nonprofit", "volunteers", "list", filters] as const,
+      list: (filters?: Record<string, any>) => ["nonprofit", "volunteers", "list", filters] as const,
       detail: (id: string) => ["nonprofit", "volunteers", "detail", id] as const,
       shifts: (volunteerId: string) => ["nonprofit", "volunteers", "shifts", volunteerId] as const,
-      allShifts: (filters?: Record<string, unknown>) => ["nonprofit", "volunteers", "allShifts", filters] as const,
+      allShifts: (filters?: Record<string, any>) => ["nonprofit", "volunteers", "allShifts", filters] as const,
       stats: ["nonprofit", "volunteers", "stats"] as const,
     },
     events: {
       all: ["nonprofit", "events"] as const,
-      list: (filters?: Record<string, unknown>) => ["nonprofit", "events", "list", filters] as const,
+      list: (filters?: Record<string, any>) => ["nonprofit", "events", "list", filters] as const,
       detail: (id: string) => ["nonprofit", "events", "detail", id] as const,
       registrants: (eventId: string) => ["nonprofit", "events", "registrants", eventId] as const,
       speakers: (eventId: string) => ["nonprofit", "events", "speakers", eventId] as const,
@@ -195,18 +195,18 @@ export const queryKeys = {
     },
     campaigns: {
       all: ["nonprofit", "campaigns"] as const,
-      list: (filters?: Record<string, unknown>) => ["nonprofit", "campaigns", "list", filters] as const,
+      list: (filters?: Record<string, any>) => ["nonprofit", "campaigns", "list", filters] as const,
       detail: (id: string) => ["nonprofit", "campaigns", "detail", id] as const,
     },
     donations: {
       all: ["nonprofit", "donations"] as const,
-      list: (filters?: Record<string, unknown>) => ["nonprofit", "donations", "list", filters] as const,
+      list: (filters?: Record<string, any>) => ["nonprofit", "donations", "list", filters] as const,
       byCampaign: (campaignId: string) => ["nonprofit", "donations", "campaign", campaignId] as const,
       stats: ["nonprofit", "donations", "stats"] as const,
     },
     programs: {
       all: ["nonprofit", "programs"] as const,
-      list: (filters?: Record<string, unknown>) => ["nonprofit", "programs", "list", filters] as const,
+      list: (filters?: Record<string, any>) => ["nonprofit", "programs", "list", filters] as const,
       detail: (id: string) => ["nonprofit", "programs", "detail", id] as const,
     },
   },
