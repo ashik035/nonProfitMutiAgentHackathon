@@ -60,9 +60,9 @@ export const navigationGroups: NavGroup[] = [
   {
     id: "fundraising",
     title: "Fundraising",
-    icon: "BadgeDollarSign",
+    icon: "TrendingUp",
     items: [
-      { title: "Donor Pipeline", href: "/donor-pipeline", icon: "Users", module: "donor-pipeline", requiredPermission: { type: "module", key: "donor-pipeline" } },
+      { title: "Donor Pipeline", href: "/donor-pipeline", icon: "GitBranch", module: "donor-pipeline", requiredPermission: { type: "module", key: "donor-pipeline" } },
       { title: "Donor Retention", href: "/donor-retention", icon: "Heart", module: "donor-retention", requiredPermission: { type: "module", key: "donor-retention" } },
       { title: "Donation Center", href: "/donations", icon: "BadgeDollarSign", module: "donations", requiredPermission: { type: "module", key: "donations" } },
     ],
@@ -70,7 +70,7 @@ export const navigationGroups: NavGroup[] = [
   {
     id: "grants",
     title: "Grants",
-    icon: "FileText",
+    icon: "ScrollText",
     items: [
       { title: "Grants Management", href: "/grants", icon: "FileText", module: "grants", requiredPermission: { type: "module", key: "grants" } },
       { title: "Grant Writer", href: "/grant-writer", icon: "PenTool", module: "grant-writer", requiredPermission: { type: "module", key: "grant-writer" } },
@@ -84,13 +84,13 @@ export const navigationGroups: NavGroup[] = [
       { title: "Membership", href: "/membership", icon: "CreditCard", module: "membership", requiredPermission: { type: "module", key: "membership" } },
       { title: "Volunteers", href: "/volunteers", icon: "HandHeart", module: "volunteers", requiredPermission: { type: "module", key: "volunteers" } },
       { title: "Communications", href: "/communications", icon: "Mail", module: "communications", requiredPermission: { type: "module", key: "communications" } },
-      { title: "Engagement Scoring", href: "/engagement-scoring", icon: "Sparkles", module: "engagement-scoring", requiredPermission: { type: "module", key: "engagement-scoring" } },
+      { title: "Engagement Scoring", href: "/engagement-scoring", icon: "Gauge", module: "engagement-scoring", requiredPermission: { type: "module", key: "engagement-scoring" } },
     ],
   },
   {
     id: "events",
     title: "Events",
-    icon: "Calendar",
+    icon: "CalendarDays",
     items: [
       { title: "Events", href: "/events", icon: "Calendar", module: "events", requiredPermission: { type: "module", key: "events" } },
     ],
@@ -98,9 +98,9 @@ export const navigationGroups: NavGroup[] = [
   {
     id: "reporting",
     title: "Reporting",
-    icon: "BarChart2",
+    icon: "LineChart",
     items: [
-      { title: "Board Reports", href: "/board-reports", icon: "BarChart2", module: "board-reports", requiredPermission: { type: "module", key: "board-reports" } },
+      { title: "Board Reports", href: "/board-reports", icon: "Presentation", module: "board-reports", requiredPermission: { type: "module", key: "board-reports" } },
       { title: "Programs", href: "/programs", icon: "Target", module: "programs", requiredPermission: { type: "module", key: "programs" } },
       { title: "Impact Dashboard", href: "/impact-dashboard", icon: "BarChart3", module: "impact-dashboard", requiredPermission: { type: "module", key: "impact-dashboard" } },
       { title: "Data Health", href: "/data-health", icon: "ShieldCheck", module: "data-health", requiredPermission: { type: "module", key: "data-health" } },
@@ -110,7 +110,7 @@ export const navigationGroups: NavGroup[] = [
   {
     id: "ai",
     title: "AI",
-    icon: "Bot",
+    icon: "Sparkles",
     isAI: true,
     items: [
       { title: "AI Agents", href: "/agents", icon: "Bot", isAI: true, module: "ai-agents" },
@@ -122,7 +122,7 @@ export const navigationGroups: NavGroup[] = [
   {
     id: "intelligence",
     title: "Intelligence",
-    icon: "BookOpen",
+    icon: "Brain",
     items: [
       { title: "Knowledge Base", href: "/knowledge", icon: "BookOpen" },
     ],
@@ -130,7 +130,7 @@ export const navigationGroups: NavGroup[] = [
   {
     id: "settings-group",
     title: "Settings",
-    icon: "Settings",
+    icon: "Settings2",
     position: "bottom",
     items: [
       { title: "Public Presence", href: "/public-presence", icon: "Globe", module: "public-presence", requiredPermission: { type: "module", key: "public-presence" } },
@@ -159,14 +159,14 @@ export const adminNavigation: NavGroup[] = [
   {
     id: "admin-dashboard",
     title: "PEOPLE & PERFORMANCE",
-    icon: "LayoutDashboard",
+    icon: "Briefcase",
     items: [
       { title: "Admin Dashboard", href: "/admin", icon: "LayoutDashboard" },
       { title: "Employee Management", href: "/admin/team/employees", icon: "Users" },
       {
         title: "Task Configuration",
         href: "/admin/tasks/streams",
-        icon: "Settings",
+        icon: "ListTodo",
         headerOnly: true,
         children: [
           { title: "Task Streams", href: "/admin/tasks/streams", icon: "GitBranch" },
@@ -178,9 +178,9 @@ export const adminNavigation: NavGroup[] = [
         icon: "Layers",
         headerOnly: true,
         children: [
-          { title: "POD Management", href: "/admin/team/pods", icon: "Users" },
+          { title: "POD Management", href: "/admin/team/pods", icon: "Network" },
           { title: "Skill Management", href: "/admin/skillmanagement", icon: "Zap" },
-          { title: "RP Settings", href: "/admin/team/employee_projection", icon: "Settings" },
+          { title: "RP Settings", href: "/admin/team/employee_projection", icon: "SlidersHorizontal" },
         ],
       },
     ],
@@ -201,7 +201,7 @@ export const adminNavigation: NavGroup[] = [
           { title: "Agent Analytics", href: "/admin/ai/agent-analytics", icon: "BarChart3" },
           { title: "Agent Categories", href: "/admin/ai/agent-categories", icon: "FolderOpen" },
           { title: "Prompt Templates", href: "/admin/ai/prompt-templates", icon: "FileText" },
-          { title: "Email Drafting", href: "/admin/ai/email-drafting", icon: "MessageSquare" },
+          { title: "Email Drafting", href: "/admin/ai/email-drafting", icon: "Mail" },
           { title: "Deal Coaching", href: "/admin/ai/deal-coaching", icon: "Target" },
         ],
       },
@@ -211,20 +211,20 @@ export const adminNavigation: NavGroup[] = [
         icon: "Search",
         headerOnly: true,
         children: [
-          { title: "Search", href: "/admin/ai/semantic-search", icon: "Search" },
-          { title: "Embeddings", href: "/admin/ai/embeddings", icon: "Brain" },
+          { title: "Search", href: "/admin/ai/semantic-search", icon: "ScanSearch" },
+          { title: "Embeddings", href: "/admin/ai/embeddings", icon: "Binary" },
         ],
       },
       {
         title: "User Memory",
         href: "/admin/memory/dashboard",
-        icon: "Brain",
+        icon: "Database",
         headerOnly: true,
         children: [
-          { title: "Memory Dashboard", href: "/admin/memory/dashboard", icon: "LayoutDashboard" },
-          { title: "User Memory Stats", href: "/admin/memory/user-stats", icon: "BarChart3" },
-          { title: "Search Analytics", href: "/admin/memory/search", icon: "BarChart3" },
-          { title: "Team Learning Patterns", href: "/admin/memory/team-learning-patterns", icon: "Users" },
+          { title: "Memory Dashboard", href: "/admin/memory/dashboard", icon: "Gauge" },
+          { title: "User Memory Stats", href: "/admin/memory/user-stats", icon: "BarChart2" },
+          { title: "Search Analytics", href: "/admin/memory/search", icon: "SearchCode" },
+          { title: "Team Learning Patterns", href: "/admin/memory/team-learning-patterns", icon: "Network" },
         ],
       },
       {
@@ -236,9 +236,9 @@ export const adminNavigation: NavGroup[] = [
           { title: "Common Knowledge", href: "/admin/knowledge/common", icon: "Globe" },
           { title: "Processing Queue", href: "/admin/knowledge/analytics", icon: "ClipboardList" },
           { title: "Sources", href: "/admin/knowledge/sources", icon: "Database" },
-          { title: "Categories", href: "/admin/knowledge/categories", icon: "FolderOpen" },
+          { title: "Categories", href: "/admin/knowledge/categories", icon: "FolderTree" },
           { title: "Batch Upload", href: "/admin/knowledge/files", icon: "Upload" },
-          { title: "Files", href: "/admin/knowledge/files", icon: "FileText" },
+          { title: "Files", href: "/admin/knowledge/files", icon: "FileStack" },
           { title: "Sync Status", href: "/admin/knowledge/sync-status", icon: "RefreshCw" },
           { title: "Gemini RAG", href: "/admin/knowledge/gemini", icon: "Sparkles" },
         ],
@@ -248,7 +248,7 @@ export const adminNavigation: NavGroup[] = [
   {
     id: "users-access",
     title: "USERS & ACCESS",
-    icon: "Users",
+    icon: "UserCog",
     items: [
       {
         title: "User Management",
@@ -256,11 +256,11 @@ export const adminNavigation: NavGroup[] = [
         icon: "Users",
         headerOnly: true,
         children: [
-          { title: "People & Invites", href: "/admin/users", icon: "Users" },
+          { title: "People & Invites", href: "/admin/users", icon: "UserPlus" },
           { title: "Roles & Permissions", href: "/admin/users/roles", icon: "Shield" },
         ],
       },
-      { title: "Activity Logs", href: "/admin/logs", icon: "Activity" },
+      { title: "Activity Logs", href: "/admin/logs", icon: "ScrollText" },
     ],
   },
   {
@@ -268,13 +268,13 @@ export const adminNavigation: NavGroup[] = [
     title: "TEAM & RESOURCES",
     icon: "Building2",
     items: [
-      { title: "Departments", href: "/admin/team/departments", icon: "Building2" },
+      { title: "Departments", href: "/admin/team/departments", icon: "Landmark" },
     ],
   },
   {
     id: "content-feedback",
     title: "CONTENT & FEEDBACK",
-    icon: "MessageSquare",
+    icon: "Inbox",
     items: [
       { title: "Feedback Management", href: "/admin/feedback", icon: "MessageSquare" },
       { title: "Support Tickets", href: "/admin/support-tickets", icon: "Ticket" },
@@ -283,7 +283,7 @@ export const adminNavigation: NavGroup[] = [
   {
     id: "ai-automation",
     title: "AI & AUTOMATION",
-    icon: "Brain",
+    icon: "Cpu",
     items: [
       { title: "AI Models", href: "/admin/ai-models", icon: "Brain" },
       { title: "AI Usage Analytics", href: "/admin/ai-usage", icon: "BarChart" },
@@ -295,13 +295,13 @@ export const adminNavigation: NavGroup[] = [
     title: "SYSTEM",
     icon: "Settings",
     items: [
-      { title: "Module Management", href: "/admin/modules", icon: "Layers" },
+      { title: "Module Management", href: "/admin/modules", icon: "Boxes" },
       { title: "System Settings", href: "/admin/settings", icon: "Settings" },
-      { title: "Organization Settings", href: "/admin/organization-settings", icon: "Building2" },
+      { title: "Organization Settings", href: "/admin/organization-settings", icon: "Building" },
       { title: "Integrations", href: "/admin/integrations", icon: "Zap" },
       { title: "Vision & Roadmap", href: "/admin/roadmap", icon: "Rocket" },
-      { title: "Seed Data Runner", href: "/admin/roadmap/seed", icon: "Database" },
-      { title: "Deployment Status", href: "/admin/deployment", icon: "Database" },
+      { title: "Seed Data Runner", href: "/admin/roadmap/seed", icon: "Sprout" },
+      { title: "Deployment Status", href: "/admin/deployment", icon: "Ship" },
       { title: "Environment Check", href: "/admin/environment", icon: "CheckCircle2" },
     ],
   },

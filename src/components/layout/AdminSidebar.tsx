@@ -10,82 +10,13 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { resolveNavIcon } from "@/lib/navIcons";
 import {
-  LayoutDashboard,
-  Users,
   Shield,
-  Activity,
-  Settings,
-  Zap,
-  Database,
   ArrowLeft,
-  CheckCircle2,
-  Brain,
-  BarChart,
   ChevronDown,
   ChevronRight,
-  MessageSquare,
-  Plug,
-  Rocket,
-  ClipboardList,
-  Building2,
-  Calendar,
-  BarChart3,
-  FolderOpen,
-  Upload,
-  GitBranch,
-  Target,
-  Crosshair,
-  Layers,
-  FileText,
-  Network,
-  Bot,
-  Search,
-  BookOpen,
-  Globe,
-  RefreshCw,
-  Sparkles,
-  type LucideIcon,
 } from "lucide-react";
-
-// Icon resolver: maps string names from navigation data to actual components
-const iconMap: Record<string, LucideIcon> = {
-  LayoutDashboard,
-  Users,
-  Shield,
-  Activity,
-  Settings,
-  Zap,
-  Database,
-  CheckCircle2,
-  Brain,
-  BarChart,
-  MessageSquare,
-  Plug,
-  Rocket,
-  ClipboardList,
-  Building2,
-  Calendar,
-  BarChart3,
-  FolderOpen,
-  Upload,
-  GitBranch,
-  Target,
-  Crosshair,
-  Layers,
-  FileText,
-  Network,
-  Bot,
-  Search,
-  BookOpen,
-  Globe,
-  RefreshCw,
-  Sparkles,
-};
-
-function resolveIcon(iconName: string): LucideIcon {
-  return iconMap[iconName] || LayoutDashboard;
-}
 
 export function AdminSidebar() {
   const location = useLocation();
@@ -205,7 +136,7 @@ export function AdminSidebar() {
                             <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground transition-all duration-150 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
                               <div className="flex items-center gap-3">
                                 {(() => {
-                                  const Icon = resolveIcon(item.icon);
+                                  const Icon = resolveNavIcon(item.icon);
                                   return (
                                     <Icon className="h-[18px] w-[18px] shrink-0 text-muted-foreground" />
                                   );
@@ -246,7 +177,7 @@ export function AdminSidebar() {
                                       )
                                     : -1;
                                 return item.children!.map((child, index) => {
-                                  const ChildIcon = resolveIcon(child.icon);
+                                  const ChildIcon = resolveNavIcon(child.icon);
                                   const childHref = child.href.startsWith("/") ? child.href : `/${child.href}`;
                                   const matchesPath = normalizedPath === childHref || normalizedPath.startsWith(childHref + "/");
                                   const isChildActive =
@@ -274,7 +205,7 @@ export function AdminSidebar() {
                         );
                       }
 
-                      const Icon = resolveIcon(item.icon);
+                      const Icon = resolveNavIcon(item.icon);
                       const isActive = location.pathname === item.href;
                       const isIntegrations = item.href === '/admin/integrations';
 

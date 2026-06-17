@@ -17,96 +17,15 @@ import {
 } from "@/shared/data/navigationStructure";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { AIIndicator } from "@/components/ui/ai-indicator";
+import { resolveNavIcon } from "@/lib/navIcons";
 import {
-  LayoutDashboard,
-  Users,
-  Calendar,
-  CheckSquare,
-  BookOpen,
-  BookMarked,
   Brain,
-  Bot,
   ChevronRight,
   ChevronDown,
-  MessageSquare,
-  MessageCircle,
-  Target,
-  FolderKanban,
-  BarChart3,
-  GitBranch,
-  Crosshair,
-  Eye,
-  AlertCircle,
-  Repeat,
-  Handshake,
-  Contact,
-  FileText,
-  Briefcase,
-  ListTodo,
-  Settings2,
-  Sparkles,
-  ScrollText,
-  Network,
-  Search,
-  Calculator,
-  CheckCircle,
   PanelLeft,
-  Wrench,
-  Monitor,
-  HelpCircle,
   PanelLeftClose,
-  ShieldCheck,
-  ArrowLeftRight,
-  CalendarDays,
-  Plug,
-  type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-// Icon resolver: maps string names from navigation data to actual components
-const iconMap: Record<string, LucideIcon> = {
-  LayoutDashboard,
-  Users,
-  Calendar,
-  CheckSquare,
-  BookOpen,
-  BookMarked,
-  Brain,
-  Bot,
-  MessageSquare,
-  MessageCircle,
-  Target,
-  FolderKanban,
-  BarChart3,
-  GitBranch,
-  Crosshair,
-  Eye,
-  AlertCircle,
-  Repeat,
-  Handshake,
-  Contact,
-  FileText,
-  Briefcase,
-  ListTodo,
-  Settings2,
-  Sparkles,
-  ScrollText,
-  Network,
-  Search,
-  Calculator,
-  CheckCircle,
-  Wrench,
-  Monitor,
-  HelpCircle,
-  ShieldCheck,
-  ArrowLeftRight,
-  CalendarDays,
-  Plug,
-};
-
-function resolveIcon(iconName: string): LucideIcon {
-  return iconMap[iconName] || LayoutDashboard;
-}
 
 // Local storage key for expanded groups and header-only sections
 const EXPANDED_GROUPS_KEY = "sidebar-expanded-groups";
@@ -247,7 +166,7 @@ export function AppSidebar({ open = true, onToggleSidebar, isMobile = false }: A
   const visibleGroups = navigationGroups.filter(isGroupVisible);
 
   // Dashboard item visibility
-  const DashboardIcon = resolveIcon(dashboardItem.icon);
+  const DashboardIcon = resolveNavIcon(dashboardItem.icon);
   const isDashboardActive = isRouteActive(dashboardItem.href);
 
   // Collapsed: flat list of dashboard + all visible items (icon-only)
@@ -377,7 +296,7 @@ export function AppSidebar({ open = true, onToggleSidebar, isMobile = false }: A
           {/* Grouped Navigation */}
           <div className="space-y-2">
             {visibleGroups.map((group) => {
-              const GroupIcon = resolveIcon(group.icon);
+              const GroupIcon = resolveNavIcon(group.icon);
               const isExpanded = expandedGroups[group.id] ?? true;
               const groupActive = isGroupActive(group);
 
@@ -388,7 +307,7 @@ export function AppSidebar({ open = true, onToggleSidebar, isMobile = false }: A
                 return (
                   <div key={group.id} className="space-y-0.5">
                     {group.items.filter(isItemVisible).map((item) => {
-                      const Icon = resolveIcon(item.icon);
+                      const Icon = resolveNavIcon(item.icon);
                       const isActive = isRouteActive(item.href);
                       return (
                         <Link
@@ -448,7 +367,7 @@ export function AppSidebar({ open = true, onToggleSidebar, isMobile = false }: A
 
                   <CollapsibleContent className="mt-1 space-y-0.5 pl-2">
                     {group.items.filter(isItemVisible).map((item) => {
-                      const Icon = resolveIcon(item.icon);
+                      const Icon = resolveNavIcon(item.icon);
                       const isActive = isRouteActive(item.href);
                       const hasChildren =
                         item.children && item.children.filter(isItemVisible).length > 0;
@@ -492,7 +411,7 @@ export function AppSidebar({ open = true, onToggleSidebar, isMobile = false }: A
                             {/* Sub-parts: same highlighting as Deals (e.g. Discovery) - solid blue bar, blue text, badge grey */}
                             <CollapsibleContent className="mt-0.5 space-y-0.5 pl-3">
                               {item.children!.filter(isItemVisible).map((child) => {
-                                const ChildIcon = resolveIcon(child.icon);
+                                const ChildIcon = resolveNavIcon(child.icon);
                                 const isChildActive = isRouteActive(child.href);
                                 // Deals section: "All Deals" shows total count, stage links show stage count
                                 const isDealsSection = item.href === "/deals";
@@ -574,7 +493,7 @@ export function AppSidebar({ open = true, onToggleSidebar, isMobile = false }: A
                           {hasChildren && (
                             <div className="ml-6 mt-0.5 space-y-0.5 border-l border-sidebar-border pl-3">
                               {item.children!.filter(isItemVisible).map((child) => {
-                                const ChildIcon = resolveIcon(child.icon);
+                                const ChildIcon = resolveNavIcon(child.icon);
                                 const isChildActive = isRouteActive(child.href);
                                 const stageMatch = item.href === "/deals" && child.href.match(/stage=(\w+)/);
                                 const stageCount = stageMatch ? (dealStageCounts as Record<string, { count: number; value: number }>)[stageMatch[1]]?.count : undefined;
@@ -616,7 +535,7 @@ export function AppSidebar({ open = true, onToggleSidebar, isMobile = false }: A
         <nav className="flex-1 overflow-y-auto py-2">
           <div className="flex flex-col items-center gap-0.5">
             {collapsedNavItems.map((item) => {
-              const Icon = resolveIcon(item.icon);
+              const Icon = resolveNavIcon(item.icon);
               const isActive = isRouteActive(item.href);
               return (
                 <Link
