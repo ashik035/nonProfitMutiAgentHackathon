@@ -21,11 +21,11 @@ INSERT INTO public.nonprofit_programs (
   id, created_by, name, description, start_date, status, lead_staff,
   beneficiary_count, volunteer_hours, budget_used, budget_total, outcomes_achieved, outcomes_target
 ) VALUES
-  ('f789ce2b-5be4-4d03-8462-8545baeadcb3', (SELECT id FROM auth.users ORDER BY created_at LIMIT 1), 'Youth Mentorship Program', 'One-on-one mentorship pairing at-risk youth with community leaders for academic and career guidance.', '2025-12-18', 'active', 'Maria Santos', 85, 1200, 42000, 50000, 62, 80),
-  ('6ed751a7-83bb-4670-8d15-f9bd264d3060', (SELECT id FROM auth.users ORDER BY created_at LIMIT 1), 'Community Health Initiative', 'Free health screenings and wellness workshops in underserved neighborhoods.', '2025-06-16', 'active', 'Dr. James Lee', 320, 800, 68000, 75000, 290, 300),
-  ('32b80ba8-979c-418f-8aa6-6765acc09a73', (SELECT id FROM auth.users ORDER BY created_at LIMIT 1), 'Digital Literacy Workshop', 'Teaching basic computer and internet skills to senior citizens and low-income families.', '2026-03-18', 'active', 'Kevin Park', 45, 380, 12000, 25000, 30, 60),
-  ('6ecdd833-aa87-4d3e-8747-f98d669d5374', (SELECT id FROM auth.users ORDER BY created_at LIMIT 1), 'Food Security Network', 'Weekly food distribution and nutrition education in partnership with local farms and grocers.', '2024-06-16', 'active', 'Linda Chen', 500, 2100, 95000, 100000, 480, 500),
-  ('8bc2194f-ff6f-4722-8f19-ecfb8ef1b967', (SELECT id FROM auth.users ORDER BY created_at LIMIT 1), 'Summer Arts Camp', 'Two-week intensive arts and creativity camp for children ages 8-14.', '2025-05-12', 'completed', 'Rachel Adams', 60, 450, 18000, 18000, 58, 60)
+  ('f789ce2b-5be4-4d03-8462-8545baeadcb3', (SELECT id FROM auth.users ORDER BY created_at LIMIT 1), 'Youth Mentorship Program', 'One-on-one mentorship pairing at-risk youth with community leaders for academic and career guidance.', '2025-12-19', 'active', 'Maria Santos', 85, 1200, 42000, 50000, 62, 80),
+  ('6ed751a7-83bb-4670-8d15-f9bd264d3060', (SELECT id FROM auth.users ORDER BY created_at LIMIT 1), 'Community Health Initiative', 'Free health screenings and wellness workshops in underserved neighborhoods.', '2025-06-17', 'active', 'Dr. James Lee', 320, 800, 68000, 75000, 290, 300),
+  ('32b80ba8-979c-418f-8aa6-6765acc09a73', (SELECT id FROM auth.users ORDER BY created_at LIMIT 1), 'Digital Literacy Workshop', 'Teaching basic computer and internet skills to senior citizens and low-income families.', '2026-03-19', 'active', 'Kevin Park', 45, 380, 12000, 25000, 30, 60),
+  ('6ecdd833-aa87-4d3e-8747-f98d669d5374', (SELECT id FROM auth.users ORDER BY created_at LIMIT 1), 'Food Security Network', 'Weekly food distribution and nutrition education in partnership with local farms and grocers.', '2024-06-17', 'active', 'Linda Chen', 500, 2100, 95000, 100000, 480, 500),
+  ('8bc2194f-ff6f-4722-8f19-ecfb8ef1b967', (SELECT id FROM auth.users ORDER BY created_at LIMIT 1), 'Summer Arts Camp', 'Two-week intensive arts and creativity camp for children ages 8-14.', '2025-05-13', 'completed', 'Rachel Adams', 60, 450, 18000, 18000, 58, 60)
 ON CONFLICT (id) DO UPDATE SET
   name = EXCLUDED.name,
   description = EXCLUDED.description,

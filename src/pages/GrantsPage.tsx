@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
 import { jsPDF } from "jspdf";
+import { DEMO_GRANTS_PAGE, type GrantsPageGrant } from "@/shared/data/nonprofitDemoData";
 
 function buildReportText(g: {
   name: string; funder: string; amount: number; period: string; programOfficer: string;
@@ -78,75 +79,7 @@ function downloadGrantReportPdf(g: Parameters<typeof buildReportText>[0]) {
   doc.save(`grant-report-${slug || "draft"}.pdf`);
 }
 
-interface GrantDeliverable {
-  text: string;
-  done: boolean;
-}
-
-interface Grant {
-  id: string;
-  name: string;
-  funder: string;
-  amount: number;
-  period: string;
-  status: "AT RISK" | "ON TRACK";
-  utilization: number;
-  reportDueDays: number;
-  programOfficer: string;
-  deliverables: GrantDeliverable[];
-  budgetBreakdown: { label: string; pct: number }[];
-}
-
-const INITIAL_GRANTS: Grant[] = [
-  {
-    id: "g1", name: "Community Health Initiative", funder: "Kresge Foundation",
-    amount: 185000, period: "Jan 1 – Dec 31, 2026", status: "AT RISK",
-    utilization: 61, reportDueDays: 8, programOfficer: "Dr. Alicia Ramos",
-    deliverables: [
-      { text: "Q1 Progress Report submitted", done: true },
-      { text: "Mid-year financial report submitted", done: true },
-      { text: "Site visit scheduled (due May 15)", done: false },
-      { text: "Final narrative report (due Dec 15)", done: false },
-    ],
-    budgetBreakdown: [{ label: "Personnel", pct: 45 }, { label: "Programs", pct: 35 }, { label: "Overhead", pct: 20 }],
-  },
-  {
-    id: "g2", name: "Youth Programs Initiative", funder: "Robert Wood Johnson Foundation",
-    amount: 95000, period: "Oct 1, 2025 – Sep 30, 2026", status: "ON TRACK",
-    utilization: 88, reportDueDays: 31, programOfficer: "Marcus Webb",
-    deliverables: [
-      { text: "Program launch report", done: true },
-      { text: "Quarterly financial update", done: true },
-      { text: "Participant survey results", done: false },
-      { text: "Year-end impact assessment", done: false },
-    ],
-    budgetBreakdown: [{ label: "Personnel", pct: 50 }, { label: "Programs", pct: 40 }, { label: "Overhead", pct: 10 }],
-  },
-  {
-    id: "g3", name: "Technology Access Fund", funder: "Gates Foundation",
-    amount: 125000, period: "Jul 1, 2025 – Jun 30, 2026", status: "ON TRACK",
-    utilization: 44, reportDueDays: 83, programOfficer: "Sandra Liu",
-    deliverables: [
-      { text: "Equipment procurement report", done: true },
-      { text: "Digital literacy curriculum plan", done: false },
-      { text: "Mid-year progress report", done: false },
-      { text: "Final impact report", done: false },
-    ],
-    budgetBreakdown: [{ label: "Equipment", pct: 55 }, { label: "Training", pct: 30 }, { label: "Admin", pct: 15 }],
-  },
-  {
-    id: "g4", name: "Housing Support Initiative", funder: "Local Community Foundation",
-    amount: 92000, period: "Jan 1 – Jun 30, 2026", status: "ON TRACK",
-    utilization: 71, reportDueDays: 52, programOfficer: "James Okafor",
-    deliverables: [
-      { text: "Needs assessment completed", done: true },
-      { text: "Partner agreements signed", done: true },
-      { text: "Mid-program evaluation", done: false },
-      { text: "Final report", done: false },
-    ],
-    budgetBreakdown: [{ label: "Direct Services", pct: 60 }, { label: "Staffing", pct: 30 }, { label: "Admin", pct: 10 }],
-  },
-];
+interface Grant extends GrantsPageGrant {}
 
 function utilizationColor(pct: number) {
   if (pct >= 75) return "bg-green-500";
@@ -156,7 +89,7 @@ function utilizationColor(pct: number) {
 
 export default function GrantsPage() {
   const navigate = useNavigate();
-  const [grants, setGrants] = useState(INITIAL_GRANTS);
+  const [grants, setGrants] = useState(DEMO_GRANTS_PAGE);
   const [drawerGrant, setDrawerGrant] = useState<Grant | null>(null);
   const [generating, setGenerating] = useState<string | null>(null);
   const [reportGrant, setReportGrant] = useState<Grant | null>(null);

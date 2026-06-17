@@ -16,6 +16,8 @@ import {
   DEMO_AGENTS,
   DEMO_INTEGRATIONS,
   DEMO_AI_RECOMMENDATIONS,
+  DEMO_ORG_HEALTH,
+  getSinceYouWereAwayDigest,
   type AIRecommendation,
 } from "@/shared/data/nonprofitDemoData";
 
@@ -64,6 +66,7 @@ export default function OperationsManagerDashboard() {
   const visibleRecs = DEMO_AI_RECOMMENDATIONS.filter(
     (r) => !dismissedRecs.includes(r.id)
   );
+  const awayDigest = getSinceYouWereAwayDigest("operations_manager");
 
   return (
     <div className="space-y-6">
@@ -76,8 +79,8 @@ export default function OperationsManagerDashboard() {
 
       {/* Org Health Score — ops-focused */}
       <OrgHealthScore
-        score={80}
-        scoreColor="amber"
+        score={DEMO_ORG_HEALTH.score}
+        scoreColor={DEMO_ORG_HEALTH.scoreColor}
         breakdown={[
           { label: "Data Quality", value: "82%", percent: 82, color: "green" },
           { label: "Agent Activity", value: "5/5 active", percent: 100, color: "green" },
@@ -87,15 +90,10 @@ export default function OperationsManagerDashboard() {
         insight="All 5 AI agents active. CRM Data Integrity Agent flagged 3 duplicate records requiring merge review."
       />
 
-      {/* Since You Were Away — ops-focused */}
       <SinceYouWereAway
-        lastLoginAgo="2 days ago"
-        summary="Your AI agents ran 14 times while you were away. The CRM Data Integrity Agent found 3 potential duplicate records — Sarah Chen and Michael Torres flagged for merge review. All 5 agents remain active with no errors. Salesforce and Stripe integrations synced successfully."
-        actions={[
-          { label: "Review 3 duplicates →", href: "/agents/crm-data-integrity" },
-          { label: "View agent status →", href: "/agents" },
-          { label: "Check data health →", href: "/data-health" },
-        ]}
+        lastLoginAgo={awayDigest.lastLoginAgo}
+        summary={awayDigest.summary}
+        actions={awayDigest.actions}
       />
 
       <AgentROIHeroCard role="operations_manager" />
@@ -150,7 +148,7 @@ export default function OperationsManagerDashboard() {
         </CardContent>
       </Card>
 
-      <AIActivityWidget />
+      <AIActivityWidget role="operations_manager" />
 
       <AITeamsDashboardCard />
     </div>

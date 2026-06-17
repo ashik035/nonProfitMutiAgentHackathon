@@ -34,14 +34,13 @@ export default function AgentROIHeroCard({ role }: AgentROIHeroCardProps) {
               <Sparkles className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">AI ROI this month</p>
+              <p className="text-sm font-medium text-muted-foreground">AI ROI this week</p>
               <p className="mt-1 text-2xl font-semibold tracking-tight text-foreground lg:text-3xl">
                 Your AI agents saved{" "}
-                <span className="ai-gradient-text">{hoursLabel} hours</span> this month
+                <span className="ai-gradient-text">{hoursLabel} hours</span> this week
               </p>
               <p className="mt-2 text-sm text-muted-foreground">
-                Across {agentCount} role-relevant agent{agentCount === 1 ? "" : "s"} actively
-                monitoring your operations
+                {agentRunCount} successful run{agentRunCount === 1 ? "" : "s"} across {agentCount} role-relevant agent{agentCount === 1 ? "" : "s"}
               </p>
             </div>
           </div>

@@ -10,7 +10,8 @@ import { Bot, CheckCircle2, Loader2, XCircle, ArrowRight } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { DEMO_AGENT_ACTIVITY } from "@/shared/data/nonprofitDemoData";
+import type { AgencyRole } from "@/hooks/useAgencyRole";
+import { getRecentAgentActivityForRole } from "@/lib/agentRoi";
 
 const statusIcons = {
   success: { icon: CheckCircle2, className: "text-green-500" },
@@ -18,9 +19,13 @@ const statusIcons = {
   failed: { icon: XCircle, className: "text-red-500" },
 };
 
-export default function AIActivityWidget() {
+interface AIActivityWidgetProps {
+  role?: Exclude<AgencyRole, "admin">;
+}
+
+export default function AIActivityWidget({ role = "executive_director" }: AIActivityWidgetProps) {
   const navigate = useNavigate();
-  const recentRuns = DEMO_AGENT_ACTIVITY.slice(0, 5);
+  const recentRuns = getRecentAgentActivityForRole(role, 5);
 
   return (
     <Card>

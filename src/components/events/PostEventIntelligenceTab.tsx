@@ -20,79 +20,16 @@ import { CalendarDays, Users, Loader2, Send, Tag, Copy, Mail, ClipboardList, Bel
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
+import { DEMO_POST_EVENT, type PostEventAttendee, type PostEventData } from "@/shared/data/nonprofitDemoData";
 
-/* ── Attendee data ── */
+type Attendee = PostEventAttendee;
+type EventData = PostEventData;
 
-interface Attendee {
-  id: string;
-  name: string;
-  type: "Donor" | "Volunteer" | "Prospect" | "New Contact";
-  engagement: string;
-  followUp: "Pending" | "Contacted" | "Done";
+const EVENTS = DEMO_POST_EVENT;
+
+function initialAttendeesState(): Record<string, Attendee[]> {
+  return Object.fromEntries(EVENTS.map((event) => [event.id, [...event.attendees]]));
 }
-
-const GALA_ATTENDEES: Attendee[] = [
-  { id: "a1", name: "Sarah Mitchell", type: "Donor", engagement: "Major Gift Prospect", followUp: "Contacted" },
-  { id: "a2", name: "Robert Kim", type: "Prospect", engagement: "First-Time Attendee", followUp: "Pending" },
-  { id: "a3", name: "Patricia Lee", type: "New Contact", engagement: "Corporate Contact", followUp: "Pending" },
-  { id: "a4", name: "David Osei", type: "Donor", engagement: "Recurring Donor", followUp: "Done" },
-  { id: "a5", name: "Jennifer Walsh", type: "Prospect", engagement: "Board Referral", followUp: "Pending" },
-  { id: "a6", name: "Mark Abrams", type: "New Contact", engagement: "Walk-In", followUp: "Pending" },
-  { id: "a7", name: "Lisa Chen", type: "Prospect", engagement: "Volunteer Interest", followUp: "Pending" },
-  { id: "a8", name: "Thomas Rivera", type: "Donor", engagement: "Lapsed Donor", followUp: "Contacted" },
-  { id: "a9", name: "Carol Nguyen", type: "New Contact", engagement: "Event Sponsor Rep", followUp: "Pending" },
-  { id: "a10", name: "James Wright", type: "Prospect", engagement: "Table Captain Guest", followUp: "Pending" },
-  { id: "a11", name: "Angela Torres", type: "Volunteer", engagement: "Active Volunteer", followUp: "Done" },
-  { id: "a12", name: "Kevin Park", type: "Donor", engagement: "Mid-Level Donor", followUp: "Contacted" },
-];
-
-const VOLUNTEER_ATTENDEES: Attendee[] = [
-  { id: "v1", name: "Marcus Webb", type: "Volunteer", engagement: "New Recruit", followUp: "Pending" },
-  { id: "v2", name: "Aisha Patel", type: "Volunteer", engagement: "Returning Volunteer", followUp: "Done" },
-  { id: "v3", name: "Daniel Flores", type: "Volunteer", engagement: "New Recruit", followUp: "Pending" },
-  { id: "v4", name: "Nadia Okafor", type: "Volunteer", engagement: "Skills-Based", followUp: "Pending" },
-  { id: "v5", name: "Chris Bailey", type: "Volunteer", engagement: "New Recruit", followUp: "Pending" },
-  { id: "v6", name: "Yuki Tanaka", type: "Donor", engagement: "Donor → Volunteer", followUp: "Done" },
-  { id: "v7", name: "Emily Saunders", type: "Volunteer", engagement: "Returning Volunteer", followUp: "Contacted" },
-  { id: "v8", name: "Omar Hassan", type: "Prospect", engagement: "Community Leader", followUp: "Pending" },
-];
-
-/* ── Event definitions ── */
-
-interface EventData {
-  id: string;
-  name: string;
-  date: string;
-  location: string;
-  color: string;
-  iconColor: string;
-  status: "FOLLOW-UP NEEDED" | "COMPLETE";
-  statusColor: string;
-  summary: string;
-  badges: string[];
-  attendees: Attendee[];
-}
-
-const EVENTS: EventData[] = [
-  {
-    id: "e1", name: "Spring Gala 2026", date: "April 3, 2026",
-    location: "The Boston Marriott Copley Place",
-    color: "bg-blue-100 dark:bg-blue-900/40", iconColor: "text-blue-600",
-    status: "FOLLOW-UP NEEDED", statusColor: "bg-amber-100 text-amber-700 border-amber-200",
-    summary: "247 attendees (187 existing donors, 42 prospects, 18 new contacts) · Revenue: $142,000",
-    badges: ["47 not thanked", "12 volunteer interest", "8 upgrade prospects"],
-    attendees: GALA_ATTENDEES,
-  },
-  {
-    id: "e2", name: "Volunteer Orientation", date: "March 15, 2026",
-    location: "Brightside Foundation HQ — 120 Tremont St, Boston",
-    color: "bg-green-100 dark:bg-green-900/40", iconColor: "text-green-600",
-    status: "COMPLETE", statusColor: "bg-green-100 text-green-700 border-green-200",
-    summary: "34 attendees · 28 new volunteers · 3 donors converted",
-    badges: [],
-    attendees: VOLUNTEER_ATTENDEES,
-  },
-];
 
 /* ── Helpers ── */
 
@@ -109,10 +46,7 @@ function followUpBadge(status: Attendee["followUp"]) {
 export function PostEventIntelligenceTab() {
   // Attendee dialog
   const [attendeeEvent, setAttendeeEvent] = useState<EventData | null>(null);
-  const [attendeesState, setAttendeesState] = useState<Record<string, Attendee[]>>({
-    e1: GALA_ATTENDEES,
-    e2: VOLUNTEER_ATTENDEES,
-  });
+  const [attendeesState, setAttendeesState] = useState<Record<string, Attendee[]>>(initialAttendeesState);
 
   // Follow-up email sheet
   const [emailEvent, setEmailEvent] = useState<EventData | null>(null);

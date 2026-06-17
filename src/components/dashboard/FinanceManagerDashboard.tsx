@@ -12,8 +12,9 @@ import AgentROIHeroCard from "@/components/dashboard/AgentROIHeroCard";
 import QuickStatsRow from "@/components/dashboard/QuickStatsRow";
 import {
   DEMO_RECONCILIATION,
-  DEMO_GRANTS,
   DEMO_AI_RECOMMENDATIONS,
+  DEMO_ORG_HEALTH,
+  getSinceYouWereAwayDigest,
   type AIRecommendation,
 } from "@/shared/data/nonprofitDemoData";
 
@@ -61,6 +62,7 @@ export default function FinanceManagerDashboard() {
   if (isLoading) return <DashboardSkeleton />;
 
   const visibleRecs = FINANCE_RECS.filter((r) => !dismissedRecs.includes(r.id));
+  const awayDigest = getSinceYouWereAwayDigest("finance_manager");
 
   return (
     <div className="space-y-6">
@@ -73,8 +75,8 @@ export default function FinanceManagerDashboard() {
 
       {/* Org Health Score — finance-focused */}
       <OrgHealthScore
-        score={77}
-        scoreColor="amber"
+        score={DEMO_ORG_HEALTH.score}
+        scoreColor={DEMO_ORG_HEALTH.scoreColor}
         breakdown={[
           { label: "Reconciliation", value: "90%", percent: 90, color: "green" },
           { label: "Grant Health", value: "61%", percent: 61, color: "amber" },
@@ -84,15 +86,10 @@ export default function FinanceManagerDashboard() {
         insight="1 unmatched Stripe transaction ($2,340) needs review. Grant utilization at 61% for Kresge Foundation."
       />
 
-      {/* Since You Were Away — finance-focused */}
       <SinceYouWereAway
-        lastLoginAgo="2 days ago"
-        summary="Your AI agents ran 14 times while you were away. One Stripe transaction from Apr 6 ($2,340, donor email m.chen@outlook.com) remains unmatched in Salesforce. The Grant Compliance Agent flagged the Kresge Foundation report due in 8 days — utilization at 61% with a $4,200 budget variance requiring explanation."
-        actions={[
-          { label: "Review transaction →", href: "/agents/reconciliation-fund-accounting" },
-          { label: "Open grant report →", href: "/agents/grant-compliance" },
-          { label: "View reconciliation →", href: "/reconciliation" },
-        ]}
+        lastLoginAgo={awayDigest.lastLoginAgo}
+        summary={awayDigest.summary}
+        actions={awayDigest.actions}
       />
 
       <AgentROIHeroCard role="finance_manager" />

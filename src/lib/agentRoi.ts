@@ -1,10 +1,12 @@
 /**
- * Static ROI stats derived from agentTeamConfig timeSavedHrs and demo activity data.
+ * ROI stats derived from demo agent activity logs (weekly window).
  */
 
-import { allTeams, type AgentTeamAgent } from "@/components/ai/agentTeamConfig";
 import type { AgencyRole } from "@/hooks/useAgencyRole";
-import { DEMO_AGENT_ACTIVITY } from "@/shared/data/nonprofitDemoData";
+import {
+  DEMO_AGENT_ACTIVITY,
+  getWeeklyAgentRunsForSlugs,
+} from "@/shared/data/nonprofitDemoData";
 
 export const NONPROFIT_STAFF_HOURLY_RATE = 35;
 
@@ -31,29 +33,33 @@ export interface AgentROIStats {
   agentCount: number;
 }
 
-function getAgentsForSlugs(slugs: string[]): AgentTeamAgent[] {
-  const slugSet = new Set(slugs);
-  return allTeams.flatMap((team) => team.agents).filter((agent) => slugSet.has(agent.slug));
-}
-
 export function getAgentROIStats(role: NonprofitDashboardRole): AgentROIStats {
   const slugs = ROLE_AGENT_SLUGS[role];
-  const agents = getAgentsForSlugs(slugs);
   const slugSet = new Set(slugs);
+  const weeklyRuns = getWeeklyAgentRunsForSlugs(slugs);
 
-  const hoursSaved = agents.reduce(
-    (sum, agent) => sum + (agent.operational?.timeSavedHrs ?? 0),
-    0
-  );
-
-  const agentRunCount = DEMO_AGENT_ACTIVITY.filter((run) => slugSet.has(run.agentSlug)).length;
+  const hoursSaved = weeklyRuns.reduce((sum, run) => sum + run.hoursSaved, 0);
+  const agentRunCount = weeklyRuns.length;
+  const agentCount = slugSet.size;
 
   return {
     hoursSaved,
     dollarValue: hoursSaved * NONPROFIT_STAFF_HOURLY_RATE,
     agentRunCount,
-    agentCount: agents.length,
+    agentCount,
   };
+}
+
+export function getRecentAgentActivityForRole(
+  role: NonprofitDashboardRole,
+  limit = 5
+) {
+  const slugs = ROLE_AGENT_SLUGS[role];
+  const slugSet = new Set(slugs);
+  return [...DEMO_AGENT_ACTIVITY]
+    .filter((run) => slugSet.has(run.agentSlug))
+    .sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime())
+    .slice(0, limit);
 }
 
 export function formatHoursSaved(hours: number): string {

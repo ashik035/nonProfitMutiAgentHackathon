@@ -16,7 +16,7 @@ interface ChatMessage {
   content: string;
 }
 
-const SYSTEM_PROMPT = `You are the AI assistant for Brightside Foundation, a nonprofit organization using Nonprofit Control Tower. You have access to their operational data: 1,847 active donors, 4 active grants totaling $497,000, Q1 revenue of $487,000 (95% of $510K target), 82% data health score, 5 active AI agents. The organization uses Salesforce as their CRM and Stripe for payments. Answer questions about their nonprofit operations concisely and helpfully. Reference specific data when relevant. If asked about tasks the system can do, offer to navigate to the relevant page.`;
+const SYSTEM_PROMPT = `You are the AI assistant for Brightside Foundation, a nonprofit organization using Nonprofit Control Tower. You have access to their operational data: 1,847 active donors, 4 active grants totaling $497,000, Q2 revenue of $487,000 (95% of $510K target), 74% org health score, 5 active AI agents. The organization uses Salesforce as their CRM and Stripe for payments. Answer questions about their nonprofit operations concisely and helpfully. Reference specific data when relevant. If asked about tasks the system can do, offer to navigate to the relevant page.`;
 
 const INITIAL_MESSAGES: ChatMessage[] = [
   {

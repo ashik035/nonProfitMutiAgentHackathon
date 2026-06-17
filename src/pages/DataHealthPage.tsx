@@ -6,78 +6,19 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CheckCircle, X, Eye, Flag, Archive, Loader2, Users, AlertTriangle, ChevronDown } from "lucide-react";
+import { CheckCircle, X, Eye, Flag, Archive, Loader2, Users, AlertTriangle, ChevronDown, ArrowLeftRight } from "lucide-react";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
+import {
+  DEMO_DATA_HEALTH_PAGE,
+  type DataHealthDuplicatePair,
+  type DataHealthIncompleteProfile,
+  type DataHealthStaleRecord,
+} from "@/shared/data/nonprofitDemoData";
 
-// ── Types ──
-interface DuplicateRecord {
-  email: string;
-  phone: string;
-  lastGift: string;
-  lastGiftDate: string;
-  created: string;
-}
-
-interface DuplicatePair {
-  id: string;
-  name: string;
-  idA: string;
-  idB: string;
-  confidence: number;
-  recordA: DuplicateRecord;
-  recordB: DuplicateRecord;
-}
-
-interface IncompleteProfile {
-  id: string;
-  name: string;
-  missingFields: string[];
-  lastUpdated: string;
-}
-
-interface StaleRecord {
-  id: string;
-  name: string;
-  lastActivity: string;
-  lastGift: string;
-}
-
-// ── Data ──
-const INITIAL_DUPLICATES: DuplicatePair[] = [
-  {
-    id: "d1", name: "Sarah Chen", idA: "#1847", idB: "#2103", confidence: 94,
-    recordA: { email: "sarah.chen@gmail.com", phone: "617-555-0142", lastGift: "$500", lastGiftDate: "Mar 2026", created: "Jan 2024" },
-    recordB: { email: "sarah.chen@gmail.com", phone: "617-555-0198", lastGift: "$250", lastGiftDate: "Nov 2025", created: "Mar 2025" },
-  },
-  {
-    id: "d2", name: "Michael Torres", idA: "#892", idB: "#1654", confidence: 87,
-    recordA: { email: "mike.torres@outlook.com", phone: "781-555-0367", lastGift: "$1,200", lastGiftDate: "Feb 2026", created: "Aug 2022" },
-    recordB: { email: "michael.torres@outlook.com", phone: "781-555-0367", lastGift: "$750", lastGiftDate: "Jan 2026", created: "May 2024" },
-  },
-  {
-    id: "d3", name: "Jennifer Walsh", idA: "#3021", idB: "#3089", confidence: 99,
-    recordA: { email: "jwalsh@comcast.net", phone: "508-555-0291", lastGift: "$2,500", lastGiftDate: "Apr 2026", created: "Apr 7, 2026 9:14am" },
-    recordB: { email: "jwalsh@comcast.net", phone: "508-555-0291", lastGift: "$2,500", lastGiftDate: "Apr 2026", created: "Apr 7, 2026 9:16am" },
-  },
-];
-
-const INITIAL_INCOMPLETE: IncompleteProfile[] = [
-  { id: "ip1", name: "Robert Kim", missingFields: ["Phone", "Address"], lastUpdated: "14 months ago" },
-  { id: "ip2", name: "Patricia Osei", missingFields: ["Phone"], lastUpdated: "8 months ago" },
-  { id: "ip3", name: "David Chen", missingFields: ["Address", "Birthdate"], lastUpdated: "2 years ago" },
-  { id: "ip4", name: "Susan Park", missingFields: ["Employment"], lastUpdated: "6 months ago" },
-  { id: "ip5", name: "Thomas Rivera", missingFields: ["Phone", "Address"], lastUpdated: "3 years ago" },
-  { id: "ip6", name: "Angela Davis", missingFields: ["Email"], lastUpdated: "4 months ago" },
-  { id: "ip7", name: "Mark Johnson", missingFields: ["Phone", "Birthdate"], lastUpdated: "11 months ago" },
-  { id: "ip8", name: "Helen Brooks", missingFields: ["Address"], lastUpdated: "7 months ago" },
-];
-
-const INITIAL_STALE: StaleRecord[] = [
-  { id: "s1", name: "Margaret Liu", lastActivity: "22 months ago", lastGift: "$150" },
-  { id: "s2", name: "William Park", lastActivity: "31 months ago", lastGift: "$75" },
-  { id: "s3", name: "Helen Brooks", lastActivity: "19 months ago", lastGift: "$500" },
-  { id: "s4", name: "James Okafor", lastActivity: "26 months ago", lastGift: "$200" },
-];
+type DuplicatePair = DataHealthDuplicatePair;
+type IncompleteProfile = DataHealthIncompleteProfile;
+type StaleRecord = DataHealthStaleRecord;
 
 // ── Field diff highlight helper ──
 function FieldCell({ a, b, value }: { a: string; b: string; value: string }) {
@@ -90,10 +31,10 @@ function FieldCell({ a, b, value }: { a: string; b: string; value: string }) {
 }
 
 export default function DataHealthPage() {
-  const [duplicates, setDuplicates] = useState(INITIAL_DUPLICATES);
-  const [incomplete, setIncomplete] = useState(INITIAL_INCOMPLETE);
-  const [stale, setStale] = useState(INITIAL_STALE);
-  const [score, setScore] = useState(82);
+  const [duplicates, setDuplicates] = useState(DEMO_DATA_HEALTH_PAGE.duplicates);
+  const [incomplete, setIncomplete] = useState(DEMO_DATA_HEALTH_PAGE.incomplete);
+  const [stale, setStale] = useState(DEMO_DATA_HEALTH_PAGE.stale);
+  const [score, setScore] = useState(DEMO_DATA_HEALTH_PAGE.score);
   const [showMoreDups, setShowMoreDups] = useState(false);
   const [showMoreIncomplete, setShowMoreIncomplete] = useState(false);
   const [drawerPair, setDrawerPair] = useState<DuplicatePair | null>(null);
@@ -231,7 +172,33 @@ export default function DataHealthPage() {
         </CardContent>
       </Card>
 
-      {/* Section 2: Incomplete Profiles */}
+      {/* Section 2b: Integration Alerts */}
+      {DEMO_DATA_HEALTH_PAGE.stripeAlerts.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ArrowLeftRight className="h-5 w-5" /> Integration Alerts
+            </CardTitle>
+            <CardDescription>Stripe payments not matched in Salesforce</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {DEMO_DATA_HEALTH_PAGE.stripeAlerts.map((alert) => (
+              <div key={alert.stripeId} className="rounded-lg border border-amber-200 bg-amber-50/50 dark:bg-amber-950/20 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <p className="font-medium">{alert.amount} — {alert.date}</p>
+                  <p className="text-sm text-muted-foreground">{alert.email} · {alert.stripeId}</p>
+                  <Badge variant="outline" className="mt-2 text-amber-700 border-amber-300 bg-amber-100 text-xs">Unmatched in Salesforce</Badge>
+                </div>
+                <Button size="sm" asChild>
+                  <Link to="/reconciliation">Review in Reconciliation →</Link>
+                </Button>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Section 3: Incomplete Profiles */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -283,7 +250,7 @@ export default function DataHealthPage() {
         </CardContent>
       </Card>
 
-      {/* Section 3: Stale Records */}
+      {/* Section 4: Stale Records */}
       <Card>
         <CardHeader>
           <CardTitle>Stale Records</CardTitle>

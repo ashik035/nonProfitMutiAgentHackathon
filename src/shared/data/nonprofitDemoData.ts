@@ -65,16 +65,15 @@ export interface MergeSuggestion {
 }
 
 export const DEMO_DATA_HEALTH = {
-  score: 82,
-  duplicates: 12,
+  score: 74,
+  duplicates: 3,
   incompleteProfiles: 8,
   householdInconsistencies: 3,
   softCreditAlerts: 3,
   mergeSuggestions: [
-    { pair: ["John Smith (ID: 1042)", "John D. Smith (ID: 2318)"] as [string, string], confidence: 94 },
-    { pair: ["ABC Foundation (ID: 503)", "A.B.C. Foundation (ID: 891)"] as [string, string], confidence: 87 },
-    { pair: ["Mary Johnson (ID: 1205)", "Mary A. Johnson (ID: 3102)"] as [string, string], confidence: 82 },
-    { pair: ["Robert Williams (ID: 2201)", "Bob Williams (ID: 3405)"] as [string, string], confidence: 79 },
+    { pair: ["Sarah Chen (ID: 1847)", "Sarah Chen (ID: 2103)"] as [string, string], confidence: 94 },
+    { pair: ["Michael Torres (ID: 892)", "Michael Torres (ID: 1654)"] as [string, string], confidence: 87 },
+    { pair: ["Jennifer Walsh (ID: 3021)", "Jennifer Walsh (ID: 3089)"] as [string, string], confidence: 99 },
   ] satisfies MergeSuggestion[],
 };
 
@@ -115,59 +114,23 @@ export interface ReconciliationTransaction {
 }
 
 export const DEMO_RECONCILIATION = {
-  unmatchedTransactions: 5,
-  feeVarianceAlerts: 2,
-  restrictedFundMismatches: 1,
-  transactionsRequiringReview: 5,
-  matchedCount: 142,
+  unmatchedTransactions: 1,
+  feeVarianceAlerts: 0,
+  restrictedFundMismatches: 0,
+  transactionsRequiringReview: 1,
+  matchedCount: 146,
   totalCount: 147,
-  matchPercentage: 96.6,
+  matchPercentage: 99.3,
   month: format(NOW, "MMMM yyyy"),
   transactions: [
     {
       id: "TXN-4821",
-      description: "Online donation",
-      amount: 250.0,
+      description: "Online donation — M. Chen",
+      amount: 2340.0,
       source: "Stripe",
-      date: formatRelativeDate(subDays(NOW, 3)),
+      date: "April 6, 2026",
       status: "unmatched" as const,
-      issue: "No matching entry in QuickBooks",
-    },
-    {
-      id: "TXN-4835",
-      description: "Event ticket sale",
-      amount: 150.0,
-      source: "Stripe",
-      date: formatRelativeDate(subDays(NOW, 2)),
-      status: "fee_variance" as const,
-      issue: "Fee variance of $3.50 detected",
-    },
-    {
-      id: "TXN-4842",
-      description: "Grant disbursement",
-      amount: 10000.0,
-      source: "QuickBooks",
-      date: formatRelativeDate(subDays(NOW, 2)),
-      status: "fund_mismatch" as const,
-      issue: "Restricted fund code mismatch",
-    },
-    {
-      id: "TXN-4856",
-      description: "Monthly recurring gift",
-      amount: 75.0,
-      source: "Stripe",
-      date: formatRelativeDate(subDays(NOW, 1)),
-      status: "unmatched" as const,
-      issue: "Donor record not linked in CRM",
-    },
-    {
-      id: "TXN-4861",
-      description: "Corporate sponsorship",
-      amount: 5000.0,
-      source: "PayPal",
-      date: formatRelativeDate(NOW),
-      status: "fee_variance" as const,
-      issue: "Fee variance of $12.80 detected",
+      issue: "No matching donor record in Salesforce",
     },
   ] satisfies ReconciliationTransaction[],
 };
@@ -182,9 +145,9 @@ export interface FollowUpSuggestion {
 
 export const DEMO_EVENTS = {
   recentEventName: "Annual Spring Gala",
-  attendance: 120,
-  untaggedAttendees: 15,
-  volunteerInterestFlags: 8,
+  attendance: 247,
+  untaggedAttendees: 47,
+  volunteerInterestFlags: 12,
   eventDate: formatRelativeDate(subDays(NOW, 5)),
   secondEvent: {
     name: "Community Open House",
@@ -239,44 +202,44 @@ export const DEMO_GRANTS = {
   deadlineDaysThreshold: 14,
   grants: [
     {
-      name: "Community Impact Fund",
-      funder: "Ford Foundation",
-      amount: 50000,
-      utilized: 72,
+      name: "Community Health Initiative",
+      funder: "Kresge Foundation",
+      amount: 185000,
+      utilized: 61,
       daysUntilDeadline: 8,
       deadlineDate: formatRelativeDate(addDays(NOW, 8)),
       status: "active" as const,
       nextMilestone: "Q1 progress report due",
     },
     {
-      name: "Youth Education Grant",
+      name: "Youth Programs Initiative",
+      funder: "Robert Wood Johnson Foundation",
+      amount: 95000,
+      utilized: 88,
+      daysUntilDeadline: 31,
+      deadlineDate: formatRelativeDate(addDays(NOW, 31)),
+      status: "active" as const,
+      nextMilestone: "Participant survey results",
+    },
+    {
+      name: "Technology Access Fund",
       funder: "Gates Foundation",
-      amount: 25000,
-      utilized: 45,
-      daysUntilDeadline: 12,
-      deadlineDate: formatRelativeDate(addDays(NOW, 12)),
+      amount: 125000,
+      utilized: 44,
+      daysUntilDeadline: 83,
+      deadlineDate: formatRelativeDate(addDays(NOW, 83)),
       status: "active" as const,
-      nextMilestone: "Mid-term evaluation",
+      nextMilestone: "Mid-year progress report",
     },
     {
-      name: "Health Equity Initiative",
-      funder: "Robert Wood Johnson",
-      amount: 75000,
-      utilized: 91,
-      daysUntilDeadline: 34,
-      deadlineDate: formatRelativeDate(addDays(NOW, 34)),
+      name: "Housing Support Initiative",
+      funder: "Local Community Foundation",
+      amount: 92000,
+      utilized: 71,
+      daysUntilDeadline: 52,
+      deadlineDate: formatRelativeDate(addDays(NOW, 52)),
       status: "active" as const,
-      nextMilestone: "Final expenditure review",
-    },
-    {
-      name: "Environmental Justice Program",
-      funder: "Kresge Foundation",
-      amount: 40000,
-      utilized: 35,
-      daysUntilDeadline: 60,
-      deadlineDate: formatRelativeDate(addDays(NOW, 60)),
-      status: "active" as const,
-      nextMilestone: "Site visit scheduled",
+      nextMilestone: "Mid-program evaluation",
     },
   ] satisfies Grant[],
 };
@@ -294,7 +257,7 @@ const currentQuarter = `Q${Math.ceil((NOW.getMonth() + 1) / 3)} ${NOW.getFullYea
 export const ORG_NAME = "Brightside Foundation";
 
 export const DEMO_BOARD_REPORT = {
-  status: "Draft Ready",
+  status: "Pending ED Approval",
   generatedDate: formatRelativeDate(NOW),
   quarter: currentQuarter,
   totalDonors: 1847,
@@ -361,7 +324,7 @@ export const DEMO_BOARD_REPORT_SECTIONS = {
     { grant: "Housing Support", funder: "Local Community Foundation", amount: "$92,000", status: "Active", utilization: 71 },
   ] satisfies BoardReportGrantRow[],
   dataHealth: [
-    { label: "Data Health Score", value: "82%" },
+    { label: "Data Health Score", value: "74%" },
     { label: `Duplicates Resolved (${currentQuarter})`, value: "7" },
     { label: "Records Updated by AI", value: "143" },
   ] satisfies BoardReportDataHealthItem[],
@@ -397,17 +360,17 @@ export const DEMO_AGENTS: DemoAgent[] = [
     name: "CRM Data Integrity Agent",
     status: "Active",
     lastRun: AGENT_RUN_CRM,
-    alertCount: 12,
+    alertCount: 3,
     description:
       "Continuously scans your CRM for duplicate records, missing required fields, and stale donor profiles. Surfaces merge suggestions and data quality issues for review.",
     integrations: ["Salesforce", "Bloomerang"],
     findings: [
-      { text: "12 duplicate donor records detected", severity: "amber", time: AGENT_RUN_CRM },
+      { text: "3 duplicate donor records detected", severity: "amber", time: AGENT_RUN_CRM },
       { text: "8 profiles missing phone or email", severity: "amber", time: AGENT_RUN_CRM },
       { text: "3 household records with inconsistent addresses", severity: "blue", time: hoursAgo(2, 4) },
     ],
     actions: [
-      { text: "Review and approve 12 merge suggestions" },
+      { text: "Review and approve 3 merge suggestions" },
       { text: "Export incomplete profiles for data entry team" },
     ],
   },
@@ -421,12 +384,11 @@ export const DEMO_AGENTS: DemoAgent[] = [
       "Matches incoming transactions from payment processors against your finance system. Flags unmatched payments, fee variances, and restricted fund mismatches.",
     integrations: ["Stripe", "PayPal", "QuickBooks Online"],
     findings: [
-      { text: "5 Stripe transactions unmatched in QuickBooks", severity: "amber", time: AGENT_RUN_RECON },
-      { text: "2 fee variance alerts exceeding threshold", severity: "amber", time: AGENT_RUN_RECON },
-      { text: "1 restricted fund deposit miscategorized", severity: "red", time: hoursAgo(4, 6) },
+      { text: "1 Stripe transaction unmatched in Salesforce", severity: "amber", time: AGENT_RUN_RECON },
+      { text: "146 of 147 April transactions matched", severity: "green", time: AGENT_RUN_RECON },
     ],
     actions: [
-      { text: "Review 5 unmatched transactions" },
+      { text: "Review 1 unmatched transaction ($2,340)" },
       { text: "Resolve restricted fund miscategorization" },
     ],
   },
@@ -502,8 +464,8 @@ export interface AIRecommendation {
 export const DEMO_AI_RECOMMENDATIONS: AIRecommendation[] = [
   {
     id: "rec-001",
-    title: "12 duplicate donor records found",
-    description: "The CRM Data Integrity Agent detected 12 potential duplicate records that may inflate your donor count. Review and merge to maintain accurate metrics.",
+    title: "3 duplicate donor records found",
+    description: "The CRM Data Integrity Agent detected 3 potential duplicate records that may inflate your donor count. Review and merge to maintain accurate metrics.",
     source: "CRM Data Integrity Agent",
     severity: "warning",
     action1: { label: "Review Duplicates", href: "/data-health" },
@@ -512,8 +474,8 @@ export const DEMO_AI_RECOMMENDATIONS: AIRecommendation[] = [
   },
   {
     id: "rec-002",
-    title: "Community Impact Fund deadline in 8 days",
-    description: `The Q1 progress report for the Ford Foundation's Community Impact Fund is due ${formatShortDate(addDays(NOW, 8))}. Fund utilization is at 72%.`,
+    title: "Kresge Foundation report due in 8 days",
+    description: `The Q1 progress report for the Kresge Foundation's Community Health Initiative is due ${formatShortDate(addDays(NOW, 8))}. Fund utilization is at 61%.`,
     source: "Grant Compliance Agent",
     severity: "critical",
     action1: { label: "View Grant Details", href: "/grants" },
@@ -522,8 +484,8 @@ export const DEMO_AI_RECOMMENDATIONS: AIRecommendation[] = [
   },
   {
     id: "rec-003",
-    title: "15 gala attendees need CRM tagging",
-    description: "Annual Spring Gala attendees have not been tagged in your CRM. Creating follow-up tasks will help convert event interest into donor engagement.",
+    title: "47 gala attendees need CRM tagging",
+    description: "Spring Gala 2026 attendees have not been tagged in Salesforce. Creating follow-up tasks will help convert event interest into donor engagement.",
     source: "Event Intelligence Agent",
     severity: "warning",
     action1: { label: "View Attendees", href: "/events" },
@@ -533,7 +495,7 @@ export const DEMO_AI_RECOMMENDATIONS: AIRecommendation[] = [
   {
     id: "rec-004",
     title: `${currentQuarter} board report draft is ready`,
-    description: `All KPI data sources have been synced and the ${currentQuarter} board report has been generated. Review the draft before your next board meeting.`,
+    description: `All KPI data sources have been synced and the ${currentQuarter} board report is pending ED approval. Review the draft before your next board meeting.`,
     source: "Board Reporting Agent",
     severity: "success",
     action1: { label: "Review Report", href: "/board-reports" },
@@ -542,8 +504,8 @@ export const DEMO_AI_RECOMMENDATIONS: AIRecommendation[] = [
   },
   {
     id: "rec-005",
-    title: "5 unmatched Stripe transactions",
-    description: "Reconciliation detected 5 Stripe transactions with no matching entry in QuickBooks. Review and match to keep your books balanced.",
+    title: "1 unmatched Stripe transaction",
+    description: "Reconciliation detected 1 Stripe transaction ($2,340 from Apr 6) with no matching donor record in Salesforce. Review and match to keep your books balanced.",
     source: "Reconciliation Agent",
     severity: "warning",
     action1: { label: "Review Transactions", href: "/reconciliation" },
@@ -552,8 +514,8 @@ export const DEMO_AI_RECOMMENDATIONS: AIRecommendation[] = [
   },
   {
     id: "rec-006",
-    title: "Health Equity Initiative at 91% utilization",
-    description: "Grant spending is approaching the approved budget ceiling. Review spending pace to avoid over-utilization before the reporting deadline.",
+    title: "Youth Programs Initiative at 88% utilization",
+    description: "Grant spending is approaching the approved budget ceiling. Review spending pace before the next reporting deadline.",
     source: "Grant Compliance Agent",
     severity: "critical",
     action1: { label: "View Grant", href: "/grants" },
@@ -841,19 +803,25 @@ export interface AgentActivityRun {
   outcome: string;
   timestamp: string;
   status: "success" | "running" | "failed";
+  completedAt: Date;
+  hoursSaved: number;
 }
 
 export const DEMO_AGENT_ACTIVITY: AgentActivityRun[] = [
-  { id: "run-001", agentName: "CRM Data Integrity Agent", agentSlug: "crm-data-integrity", team: "Core Operations", action: "Full CRM scan", outcome: "12 duplicate records flagged, 8 incomplete profiles identified", timestamp: AGENT_RUN_CRM, status: "success" },
-  { id: "run-002", agentName: "Grant Compliance Agent", agentSlug: "grant-compliance", team: "Core Operations", action: "Deadline monitoring", outcome: "2 grants approaching deadline, utilization alerts generated", timestamp: AGENT_RUN_GRANT, status: "success" },
-  { id: "run-003", agentName: "Board Reporting Agent", agentSlug: "board-reporting", team: "Core Operations", action: "Report generation", outcome: `${currentQuarter} board report draft generated successfully`, timestamp: AGENT_RUN_BOARD, status: "success" },
-  { id: "run-004", agentName: "Event Intelligence Agent", agentSlug: "event-intelligence", team: "Core Operations", action: "Post-event analysis", outcome: "15 attendees flagged for CRM tagging, 8 volunteer prospects found", timestamp: AGENT_RUN_EVENT, status: "success" },
-  { id: "run-005", agentName: "Reconciliation Agent", agentSlug: "reconciliation-fund-accounting", team: "Core Operations", action: "Transaction matching", outcome: "142/147 transactions matched, 5 require manual review", timestamp: AGENT_RUN_RECON, status: "success" },
-  { id: "run-006", agentName: "Grant Budget Watcher", agentSlug: "grant-budget-watcher", team: "Finance", action: "Budget utilization check", outcome: "Health Equity Initiative at 91% — overspend alert triggered", timestamp: hoursAgo(2, 4), status: "success" },
-  { id: "run-007", agentName: "Integration Health Monitor", agentSlug: "integration-health-monitor", team: "Operations", action: "System connectivity check", outcome: "All 4 integrations healthy, Salesforce API latency elevated", timestamp: hoursAgo(1, 3), status: "success" },
-  { id: "run-008", agentName: "CRM Data Integrity Agent", agentSlug: "crm-data-integrity", team: "Core Operations", action: "Incremental scan", outcome: "Scan in progress — analyzing 200 records...", timestamp: "just now", status: "running" },
-  { id: "run-009", agentName: "Onboarding Checklist AI", agentSlug: "onboarding-checklist-ai", team: "Operations", action: "New hire checklist generation", outcome: "Failed to generate — knowledge base documents unavailable", timestamp: hoursAgo(5, 8), status: "failed" },
-  { id: "run-010", agentName: "Event Intelligence Agent", agentSlug: "event-intelligence", team: "Core Operations", action: "Volunteer matching", outcome: "3 attendees matched to existing major donor profiles", timestamp: hoursAgo(6, 10), status: "success" },
+  { id: "run-001", agentName: "CRM Data Integrity Agent", agentSlug: "crm-data-integrity", team: "Core Operations", action: "Full CRM scan", outcome: "3 duplicate records flagged, 8 incomplete profiles identified", timestamp: AGENT_RUN_CRM, status: "success", completedAt: subDays(NOW, 2), hoursSaved: 2.5 },
+  { id: "run-002", agentName: "Grant Compliance Agent", agentSlug: "grant-compliance", team: "Core Operations", action: "Deadline monitoring", outcome: "Kresge Foundation report due in 8 days, utilization at 61%", timestamp: AGENT_RUN_GRANT, status: "success", completedAt: subDays(NOW, 3), hoursSaved: 1.5 },
+  { id: "run-003", agentName: "Board Reporting Agent", agentSlug: "board-reporting", team: "Core Operations", action: "Report generation", outcome: `${currentQuarter} board report draft generated — pending ED approval`, timestamp: AGENT_RUN_BOARD, status: "success", completedAt: subDays(NOW, 1), hoursSaved: 4 },
+  { id: "run-004", agentName: "Event Intelligence Agent", agentSlug: "event-intelligence", team: "Core Operations", action: "Post-event analysis", outcome: "47 Spring Gala attendees not tagged in Salesforce, 12 volunteer prospects found", timestamp: AGENT_RUN_EVENT, status: "success", completedAt: subDays(NOW, 1), hoursSaved: 2 },
+  { id: "run-005", agentName: "Reconciliation Agent", agentSlug: "reconciliation-fund-accounting", team: "Core Operations", action: "Transaction matching", outcome: "146/147 transactions matched, 1 requires manual review ($2,340)", timestamp: AGENT_RUN_RECON, status: "success", completedAt: subDays(NOW, 4), hoursSaved: 1.5 },
+  { id: "run-006", agentName: "Grant Budget Watcher", agentSlug: "grant-budget-watcher", team: "Finance", action: "Budget utilization check", outcome: "Youth Programs Initiative at 88% — review recommended", timestamp: hoursAgo(2, 4), status: "success", completedAt: subDays(NOW, 2), hoursSaved: 1 },
+  { id: "run-007", agentName: "Integration Health Monitor", agentSlug: "integration-health-monitor", team: "Operations", action: "System connectivity check", outcome: "All 4 integrations healthy, Salesforce API latency elevated", timestamp: hoursAgo(1, 3), status: "success", completedAt: subDays(NOW, 1), hoursSaved: 0.5 },
+  { id: "run-008", agentName: "CRM Data Integrity Agent", agentSlug: "crm-data-integrity", team: "Core Operations", action: "Incremental scan", outcome: "Scan in progress — analyzing 200 records...", timestamp: "just now", status: "running", completedAt: NOW, hoursSaved: 0 },
+  { id: "run-009", agentName: "Onboarding Checklist AI", agentSlug: "onboarding-checklist-ai", team: "Operations", action: "New hire checklist generation", outcome: "Failed to generate — knowledge base documents unavailable", timestamp: hoursAgo(5, 8), status: "failed", completedAt: subDays(NOW, 5), hoursSaved: 0 },
+  { id: "run-010", agentName: "Event Intelligence Agent", agentSlug: "event-intelligence", team: "Core Operations", action: "Volunteer matching", outcome: "3 attendees matched to existing major donor profiles", timestamp: hoursAgo(6, 10), status: "success", completedAt: subDays(NOW, 5), hoursSaved: 1 },
+  { id: "run-011", agentName: "Board Reporting Agent", agentSlug: "board-reporting", team: "Core Operations", action: "Financial snapshot sync", outcome: "Q2 revenue and grant utilization data refreshed", timestamp: hoursAgo(8, 12), status: "success", completedAt: subDays(NOW, 3), hoursSaved: 2 },
+  { id: "run-012", agentName: "Reconciliation Agent", agentSlug: "reconciliation-fund-accounting", team: "Core Operations", action: "April ledger review", outcome: "10 matched transactions auto-posted to Salesforce", timestamp: hoursAgo(10, 14), status: "success", completedAt: subDays(NOW, 6), hoursSaved: 1.5 },
+  { id: "run-013", agentName: "Grant Compliance Agent", agentSlug: "grant-compliance", team: "Core Operations", action: "Deliverable tracking", outcome: "4 active grants reviewed — 2 reports due within 30 days", timestamp: hoursAgo(12, 16), status: "success", completedAt: subDays(NOW, 4), hoursSaved: 1.5 },
+  { id: "run-014", agentName: "CRM Data Integrity Agent", agentSlug: "crm-data-integrity", team: "Core Operations", action: "Stripe-Salesforce cross-check", outcome: "1 unmatched Stripe transaction flagged for review", timestamp: hoursAgo(4, 6), status: "success", completedAt: subDays(NOW, 1), hoursSaved: 1 },
 ];
 
 // ─── Donor Retention ────────────────────────────────────────────
@@ -880,8 +848,7 @@ export const DEMO_DONOR_RETENTION = {
     { year: NOW.getFullYear(), rate: 72 },
   ],
   atRiskDonors: [
-    { id: "d-001", name: "Carol Nguyen", lastGiftDate: formatRelativeDate(subDays(NOW, 380)), lastGiftAmount: 500, daysSinceLastGift: 380, totalGiving: 3200, segment: "Major Donor" },
-    { id: "d-002", name: "James Wilson", lastGiftDate: formatRelativeDate(subDays(NOW, 320)), lastGiftAmount: 250, daysSinceLastGift: 320, totalGiving: 1800, segment: "Mid-Level" },
+    { id: "d-001", name: "James Wilson", lastGiftDate: formatRelativeDate(subDays(NOW, 320)), lastGiftAmount: 250, daysSinceLastGift: 320, totalGiving: 1800, segment: "Mid-Level" },
     { id: "d-003", name: "Patricia Osei", lastGiftDate: formatRelativeDate(subDays(NOW, 290)), lastGiftAmount: 1000, daysSinceLastGift: 290, totalGiving: 5400, segment: "Major Donor" },
     { id: "d-004", name: "Robert Kim", lastGiftDate: formatRelativeDate(subDays(NOW, 275)), lastGiftAmount: 150, daysSinceLastGift: 275, totalGiving: 900, segment: "Regular" },
     { id: "d-005", name: "Nancy Thompson", lastGiftDate: formatRelativeDate(subDays(NOW, 400)), lastGiftAmount: 75, daysSinceLastGift: 400, totalGiving: 450, segment: "Regular" },
@@ -1310,13 +1277,13 @@ export const DEMO_MANAGED_EVENTS: DemoManagedEvent[] = [
     date: formatRelativeDate(subDays(NOW, 5)),
     location: "The Boston Marriott Copley Place",
     description: "Our premier annual fundraising gala celebrating the impact of our community. An evening of dinner, dancing, live auction, and recognition of our top donors and volunteers.",
-    capacity: 150,
-    registrationCount: 120,
-    fundRaised: 42000,
+    capacity: 300,
+    registrationCount: 247,
+    fundRaised: 142000,
     ticketTypes: [
-      { tier: "General Admission", price: 150, capacity: 80, sold: 68 },
-      { tier: "VIP", price: 350, capacity: 40, sold: 35 },
-      { tier: "Member-Only", price: 100, capacity: 30, sold: 17 },
+      { tier: "General Admission", price: 150, capacity: 180, sold: 168 },
+      { tier: "VIP", price: 350, capacity: 60, sold: 52 },
+      { tier: "Member-Only", price: 100, capacity: 60, sold: 27 },
     ],
     speakers: [
       { name: "Patricia Lee", title: "Board Chair", organization: "Brightside Foundation" },
@@ -1644,3 +1611,474 @@ export const DEMO_PUBLIC_PRESENCE = {
   },
   lastPublishedAt: formatRelativeDate(subDays(NOW, 2)),
 };
+
+// ─── Org Health (Dashboard) ───────────────────────────────────────
+
+export interface OrgHealthBreakdownItem {
+  label: string;
+  value: string;
+  percent: number;
+  color: "green" | "amber" | "red";
+}
+
+export const DEMO_ORG_HEALTH = {
+  score: 74,
+  scoreColor: "amber" as const,
+  breakdown: [
+    { label: "Data Quality", value: "82%", percent: 82, color: "green" as const },
+    { label: "Grant Health", value: "61%", percent: 61, color: "amber" as const },
+    { label: "Reconciliation", value: "90%", percent: 90, color: "green" as const },
+    { label: "Agent Activity", value: "5/5 active", percent: 100, color: "green" as const },
+  ] satisfies OrgHealthBreakdownItem[],
+  insight: "Grant health is below target — 2 reports due within 14 days. Review recommended.",
+};
+
+// ─── Donor Pipeline Page ──────────────────────────────────────────
+
+export interface PipelineDonor {
+  id: string;
+  name: string;
+  currentGiving: string;
+  targetGiving: string;
+  assignedTo: string;
+  note?: string;
+  outreachDate?: string;
+  lastContact?: string;
+  pledgeAmount?: string;
+  pledgeDate?: string;
+  upgradeAmount?: string;
+  completedDate?: string;
+  email?: string;
+  fundDesignation?: string;
+  totalGiving?: string;
+  lastGiftAmount?: string;
+  lastGiftDate?: string;
+  givingHistory?: string;
+  contactNotes?: string;
+  volunteerHistory?: string;
+}
+
+export const DEMO_DONOR_PIPELINE: Record<string, PipelineDonor[]> = {
+  identified: [
+    { id: "d1", name: "Margaret Liu", currentGiving: "$2,500/yr", targetGiving: "$5,000/yr", assignedTo: "Maria Santos",
+      email: "margaret.liu@email.com", fundDesignation: "Technology Access", totalGiving: "$8,750",
+      lastGiftAmount: "$2,500", lastGiftDate: "January 2026",
+      givingHistory: "$2,500 (Jan 2026), $2,500 (Jan 2025), $2,000 (Jan 2024), $1,750 (Jan 2023)",
+      contactNotes: "Retired software engineer. Passionate about digital literacy for underserved youth. Volunteers as a coding mentor every Saturday.",
+      volunteerHistory: "Weekly coding mentor since 2023, attended Tech for Good gala 2025" },
+    { id: "d2", name: "Robert Kim", currentGiving: "$1,800/yr", targetGiving: "$3,000/yr", assignedTo: "",
+      email: "r.kim@email.com", fundDesignation: "General Operating", totalGiving: "$5,400",
+      lastGiftAmount: "$1,800", lastGiftDate: "December 2025",
+      givingHistory: "$1,800 (Dec 2025), $1,800 (Dec 2024), $1,800 (Dec 2023)",
+      contactNotes: "Local business owner — Kim's Hardware. Interested in workforce development programs.",
+      volunteerHistory: "Donated supplies for community center renovation 2024" },
+    { id: "d3", name: "Patricia Osei", currentGiving: "$3,200/yr", targetGiving: "$7,500/yr", assignedTo: "Maria Santos",
+      email: "p.osei@email.com", fundDesignation: "Youth Programs", totalGiving: "$12,800",
+      lastGiftAmount: "$3,200", lastGiftDate: "February 2026",
+      givingHistory: "$3,200 (Feb 2026), $3,200 (Feb 2025), $3,200 (Feb 2024), $3,200 (Feb 2023)",
+      contactNotes: "School principal. Deeply invested in after-school tutoring program. Has referred three other donors.",
+      volunteerHistory: "Board advisory committee member, Spring Gala host committee 2025" },
+  ],
+  outreach: [
+    { id: "d4", name: "David Chen", currentGiving: "$2,100/yr", targetGiving: "$5,000/yr", assignedTo: "Maria Santos", outreachDate: "Apr 10, 2026",
+      email: "david.chen@email.com", fundDesignation: "General Operating", totalGiving: "$6,300",
+      lastGiftAmount: "$2,100", lastGiftDate: "November 2025",
+      givingHistory: "$2,100 (Nov 2025), $2,100 (Nov 2024), $2,100 (Nov 2023)",
+      contactNotes: "Financial advisor. Expressed interest in planned giving program at last event.",
+      volunteerHistory: "Attended Fall Fundraiser 2024 and 2025" },
+    { id: "d5", name: "Susan Park", currentGiving: "$4,500/yr", targetGiving: "$10,000/yr", assignedTo: "Kevin Park", outreachDate: "Apr 12, 2026",
+      email: "susan.park@email.com", fundDesignation: "Youth Programs", totalGiving: "$18,000",
+      lastGiftAmount: "$4,500", lastGiftDate: "March 2026",
+      givingHistory: "$4,500 (Mar 2026), $4,500 (Mar 2025), $4,500 (Sep 2024), $4,500 (Mar 2024)",
+      contactNotes: "Pediatrician. Her daughter participated in our summer camp. Interested in scholarship fund naming.",
+      volunteerHistory: "Health screening volunteer 2024, Summer Camp sponsor 2025" },
+  ],
+  conversation: [
+    { id: "d6", name: "Jennifer Walsh", currentGiving: "$1,950/yr", targetGiving: "$5,000/yr", assignedTo: "Maria Santos", lastContact: "Apr 5",
+      note: "Very interested in naming opportunity for youth programs room",
+      email: "jennifer.walsh@email.com", fundDesignation: "Youth Programs", totalGiving: "$7,350",
+      lastGiftAmount: "$750", lastGiftDate: "March 2026",
+      givingHistory: "$750 (Mar 2026), $500 (Dec 2025), $700 (Jun 2025), $500 (Dec 2024), $500 (Mar 2024)",
+      contactNotes: "Attorney. Youth education meant a great deal to her late mother, Eleanor Walsh, who volunteered here for 15 years. Jennifer is considering a naming gift in her mother's honor.",
+      volunteerHistory: "Attended Spring Gala 2025 and 2026, Eleanor Walsh Memorial donor since 2024" },
+    { id: "d7", name: "Mark Abrams", currentGiving: "$3,800/yr", targetGiving: "$7,500/yr", assignedTo: "Kevin Park", lastContact: "Apr 3",
+      note: "Meeting scheduled Apr 15 with ED",
+      email: "mark.abrams@email.com", fundDesignation: "General Operating", totalGiving: "$15,200",
+      lastGiftAmount: "$3,800", lastGiftDate: "January 2026",
+      givingHistory: "$3,800 (Jan 2026), $3,800 (Jan 2025), $3,800 (Jan 2024), $3,800 (Jan 2023)",
+      contactNotes: "Real estate developer. Long-time supporter since founding. Interested in capital campaign for new community center wing.",
+      volunteerHistory: "Founding donor, attended every annual gala, site tour host for potential donors" },
+  ],
+  pledge: [
+    { id: "d8", name: "Thomas Rivera", currentGiving: "$2,500/yr", targetGiving: "$5,000/yr", assignedTo: "Maria Santos", pledgeAmount: "$5,000", pledgeDate: "Apr 1, 2026",
+      email: "thomas.rivera@email.com", fundDesignation: "General Operating", totalGiving: "$12,500",
+      lastGiftAmount: "$5,000", lastGiftDate: "April 2026",
+      givingHistory: "$5,000 pledge (Apr 2026), $2,500 (Jan 2026), $2,500 (Jan 2025), $2,500 (Jan 2024), $2,500 (Jan 2023), $2,500 (Jan 2022)",
+      contactNotes: "Retired teacher. Believes strongly in educational equity. His grandchildren attend our after-school program.",
+      volunteerHistory: "Reading tutor volunteer 2022-present, Mentor Match program participant" },
+  ],
+  upgraded: [
+    { id: "d9", name: "Carol Nguyen", currentGiving: "$1,200/yr", targetGiving: "$2,500/yr", assignedTo: "Maria Santos", upgradeAmount: "+$1,300/yr", completedDate: "Mar 28, 2026",
+      email: "carol.nguyen@email.com", fundDesignation: "Technology Access", totalGiving: "$4,900",
+      lastGiftAmount: "$2,500", lastGiftDate: "March 2026",
+      givingHistory: "$2,500 (Mar 2026 — upgraded!), $1,200 (Mar 2025), $1,200 (Mar 2024), $1,000 (Mar 2023)",
+      contactNotes: "IT consultant. Upgraded after seeing demo of new computer lab. Very excited about STEM curriculum.",
+      volunteerHistory: "Computer lab setup volunteer, Tech Career Day speaker 2025" },
+  ],
+};
+
+export const DEMO_PIPELINE_STAFF = ["Maria Santos", "Kevin Park", "Lisa Chen"];
+
+// ─── Grants Page ──────────────────────────────────────────────────
+
+export interface GrantDeliverable {
+  text: string;
+  done: boolean;
+}
+
+export interface GrantsPageGrant {
+  id: string;
+  name: string;
+  funder: string;
+  amount: number;
+  period: string;
+  status: "AT RISK" | "ON TRACK";
+  utilization: number;
+  reportDueDays: number;
+  programOfficer: string;
+  deliverables: GrantDeliverable[];
+  budgetBreakdown: { label: string; pct: number }[];
+}
+
+export const DEMO_GRANTS_PAGE: GrantsPageGrant[] = [
+  {
+    id: "g1", name: "Community Health Initiative", funder: "Kresge Foundation",
+    amount: 185000, period: "Jan 1 – Dec 31, 2026", status: "AT RISK",
+    utilization: 61, reportDueDays: 8, programOfficer: "Dr. Alicia Ramos",
+    deliverables: [
+      { text: "Q1 Progress Report submitted", done: true },
+      { text: "Mid-year financial report submitted", done: true },
+      { text: "Site visit scheduled (due May 15)", done: false },
+      { text: "Final narrative report (due Dec 15)", done: false },
+    ],
+    budgetBreakdown: [{ label: "Personnel", pct: 45 }, { label: "Programs", pct: 35 }, { label: "Overhead", pct: 20 }],
+  },
+  {
+    id: "g2", name: "Youth Programs Initiative", funder: "Robert Wood Johnson Foundation",
+    amount: 95000, period: "Oct 1, 2025 – Sep 30, 2026", status: "ON TRACK",
+    utilization: 88, reportDueDays: 31, programOfficer: "Marcus Webb",
+    deliverables: [
+      { text: "Program launch report", done: true },
+      { text: "Quarterly financial update", done: true },
+      { text: "Participant survey results", done: false },
+      { text: "Year-end impact assessment", done: false },
+    ],
+    budgetBreakdown: [{ label: "Personnel", pct: 50 }, { label: "Programs", pct: 40 }, { label: "Overhead", pct: 10 }],
+  },
+  {
+    id: "g3", name: "Technology Access Fund", funder: "Gates Foundation",
+    amount: 125000, period: "Jul 1, 2025 – Jun 30, 2026", status: "ON TRACK",
+    utilization: 44, reportDueDays: 83, programOfficer: "Sandra Liu",
+    deliverables: [
+      { text: "Equipment procurement report", done: true },
+      { text: "Digital literacy curriculum plan", done: false },
+      { text: "Mid-year progress report", done: false },
+      { text: "Final impact report", done: false },
+    ],
+    budgetBreakdown: [{ label: "Equipment", pct: 55 }, { label: "Training", pct: 30 }, { label: "Admin", pct: 15 }],
+  },
+  {
+    id: "g4", name: "Housing Support Initiative", funder: "Local Community Foundation",
+    amount: 92000, period: "Jan 1 – Jun 30, 2026", status: "ON TRACK",
+    utilization: 71, reportDueDays: 52, programOfficer: "James Okafor",
+    deliverables: [
+      { text: "Needs assessment completed", done: true },
+      { text: "Partner agreements signed", done: true },
+      { text: "Mid-program evaluation", done: false },
+      { text: "Final report", done: false },
+    ],
+    budgetBreakdown: [{ label: "Direct Services", pct: 60 }, { label: "Staffing", pct: 30 }, { label: "Admin", pct: 10 }],
+  },
+];
+
+// ─── Data Health Page ─────────────────────────────────────────────
+
+export interface DataHealthDuplicateRecord {
+  email: string;
+  phone: string;
+  lastGift: string;
+  lastGiftDate: string;
+  created: string;
+}
+
+export interface DataHealthDuplicatePair {
+  id: string;
+  name: string;
+  idA: string;
+  idB: string;
+  confidence: number;
+  recordA: DataHealthDuplicateRecord;
+  recordB: DataHealthDuplicateRecord;
+}
+
+export interface DataHealthIncompleteProfile {
+  id: string;
+  name: string;
+  missingFields: string[];
+  lastUpdated: string;
+}
+
+export interface DataHealthStaleRecord {
+  id: string;
+  name: string;
+  lastActivity: string;
+  lastGift: string;
+}
+
+export interface DataHealthStripeAlert {
+  amount: string;
+  date: string;
+  stripeId: string;
+  email: string;
+}
+
+export const DEMO_DATA_HEALTH_PAGE = {
+  score: 74,
+  duplicates: [
+    {
+      id: "d1", name: "Sarah Chen", idA: "#1847", idB: "#2103", confidence: 94,
+      recordA: { email: "sarah.chen@gmail.com", phone: "617-555-0142", lastGift: "$500", lastGiftDate: "Mar 2026", created: "Jan 2024" },
+      recordB: { email: "sarah.chen@gmail.com", phone: "617-555-0198", lastGift: "$250", lastGiftDate: "Nov 2025", created: "Mar 2025" },
+    },
+    {
+      id: "d2", name: "Michael Torres", idA: "#892", idB: "#1654", confidence: 87,
+      recordA: { email: "mike.torres@outlook.com", phone: "781-555-0367", lastGift: "$1,200", lastGiftDate: "Feb 2026", created: "Aug 2022" },
+      recordB: { email: "michael.torres@outlook.com", phone: "781-555-0367", lastGift: "$750", lastGiftDate: "Jan 2026", created: "May 2024" },
+    },
+    {
+      id: "d3", name: "Jennifer Walsh", idA: "#3021", idB: "#3089", confidence: 99,
+      recordA: { email: "jwalsh@comcast.net", phone: "508-555-0291", lastGift: "$2,500", lastGiftDate: "Apr 2026", created: "Apr 7, 2026 9:14am" },
+      recordB: { email: "jwalsh@comcast.net", phone: "508-555-0291", lastGift: "$2,500", lastGiftDate: "Apr 2026", created: "Apr 7, 2026 9:16am" },
+    },
+  ] satisfies DataHealthDuplicatePair[],
+  incomplete: [
+    { id: "ip1", name: "Robert Kim", missingFields: ["Phone", "Address"], lastUpdated: "14 months ago" },
+    { id: "ip2", name: "Patricia Osei", missingFields: ["Phone"], lastUpdated: "8 months ago" },
+    { id: "ip3", name: "David Chen", missingFields: ["Address", "Birthdate"], lastUpdated: "2 years ago" },
+    { id: "ip4", name: "Susan Park", missingFields: ["Employment"], lastUpdated: "6 months ago" },
+    { id: "ip5", name: "Thomas Rivera", missingFields: ["Phone", "Address"], lastUpdated: "3 years ago" },
+    { id: "ip6", name: "Angela Davis", missingFields: ["Email"], lastUpdated: "4 months ago" },
+    { id: "ip7", name: "Mark Johnson", missingFields: ["Phone", "Birthdate"], lastUpdated: "11 months ago" },
+    { id: "ip8", name: "Helen Brooks", missingFields: ["Address"], lastUpdated: "7 months ago" },
+  ] satisfies DataHealthIncompleteProfile[],
+  stale: [
+    { id: "s1", name: "Margaret Liu", lastActivity: "22 months ago", lastGift: "$150" },
+    { id: "s2", name: "William Park", lastActivity: "31 months ago", lastGift: "$75" },
+    { id: "s3", name: "Helen Brooks", lastActivity: "19 months ago", lastGift: "$500" },
+    { id: "s4", name: "James Okafor", lastActivity: "26 months ago", lastGift: "$200" },
+  ] satisfies DataHealthStaleRecord[],
+  stripeAlerts: [
+    {
+      amount: "$2,340.00",
+      date: "April 6, 2026",
+      stripeId: "ch_3OxK9L2eZvKYlo2C1mR4p7Qn",
+      email: "m.chen@outlook.com",
+    },
+  ] satisfies DataHealthStripeAlert[],
+};
+
+// ─── Reconciliation Page ──────────────────────────────────────────
+
+export type ReconciliationTxnStatus = "needs_action" | "under_review" | "resolved";
+
+export interface ReconciliationFlaggedTxn {
+  id: string;
+  amount: string;
+  date: string;
+  stripeId: string;
+  email: string;
+  status: ReconciliationTxnStatus;
+}
+
+export interface ReconciliationMatchedTxn {
+  date: string;
+  name: string;
+  amount: string;
+  stripeId: string;
+  sfId: string;
+  status: string;
+}
+
+export const DEMO_RECONCILIATION_PAGE = {
+  flaggedTxn: {
+    id: "t1", amount: "$2,340.00", date: "April 6, 2026",
+    stripeId: "ch_3OxK9L2eZvKYlo2C1mR4p7Qn",
+    email: "m.chen@outlook.com", status: "needs_action" as const,
+  } satisfies ReconciliationFlaggedTxn,
+  pendingCount: 1,
+  searchResults: [
+    { name: "Sarah Chen", email: "sarah.chen@gmail.com", lastGift: "$500" },
+    { name: "David Chen", email: "d.chen@work.com", lastGift: "$1,200" },
+  ],
+  matchedTxns: [
+    { date: "Apr 7", name: "Jennifer Walsh", amount: "$2,500", stripeId: "ch_3Ox..7Qp", sfId: "DON-4821", status: "Matched ✓" },
+    { date: "Apr 6", name: "Robert Kim", amount: "$150", stripeId: "ch_3Ox..8Rq", sfId: "DON-4819", status: "Matched ✓" },
+    { date: "Apr 5", name: "Patricia Lee", amount: "$500", stripeId: "ch_3Ox..9Ss", sfId: "DON-4815", status: "Matched ✓" },
+    { date: "Apr 4", name: "Mark Abrams", amount: "$1,000", stripeId: "ch_3Ox..0Tt", sfId: "DON-4812", status: "Matched ✓" },
+    { date: "Apr 3", name: "Carol Nguyen", amount: "$250", stripeId: "ch_3Ox..1Uu", sfId: "DON-4810", status: "Matched ✓" },
+    { date: "Apr 3", name: "Thomas Rivera", amount: "$5,000", stripeId: "ch_3Ox..2Vv", sfId: "DON-4809", status: "Matched ✓" },
+    { date: "Apr 2", name: "Susan Park", amount: "$750", stripeId: "ch_3Ox..3Ww", sfId: "DON-4806", status: "Matched ✓" },
+    { date: "Apr 1", name: "Lisa Chen", amount: "$300", stripeId: "ch_3Ox..4Xx", sfId: "DON-4802", status: "Matched ✓" },
+    { date: "Apr 1", name: "James Wright", amount: "$1,200", stripeId: "ch_3Ox..5Yy", sfId: "DON-4801", status: "Matched ✓" },
+    { date: "Apr 1", name: "Angela Davis", amount: "$400", stripeId: "ch_3Ox..6Zz", sfId: "DON-4800", status: "Matched ✓" },
+  ] satisfies ReconciliationMatchedTxn[],
+};
+
+// ─── Post-Event Intelligence ──────────────────────────────────────
+
+export interface PostEventAttendee {
+  id: string;
+  name: string;
+  type: "Donor" | "Volunteer" | "Prospect" | "New Contact";
+  engagement: string;
+  followUp: "Pending" | "Contacted" | "Done";
+}
+
+export interface PostEventData {
+  id: string;
+  name: string;
+  date: string;
+  location: string;
+  color: string;
+  iconColor: string;
+  status: "FOLLOW-UP NEEDED" | "COMPLETE";
+  statusColor: string;
+  summary: string;
+  badges: string[];
+  attendees: PostEventAttendee[];
+}
+
+const DEMO_GALA_ATTENDEES: PostEventAttendee[] = [
+  { id: "a1", name: "Sarah Mitchell", type: "Donor", engagement: "Major Gift Prospect", followUp: "Contacted" },
+  { id: "a2", name: "Robert Kim", type: "Prospect", engagement: "First-Time Attendee", followUp: "Pending" },
+  { id: "a3", name: "Patricia Lee", type: "New Contact", engagement: "Corporate Contact", followUp: "Pending" },
+  { id: "a4", name: "David Osei", type: "Donor", engagement: "Recurring Donor", followUp: "Done" },
+  { id: "a5", name: "Jennifer Walsh", type: "Prospect", engagement: "Board Referral", followUp: "Pending" },
+  { id: "a6", name: "Mark Abrams", type: "New Contact", engagement: "Walk-In", followUp: "Pending" },
+  { id: "a7", name: "Lisa Chen", type: "Prospect", engagement: "Volunteer Interest", followUp: "Pending" },
+  { id: "a8", name: "Thomas Rivera", type: "Donor", engagement: "Lapsed Donor", followUp: "Contacted" },
+  { id: "a9", name: "Carol Nguyen", type: "New Contact", engagement: "Event Sponsor Rep", followUp: "Pending" },
+  { id: "a10", name: "James Wright", type: "Prospect", engagement: "Table Captain Guest", followUp: "Pending" },
+  { id: "a11", name: "Angela Torres", type: "Volunteer", engagement: "Active Volunteer", followUp: "Done" },
+  { id: "a12", name: "Kevin Park", type: "Donor", engagement: "Mid-Level Donor", followUp: "Contacted" },
+];
+
+const DEMO_VOLUNTEER_ORIENTATION_ATTENDEES: PostEventAttendee[] = [
+  { id: "v1", name: "Marcus Webb", type: "Volunteer", engagement: "New Recruit", followUp: "Pending" },
+  { id: "v2", name: "Aisha Patel", type: "Volunteer", engagement: "Returning Volunteer", followUp: "Done" },
+  { id: "v3", name: "Daniel Flores", type: "Volunteer", engagement: "New Recruit", followUp: "Pending" },
+  { id: "v4", name: "Nadia Okafor", type: "Volunteer", engagement: "Skills-Based", followUp: "Pending" },
+  { id: "v5", name: "Chris Bailey", type: "Volunteer", engagement: "New Recruit", followUp: "Pending" },
+  { id: "v6", name: "Yuki Tanaka", type: "Donor", engagement: "Donor → Volunteer", followUp: "Done" },
+  { id: "v7", name: "Emily Saunders", type: "Volunteer", engagement: "Returning Volunteer", followUp: "Contacted" },
+  { id: "v8", name: "Omar Hassan", type: "Prospect", engagement: "Community Leader", followUp: "Pending" },
+];
+
+export const DEMO_POST_EVENT: PostEventData[] = [
+  {
+    id: "e1", name: "Spring Gala 2026", date: "April 3, 2026",
+    location: "The Boston Marriott Copley Place",
+    color: "bg-blue-100 dark:bg-blue-900/40", iconColor: "text-blue-600",
+    status: "FOLLOW-UP NEEDED", statusColor: "bg-amber-100 text-amber-700 border-amber-200",
+    summary: "247 attendees (187 existing donors, 42 prospects, 18 new contacts) · Revenue: $142,000",
+    badges: ["47 not tagged in Salesforce", "12 volunteer interest", "8 upgrade prospects"],
+    attendees: DEMO_GALA_ATTENDEES,
+  },
+  {
+    id: "e2", name: "Volunteer Orientation", date: "March 15, 2026",
+    location: "Brightside Foundation HQ — 120 Tremont St, Boston",
+    color: "bg-green-100 dark:bg-green-900/40", iconColor: "text-green-600",
+    status: "COMPLETE", statusColor: "bg-green-100 text-green-700 border-green-200",
+    summary: "34 attendees · 28 new volunteers · 3 donors converted",
+    badges: [],
+    attendees: DEMO_VOLUNTEER_ORIENTATION_ATTENDEES,
+  },
+];
+
+// ─── Dashboard digest helpers ─────────────────────────────────────
+
+const ED_AGENT_SLUGS = [
+  "crm-data-integrity",
+  "reconciliation-fund-accounting",
+  "grant-compliance",
+  "event-intelligence",
+  "board-reporting",
+];
+
+export function getWeeklyAgentRunsForSlugs(slugs: string[]): AgentActivityRun[] {
+  const slugSet = new Set(slugs);
+  const weekAgo = subDays(NOW, 7);
+  return DEMO_AGENT_ACTIVITY.filter(
+    (run) => run.status === "success" && slugSet.has(run.agentSlug) && run.completedAt >= weekAgo
+  );
+}
+
+export interface SinceYouWereAwayDigest {
+  lastLoginAgo: string;
+  summary: string;
+  actions: { label: string; href: string }[];
+}
+
+export function getSinceYouWereAwayDigest(role: "executive_director" | "development_director" | "finance_manager" | "operations_manager"): SinceYouWereAwayDigest {
+  const slugMap: Record<typeof role, string[]> = {
+    executive_director: ED_AGENT_SLUGS,
+    development_director: ["event-intelligence", "grant-compliance"],
+    finance_manager: ["reconciliation-fund-accounting", "grant-compliance"],
+    operations_manager: ["crm-data-integrity"],
+  };
+  const weeklyRuns = getWeeklyAgentRunsForSlugs(slugMap[role]);
+  const runCount = weeklyRuns.length;
+
+  if (role === "executive_director") {
+    return {
+      lastLoginAgo: "2 days ago",
+      summary: `Your AI agents ran ${runCount} times while you were away. The CRM Data Integrity Agent flagged 3 new potential duplicate records. The Grant Compliance Agent is tracking the Kresge Foundation report, due in 8 days with 61% fund utilization. One Stripe transaction from Apr 6 ($2,340) remains unmatched in Salesforce.`,
+      actions: [
+        { label: "Review 3 duplicates →", href: "/data-health" },
+        { label: "Open grant report →", href: "/grants" },
+        { label: "Review transaction →", href: "/reconciliation" },
+      ],
+    };
+  }
+
+  if (role === "development_director") {
+    return {
+      lastLoginAgo: "1 day ago",
+      summary: `Your AI agents ran ${runCount} times this week. Event Intelligence flagged 47 Spring Gala attendees not yet tagged in Salesforce. Grant Compliance noted Youth Programs Initiative at 88% utilization.`,
+      actions: [
+        { label: "Tag gala attendees →", href: "/events?tab=post-event" },
+        { label: "View donor pipeline →", href: "/donor-pipeline" },
+      ],
+    };
+  }
+
+  if (role === "finance_manager") {
+    return {
+      lastLoginAgo: "3 days ago",
+      summary: `Your AI agents ran ${runCount} times this week. Reconciliation matched 146 of 147 April transactions. One Stripe payment ($2,340) still needs a donor match in Salesforce.`,
+      actions: [
+        { label: "Review transaction →", href: "/reconciliation" },
+        { label: "View grants →", href: "/grants" },
+      ],
+    };
+  }
+
+  return {
+    lastLoginAgo: "2 days ago",
+    summary: `Your AI agents ran ${runCount} times this week. CRM Data Integrity found 3 duplicate pairs and 8 incomplete profiles requiring review.`,
+    actions: [
+      { label: "Review data health →", href: "/data-health" },
+      { label: "View agent activity →", href: "/agents/activity" },
+    ],
+  };
+}

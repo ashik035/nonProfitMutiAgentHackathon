@@ -15,30 +15,9 @@ import { ChevronDown, Loader2, DollarSign, TrendingUp, Clock, Users, Mic, FileTe
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { DonorProfileSheet } from "@/components/donors/DonorProfileSheet";
+import { DEMO_DONOR_PIPELINE, DEMO_PIPELINE_STAFF, type PipelineDonor } from "@/shared/data/nonprofitDemoData";
 
-interface Donor {
-  id: string;
-  name: string;
-  currentGiving: string;
-  targetGiving: string;
-  assignedTo: string;
-  note?: string;
-  outreachDate?: string;
-  lastContact?: string;
-  pledgeAmount?: string;
-  pledgeDate?: string;
-  upgradeAmount?: string;
-  completedDate?: string;
-  // Enriched fields for letter generation
-  email?: string;
-  fundDesignation?: string;
-  totalGiving?: string;
-  lastGiftAmount?: string;
-  lastGiftDate?: string;
-  givingHistory?: string;
-  contactNotes?: string;
-  volunteerHistory?: string;
-}
+type Donor = PipelineDonor;
 
 interface Column {
   id: string;
@@ -55,80 +34,11 @@ const COLUMNS: Column[] = [
   { id: "upgraded", title: "Upgraded ✓", color: "bg-green-50 dark:bg-green-950/30", borderColor: "border-t-green-600" },
 ];
 
-const INITIAL_DONORS: Record<string, Donor[]> = {
-  identified: [
-    { id: "d1", name: "Margaret Liu", currentGiving: "$2,500/yr", targetGiving: "$5,000/yr", assignedTo: "Maria Santos",
-      email: "margaret.liu@email.com", fundDesignation: "Technology Access", totalGiving: "$8,750",
-      lastGiftAmount: "$2,500", lastGiftDate: "January 2026",
-      givingHistory: "$2,500 (Jan 2026), $2,500 (Jan 2025), $2,000 (Jan 2024), $1,750 (Jan 2023)",
-      contactNotes: "Retired software engineer. Passionate about digital literacy for underserved youth. Volunteers as a coding mentor every Saturday.",
-      volunteerHistory: "Weekly coding mentor since 2023, attended Tech for Good gala 2025" },
-    { id: "d2", name: "Robert Kim", currentGiving: "$1,800/yr", targetGiving: "$3,000/yr", assignedTo: "",
-      email: "r.kim@email.com", fundDesignation: "General Operating", totalGiving: "$5,400",
-      lastGiftAmount: "$1,800", lastGiftDate: "December 2025",
-      givingHistory: "$1,800 (Dec 2025), $1,800 (Dec 2024), $1,800 (Dec 2023)",
-      contactNotes: "Local business owner — Kim's Hardware. Interested in workforce development programs.",
-      volunteerHistory: "Donated supplies for community center renovation 2024" },
-    { id: "d3", name: "Patricia Osei", currentGiving: "$3,200/yr", targetGiving: "$7,500/yr", assignedTo: "Maria Santos",
-      email: "p.osei@email.com", fundDesignation: "Youth Programs", totalGiving: "$12,800",
-      lastGiftAmount: "$3,200", lastGiftDate: "February 2026",
-      givingHistory: "$3,200 (Feb 2026), $3,200 (Feb 2025), $3,200 (Feb 2024), $3,200 (Feb 2023)",
-      contactNotes: "School principal. Deeply invested in after-school tutoring program. Has referred three other donors.",
-      volunteerHistory: "Board advisory committee member, Spring Gala host committee 2025" },
-  ],
-  outreach: [
-    { id: "d4", name: "David Chen", currentGiving: "$2,100/yr", targetGiving: "$5,000/yr", assignedTo: "Maria Santos", outreachDate: "Apr 10, 2026",
-      email: "david.chen@email.com", fundDesignation: "General Operating", totalGiving: "$6,300",
-      lastGiftAmount: "$2,100", lastGiftDate: "November 2025",
-      givingHistory: "$2,100 (Nov 2025), $2,100 (Nov 2024), $2,100 (Nov 2023)",
-      contactNotes: "Financial advisor. Expressed interest in planned giving program at last event.",
-      volunteerHistory: "Attended Fall Fundraiser 2024 and 2025" },
-    { id: "d5", name: "Susan Park", currentGiving: "$4,500/yr", targetGiving: "$10,000/yr", assignedTo: "Kevin Park", outreachDate: "Apr 12, 2026",
-      email: "susan.park@email.com", fundDesignation: "Youth Programs", totalGiving: "$18,000",
-      lastGiftAmount: "$4,500", lastGiftDate: "March 2026",
-      givingHistory: "$4,500 (Mar 2026), $4,500 (Mar 2025), $4,500 (Sep 2024), $4,500 (Mar 2024)",
-      contactNotes: "Pediatrician. Her daughter participated in our summer camp. Interested in scholarship fund naming.",
-      volunteerHistory: "Health screening volunteer 2024, Summer Camp sponsor 2025" },
-  ],
-  conversation: [
-    { id: "d6", name: "Jennifer Walsh", currentGiving: "$1,950/yr", targetGiving: "$5,000/yr", assignedTo: "Maria Santos", lastContact: "Apr 5",
-      note: "Very interested in naming opportunity for youth programs room",
-      email: "jennifer.walsh@email.com", fundDesignation: "Youth Programs", totalGiving: "$7,350",
-      lastGiftAmount: "$750", lastGiftDate: "March 2026",
-      givingHistory: "$750 (Mar 2026), $500 (Dec 2025), $700 (Jun 2025), $500 (Dec 2024), $500 (Mar 2024)",
-      contactNotes: "Attorney. Youth education meant a great deal to her late mother, Eleanor Walsh, who volunteered here for 15 years. Jennifer is considering a naming gift in her mother's honor.",
-      volunteerHistory: "Attended Spring Gala 2025 and 2026, Eleanor Walsh Memorial donor since 2024" },
-    { id: "d7", name: "Mark Abrams", currentGiving: "$3,800/yr", targetGiving: "$7,500/yr", assignedTo: "Kevin Park", lastContact: "Apr 3",
-      note: "Meeting scheduled Apr 15 with ED",
-      email: "mark.abrams@email.com", fundDesignation: "General Operating", totalGiving: "$15,200",
-      lastGiftAmount: "$3,800", lastGiftDate: "January 2026",
-      givingHistory: "$3,800 (Jan 2026), $3,800 (Jan 2025), $3,800 (Jan 2024), $3,800 (Jan 2023)",
-      contactNotes: "Real estate developer. Long-time supporter since founding. Interested in capital campaign for new community center wing.",
-      volunteerHistory: "Founding donor, attended every annual gala, site tour host for potential donors" },
-  ],
-  pledge: [
-    { id: "d8", name: "Thomas Rivera", currentGiving: "$2,500/yr", targetGiving: "$5,000/yr", assignedTo: "Maria Santos", pledgeAmount: "$5,000", pledgeDate: "Apr 1, 2026",
-      email: "thomas.rivera@email.com", fundDesignation: "General Operating", totalGiving: "$12,500",
-      lastGiftAmount: "$5,000", lastGiftDate: "April 2026",
-      givingHistory: "$5,000 pledge (Apr 2026), $2,500 (Jan 2026), $2,500 (Jan 2025), $2,500 (Jan 2024), $2,500 (Jan 2023), $2,500 (Jan 2022)",
-      contactNotes: "Retired teacher. Believes strongly in educational equity. His grandchildren attend our after-school program.",
-      volunteerHistory: "Reading tutor volunteer 2022-present, Mentor Match program participant" },
-  ],
-  upgraded: [
-    { id: "d9", name: "Carol Nguyen", currentGiving: "$1,200/yr", targetGiving: "$2,500/yr", assignedTo: "Maria Santos", upgradeAmount: "+$1,300/yr", completedDate: "Mar 28, 2026",
-      email: "carol.nguyen@email.com", fundDesignation: "Technology Access", totalGiving: "$4,900",
-      lastGiftAmount: "$2,500", lastGiftDate: "March 2026",
-      givingHistory: "$2,500 (Mar 2026 — upgraded!), $1,200 (Mar 2025), $1,200 (Mar 2024), $1,000 (Mar 2023)",
-      contactNotes: "IT consultant. Upgraded after seeing demo of new computer lab. Very excited about STEM curriculum.",
-      volunteerHistory: "Computer lab setup volunteer, Tech Career Day speaker 2025" },
-  ],
-};
-
-const STAFF = ["Maria Santos", "Kevin Park", "Lisa Chen"];
+const STAFF = DEMO_PIPELINE_STAFF;
 
 export default function DonorPipelinePage() {
   const navigate = useNavigate();
-  const [donors, setDonors] = useState(INITIAL_DONORS);
+  const [donors, setDonors] = useState(DEMO_DONOR_PIPELINE);
   const [outreachModal, setOutreachModal] = useState<Donor | null>(null);
   const [contactModal, setContactModal] = useState<Donor | null>(null);
   const [pledgeModal, setPledgeModal] = useState<Donor | null>(null);

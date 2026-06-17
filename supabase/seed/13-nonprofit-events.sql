@@ -24,11 +24,11 @@ DELETE FROM public.nonprofit_events WHERE id IN ('10084594-789d-4d15-89e9-a39949
 INSERT INTO public.nonprofit_events (
   id, created_by, title, status, date, location, description, capacity, fund_raised
 ) VALUES
-  ('10084594-789d-4d15-89e9-a39949dcc0c7', (SELECT id FROM auth.users ORDER BY created_at LIMIT 1), 'Summer Leadership Summit', 'Upcoming', '2026-07-31', 'Boston Convention & Exhibition Center', 'Our flagship annual summit bringing together nonprofit leaders, community advocates, and major donors for a full day of keynotes, workshops, and networking. This year''s theme: ''Building Resilient Communities.''', 200, NULL),
-  ('51299673-f35b-43a3-8dd1-955ab7af82ff', (SELECT id FROM auth.users ORDER BY created_at LIMIT 1), 'Monthly Community Dinner', 'Upcoming', '2026-06-28', 'Brightside Community Center, 45 Harrison Ave', 'Our monthly gathering for community members, volunteers, and supporters. A warm meal, meaningful connections, and program updates from our team. Open to all — no one turned away.', 80, NULL),
-  ('886a4c37-21b9-4140-8820-eeb8221ac9e8', (SELECT id FROM auth.users ORDER BY created_at LIMIT 1), 'Community Health Fair', 'Active', '2026-06-16', 'Roxbury Community Park Pavilion', 'Free health screenings, wellness resources, and community connections. Partnered with Health Partners Network to provide blood pressure checks, diabetes screening, mental health resources, and more.', 150, NULL),
-  ('468e3db5-3070-4ea4-8347-5666a1a7d1f0', (SELECT id FROM auth.users ORDER BY created_at LIMIT 1), 'Annual Spring Gala', 'Past', '2026-06-11', 'The Boston Marriott Copley Place', 'Our premier annual fundraising gala celebrating the impact of our community. An evening of dinner, dancing, live auction, and recognition of our top donors and volunteers.', 150, 42000),
-  ('ecfbc23f-19d5-4958-84fa-2b66afad41e3', (SELECT id FROM auth.users ORDER BY created_at LIMIT 1), 'Board Orientation Breakfast', 'Past', '2026-05-26', 'Brightside Foundation HQ, Conference Room A', 'Orientation and onboarding session for new board members and advisory committee additions. Covers governance responsibilities, committee assignments, and strategic priorities for the year.', 25, NULL)
+  ('10084594-789d-4d15-89e9-a39949dcc0c7', (SELECT id FROM auth.users ORDER BY created_at LIMIT 1), 'Summer Leadership Summit', 'Upcoming', '2026-08-01', 'Boston Convention & Exhibition Center', 'Our flagship annual summit bringing together nonprofit leaders, community advocates, and major donors for a full day of keynotes, workshops, and networking. This year''s theme: ''Building Resilient Communities.''', 200, NULL),
+  ('51299673-f35b-43a3-8dd1-955ab7af82ff', (SELECT id FROM auth.users ORDER BY created_at LIMIT 1), 'Monthly Community Dinner', 'Upcoming', '2026-06-29', 'Brightside Community Center, 45 Harrison Ave', 'Our monthly gathering for community members, volunteers, and supporters. A warm meal, meaningful connections, and program updates from our team. Open to all — no one turned away.', 80, NULL),
+  ('886a4c37-21b9-4140-8820-eeb8221ac9e8', (SELECT id FROM auth.users ORDER BY created_at LIMIT 1), 'Community Health Fair', 'Active', '2026-06-17', 'Roxbury Community Park Pavilion', 'Free health screenings, wellness resources, and community connections. Partnered with Health Partners Network to provide blood pressure checks, diabetes screening, mental health resources, and more.', 150, NULL),
+  ('468e3db5-3070-4ea4-8347-5666a1a7d1f0', (SELECT id FROM auth.users ORDER BY created_at LIMIT 1), 'Annual Spring Gala', 'Past', '2026-06-12', 'The Boston Marriott Copley Place', 'Our premier annual fundraising gala celebrating the impact of our community. An evening of dinner, dancing, live auction, and recognition of our top donors and volunteers.', 300, 142000),
+  ('ecfbc23f-19d5-4958-84fa-2b66afad41e3', (SELECT id FROM auth.users ORDER BY created_at LIMIT 1), 'Board Orientation Breakfast', 'Past', '2026-05-27', 'Brightside Foundation HQ, Conference Room A', 'Orientation and onboarding session for new board members and advisory committee additions. Covers governance responsibilities, committee assignments, and strategic priorities for the year.', 25, NULL)
 ON CONFLICT (id) DO UPDATE SET
   title = EXCLUDED.title,
   status = EXCLUDED.status,
@@ -48,9 +48,9 @@ INSERT INTO public.nonprofit_event_ticket_types (
   ('e2d3f145-18c0-4804-8417-f7a315a19c1b', '51299673-f35b-43a3-8dd1-955ab7af82ff', 'Free', 0, 80, 67),
   ('67c30753-4584-4ca2-8fc3-598b177aea55', '886a4c37-21b9-4140-8820-eeb8221ac9e8', 'Free', 0, 100, 80),
   ('9e3bde44-c56e-49f9-85c6-83c3382d54c4', '886a4c37-21b9-4140-8820-eeb8221ac9e8', 'General Admission', 0, 50, 18),
-  ('428aa5a4-dae9-43e6-8222-e694b73f6470', '468e3db5-3070-4ea4-8347-5666a1a7d1f0', 'General Admission', 150, 80, 68),
-  ('498439ef-d49f-49bd-8ac1-e9ed21528392', '468e3db5-3070-4ea4-8347-5666a1a7d1f0', 'VIP', 350, 40, 35),
-  ('86883a12-7bbc-4a01-886e-6024f8a0241b', '468e3db5-3070-4ea4-8347-5666a1a7d1f0', 'Member-Only', 100, 30, 17),
+  ('428aa5a4-dae9-43e6-8222-e694b73f6470', '468e3db5-3070-4ea4-8347-5666a1a7d1f0', 'General Admission', 150, 180, 168),
+  ('498439ef-d49f-49bd-8ac1-e9ed21528392', '468e3db5-3070-4ea4-8347-5666a1a7d1f0', 'VIP', 350, 60, 52),
+  ('86883a12-7bbc-4a01-886e-6024f8a0241b', '468e3db5-3070-4ea4-8347-5666a1a7d1f0', 'Member-Only', 100, 60, 27),
   ('8d0ed3f5-d044-4cf9-8727-e2e9a7c9a88f', 'ecfbc23f-19d5-4958-84fa-2b66afad41e3', 'Member-Only', 0, 25, 22)
 ON CONFLICT (id) DO UPDATE SET
   tier = EXCLUDED.tier,
@@ -117,24 +117,24 @@ ON CONFLICT (id) DO UPDATE SET
 INSERT INTO public.nonprofit_event_registrants (
   id, event_id, name, email, ticket_tier, checked_in, registered_at
 ) VALUES
-  ('7c4d31c2-724d-4dea-87f0-7bb1244cf21e', '10084594-789d-4d15-89e9-a39949dcc0c7', 'Sarah Mitchell', 's.mitchell@email.com', 'VIP', FALSE, '2026-06-01 12:00:00+00'),
-  ('0490fc80-4393-472a-8f63-152348d92814', '10084594-789d-4d15-89e9-a39949dcc0c7', 'Kevin Park', 'kevin.park@kpmg.com', 'General Admission', FALSE, '2026-06-04 12:00:00+00'),
-  ('30e1128f-3d9a-48b0-86ed-7fc9c731511f', '10084594-789d-4d15-89e9-a39949dcc0c7', 'Angela Torres', 'angela.torres@email.com', 'Free', FALSE, '2026-06-06 12:00:00+00'),
-  ('9d5dc58e-7713-45f3-8a55-d7b3a58f26d8', '10084594-789d-4d15-89e9-a39949dcc0c7', 'Dr. Marcus Webb', 'mwebb@community.org', 'General Admission', FALSE, '2026-06-08 12:00:00+00'),
-  ('ef41f45c-608e-4566-80f0-6f01525f5808', '10084594-789d-4d15-89e9-a39949dcc0c7', 'Priya Mehta', 'priya.mehta@tech.com', 'VIP', FALSE, '2026-06-10 12:00:00+00'),
-  ('2addb3e2-2df9-4b75-838b-63e1f220ccff', '51299673-f35b-43a3-8dd1-955ab7af82ff', 'David Osei', 'david.osei@email.com', 'Free', FALSE, '2026-06-11 12:00:00+00'),
-  ('a4799331-57f8-4b2e-818f-93989e527f18', '51299673-f35b-43a3-8dd1-955ab7af82ff', 'Fatima Hassan', 'fatima.hassan@email.com', 'Free', FALSE, '2026-06-12 12:00:00+00'),
-  ('47f8976a-0e72-449c-885d-40a59d6d2ac0', '51299673-f35b-43a3-8dd1-955ab7af82ff', 'Carol Nguyen', 'carol.nguyen@email.com', 'Free', FALSE, '2026-06-13 12:00:00+00'),
-  ('e1e3b25d-35ae-44c6-8bf9-2dab3cbd9d78', '886a4c37-21b9-4140-8820-eeb8221ac9e8', 'Lisa Chen', 'lisa.chen@email.com', 'Free', TRUE, '2026-06-06 12:00:00+00'),
-  ('268c6536-ae04-4f0a-8171-69d199b4651c', '886a4c37-21b9-4140-8820-eeb8221ac9e8', 'Michelle Kim', 'michelle.kim@email.com', 'Free', TRUE, '2026-06-08 12:00:00+00'),
-  ('3f64c228-9f53-4b79-8f51-256fd82f3f91', '886a4c37-21b9-4140-8820-eeb8221ac9e8', 'Marcus Webb', 'marcus.webb@email.com', 'General Admission', FALSE, '2026-06-09 12:00:00+00'),
-  ('e9cb08a2-3943-4ea9-8421-a82fa2486fd1', '468e3db5-3070-4ea4-8347-5666a1a7d1f0', 'Robert Kim', 'robert.kim@email.com', 'VIP', TRUE, '2026-05-17 12:00:00+00'),
-  ('a82b720f-b65f-44b6-801a-46572320668a', '468e3db5-3070-4ea4-8347-5666a1a7d1f0', 'Jennifer Walsh', 'j.walsh@lawfirm.com', 'General Admission', TRUE, '2026-05-22 12:00:00+00'),
-  ('d6812c02-f868-445a-8bf0-213b751e86b1', '468e3db5-3070-4ea4-8347-5666a1a7d1f0', 'Thomas Rivera', 't.rivera@email.com', 'Member-Only', FALSE, '2026-05-27 12:00:00+00'),
-  ('800ef2f1-938e-4b88-8910-4ffe233b3c16', '468e3db5-3070-4ea4-8347-5666a1a7d1f0', 'Mayor Gloria Chen', 'g.chen@boston.gov', 'VIP', TRUE, '2026-05-19 12:00:00+00'),
-  ('e1096679-8d6e-460c-85db-98f9420018fe', 'ecfbc23f-19d5-4958-84fa-2b66afad41e3', 'Emily Saunders', 'emily.s@email.com', 'Member-Only', TRUE, '2026-05-19 12:00:00+00'),
-  ('27f53bd3-c4de-4ac7-807e-9ef35e15bd57', 'ecfbc23f-19d5-4958-84fa-2b66afad41e3', 'Kevin Park', 'kevin.park@kpmg.com', 'Member-Only', TRUE, '2026-05-22 12:00:00+00'),
-  ('0b948b4e-f4d4-40ff-8838-bb321685a748', 'ecfbc23f-19d5-4958-84fa-2b66afad41e3', 'Dr. Alicia Ramos', 'a.ramos@healthpartners.org', 'Member-Only', TRUE, '2026-05-20 12:00:00+00')
+  ('7c4d31c2-724d-4dea-87f0-7bb1244cf21e', '10084594-789d-4d15-89e9-a39949dcc0c7', 'Sarah Mitchell', 's.mitchell@email.com', 'VIP', FALSE, '2026-06-02 12:00:00+00'),
+  ('0490fc80-4393-472a-8f63-152348d92814', '10084594-789d-4d15-89e9-a39949dcc0c7', 'Kevin Park', 'kevin.park@kpmg.com', 'General Admission', FALSE, '2026-06-05 12:00:00+00'),
+  ('30e1128f-3d9a-48b0-86ed-7fc9c731511f', '10084594-789d-4d15-89e9-a39949dcc0c7', 'Angela Torres', 'angela.torres@email.com', 'Free', FALSE, '2026-06-07 12:00:00+00'),
+  ('9d5dc58e-7713-45f3-8a55-d7b3a58f26d8', '10084594-789d-4d15-89e9-a39949dcc0c7', 'Dr. Marcus Webb', 'mwebb@community.org', 'General Admission', FALSE, '2026-06-09 12:00:00+00'),
+  ('ef41f45c-608e-4566-80f0-6f01525f5808', '10084594-789d-4d15-89e9-a39949dcc0c7', 'Priya Mehta', 'priya.mehta@tech.com', 'VIP', FALSE, '2026-06-11 12:00:00+00'),
+  ('2addb3e2-2df9-4b75-838b-63e1f220ccff', '51299673-f35b-43a3-8dd1-955ab7af82ff', 'David Osei', 'david.osei@email.com', 'Free', FALSE, '2026-06-12 12:00:00+00'),
+  ('a4799331-57f8-4b2e-818f-93989e527f18', '51299673-f35b-43a3-8dd1-955ab7af82ff', 'Fatima Hassan', 'fatima.hassan@email.com', 'Free', FALSE, '2026-06-13 12:00:00+00'),
+  ('47f8976a-0e72-449c-885d-40a59d6d2ac0', '51299673-f35b-43a3-8dd1-955ab7af82ff', 'Carol Nguyen', 'carol.nguyen@email.com', 'Free', FALSE, '2026-06-14 12:00:00+00'),
+  ('e1e3b25d-35ae-44c6-8bf9-2dab3cbd9d78', '886a4c37-21b9-4140-8820-eeb8221ac9e8', 'Lisa Chen', 'lisa.chen@email.com', 'Free', TRUE, '2026-06-07 12:00:00+00'),
+  ('268c6536-ae04-4f0a-8171-69d199b4651c', '886a4c37-21b9-4140-8820-eeb8221ac9e8', 'Michelle Kim', 'michelle.kim@email.com', 'Free', TRUE, '2026-06-09 12:00:00+00'),
+  ('3f64c228-9f53-4b79-8f51-256fd82f3f91', '886a4c37-21b9-4140-8820-eeb8221ac9e8', 'Marcus Webb', 'marcus.webb@email.com', 'General Admission', FALSE, '2026-06-10 12:00:00+00'),
+  ('e9cb08a2-3943-4ea9-8421-a82fa2486fd1', '468e3db5-3070-4ea4-8347-5666a1a7d1f0', 'Robert Kim', 'robert.kim@email.com', 'VIP', TRUE, '2026-05-18 12:00:00+00'),
+  ('a82b720f-b65f-44b6-801a-46572320668a', '468e3db5-3070-4ea4-8347-5666a1a7d1f0', 'Jennifer Walsh', 'j.walsh@lawfirm.com', 'General Admission', TRUE, '2026-05-23 12:00:00+00'),
+  ('d6812c02-f868-445a-8bf0-213b751e86b1', '468e3db5-3070-4ea4-8347-5666a1a7d1f0', 'Thomas Rivera', 't.rivera@email.com', 'Member-Only', FALSE, '2026-05-28 12:00:00+00'),
+  ('800ef2f1-938e-4b88-8910-4ffe233b3c16', '468e3db5-3070-4ea4-8347-5666a1a7d1f0', 'Mayor Gloria Chen', 'g.chen@boston.gov', 'VIP', TRUE, '2026-05-20 12:00:00+00'),
+  ('e1096679-8d6e-460c-85db-98f9420018fe', 'ecfbc23f-19d5-4958-84fa-2b66afad41e3', 'Emily Saunders', 'emily.s@email.com', 'Member-Only', TRUE, '2026-05-20 12:00:00+00'),
+  ('27f53bd3-c4de-4ac7-807e-9ef35e15bd57', 'ecfbc23f-19d5-4958-84fa-2b66afad41e3', 'Kevin Park', 'kevin.park@kpmg.com', 'Member-Only', TRUE, '2026-05-23 12:00:00+00'),
+  ('0b948b4e-f4d4-40ff-8838-bb321685a748', 'ecfbc23f-19d5-4958-84fa-2b66afad41e3', 'Dr. Alicia Ramos', 'a.ramos@healthpartners.org', 'Member-Only', TRUE, '2026-05-21 12:00:00+00')
 ON CONFLICT (id) DO UPDATE SET
   name = EXCLUDED.name,
   email = EXCLUDED.email,

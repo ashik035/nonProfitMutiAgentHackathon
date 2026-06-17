@@ -9,45 +9,18 @@ import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ArrowLeftRight, CheckCircle, UserPlus, Search, Flag, Loader2, ChevronDown, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
+import {
+  DEMO_RECONCILIATION_PAGE,
+  type ReconciliationFlaggedTxn,
+} from "@/shared/data/nonprofitDemoData";
 
-type TxnStatus = "needs_action" | "under_review" | "resolved";
+type FlaggedTxn = ReconciliationFlaggedTxn;
 
-interface FlaggedTxn {
-  id: string;
-  amount: string;
-  date: string;
-  stripeId: string;
-  email: string;
-  status: TxnStatus;
-}
-
-const INITIAL_TXN: FlaggedTxn = {
-  id: "t1", amount: "$2,340.00", date: "April 6, 2026",
-  stripeId: "ch_3OxK9L2eZvKYlo2C1mR4p7Qn",
-  email: "m.chen@outlook.com", status: "needs_action",
-};
-
-const SEARCH_RESULTS = [
-  { name: "Sarah Chen", email: "sarah.chen@gmail.com", lastGift: "$500" },
-  { name: "David Chen", email: "d.chen@work.com", lastGift: "$1,200" },
-];
-
-const MATCHED_TXNS = [
-  { date: "Apr 7", name: "Jennifer Walsh", amount: "$2,500", stripeId: "ch_3Ox..7Qp", sfId: "DON-4821", status: "Matched ✓" },
-  { date: "Apr 6", name: "Robert Kim", amount: "$150", stripeId: "ch_3Ox..8Rq", sfId: "DON-4819", status: "Matched ✓" },
-  { date: "Apr 5", name: "Patricia Lee", amount: "$500", stripeId: "ch_3Ox..9Ss", sfId: "DON-4815", status: "Matched ✓" },
-  { date: "Apr 4", name: "Mark Abrams", amount: "$1,000", stripeId: "ch_3Ox..0Tt", sfId: "DON-4812", status: "Matched ✓" },
-  { date: "Apr 3", name: "Carol Nguyen", amount: "$250", stripeId: "ch_3Ox..1Uu", sfId: "DON-4810", status: "Matched ✓" },
-  { date: "Apr 3", name: "Thomas Rivera", amount: "$5,000", stripeId: "ch_3Ox..2Vv", sfId: "DON-4809", status: "Matched ✓" },
-  { date: "Apr 2", name: "Susan Park", amount: "$750", stripeId: "ch_3Ox..3Ww", sfId: "DON-4806", status: "Matched ✓" },
-  { date: "Apr 1", name: "Lisa Chen", amount: "$300", stripeId: "ch_3Ox..4Xx", sfId: "DON-4802", status: "Matched ✓" },
-  { date: "Apr 1", name: "James Wright", amount: "$1,200", stripeId: "ch_3Ox..5Yy", sfId: "DON-4801", status: "Matched ✓" },
-  { date: "Apr 1", name: "Angela Davis", amount: "$400", stripeId: "ch_3Ox..6Zz", sfId: "DON-4800", status: "Matched ✓" },
-];
+const { flaggedTxn: INITIAL_TXN, pendingCount: INITIAL_PENDING, searchResults: SEARCH_RESULTS, matchedTxns: MATCHED_TXNS } = DEMO_RECONCILIATION_PAGE;
 
 export default function ReconciliationPage() {
   const [txn, setTxn] = useState<FlaggedTxn | null>(INITIAL_TXN);
-  const [pendingCount, setPendingCount] = useState(1);
+  const [pendingCount, setPendingCount] = useState(INITIAL_PENDING);
   const [createModal, setCreateModal] = useState(false);
   const [matchModal, setMatchModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");

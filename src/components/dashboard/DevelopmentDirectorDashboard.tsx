@@ -12,8 +12,9 @@ import SinceYouWereAway from "@/components/dashboard/SinceYouWereAway";
 import AgentROIHeroCard from "@/components/dashboard/AgentROIHeroCard";
 import QuickStatsRow from "@/components/dashboard/QuickStatsRow";
 import {
-  DEMO_EVENTS,
   DEMO_AI_RECOMMENDATIONS,
+  DEMO_ORG_HEALTH,
+  getSinceYouWereAwayDigest,
   type AIRecommendation,
 } from "@/shared/data/nonprofitDemoData";
 
@@ -61,6 +62,7 @@ export default function DevelopmentDirectorDashboard() {
   if (isLoading) return <DashboardSkeleton />;
 
   const visibleRecs = DEV_RECS.filter((r) => !dismissedRecs.includes(r.id));
+  const awayDigest = getSinceYouWereAwayDigest("development_director");
 
   return (
     <div className="space-y-6">
@@ -73,26 +75,21 @@ export default function DevelopmentDirectorDashboard() {
 
       {/* Org Health Score — donor-focused */}
       <OrgHealthScore
-        score={76}
-        scoreColor="amber"
+        score={DEMO_ORG_HEALTH.score}
+        scoreColor={DEMO_ORG_HEALTH.scoreColor}
         breakdown={[
           { label: "Data Quality", value: "82%", percent: 82, color: "green" },
           { label: "Donor Engagement", value: "78%", percent: 78, color: "amber" },
           { label: "Reconciliation", value: "90%", percent: 90, color: "green" },
           { label: "Agent Activity", value: "5/5 active", percent: 100, color: "green" },
         ]}
-        insight="Donor engagement below target — 47 upgrade-ready donors identified. Pipeline review recommended."
+        insight="Donor engagement below target — 47 gala attendees not tagged in Salesforce. Pipeline review recommended."
       />
 
-      {/* Since You Were Away — donor-focused */}
       <SinceYouWereAway
-        lastLoginAgo="2 days ago"
-        summary="Your AI agents ran 14 times while you were away. The Mid-Donor Upgrade Agent identified 47 donors giving $250–$999/yr who are ready for upgrade conversations. 12 have been scored as high-readiness. The Event Intelligence Agent flagged 47 Spring Gala attendees not yet tagged in Salesforce."
-        actions={[
-          { label: "Review upgrade pipeline →", href: "/donor-pipeline" },
-          { label: "Tag event attendees →", href: "/agents/event-intelligence" },
-          { label: "View all agents →", href: "/agents" },
-        ]}
+        lastLoginAgo={awayDigest.lastLoginAgo}
+        summary={awayDigest.summary}
+        actions={awayDigest.actions}
       />
 
       <AgentROIHeroCard role="development_director" />

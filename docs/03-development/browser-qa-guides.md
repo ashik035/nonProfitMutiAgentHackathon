@@ -51,23 +51,23 @@ When you ask *"how can I check this in the browser?"*, the agent should follow `
    - **AI ROI hero card** ← target
    - Quick Stats row
 
-### Expected values by role
+### Expected values by role (weekly, from `DEMO_AGENT_ACTIVITY`)
 
 | Role | Quick Login label | Hours | Est. value | Agent runs | Agents |
 |------|-------------------|-------|------------|------------|--------|
-| Executive Director | Executive Director | 16 | $560 | 7 | 5 |
-| Development Director | Development Director | 7 | $245 | 3 | 2 |
-| Finance Manager | Finance Manager | 4.5 | $157.50 | 2 | 2 |
-| Operations Manager | Operations Manager | 2.5 | $87.50 | 2 | 1 |
+| Executive Director | Executive Director | 17.5 | $612.50 | 9 | 5 |
+| Development Director | Development Director | 6 | $210 | 4 | 2 |
+| Finance Manager | Finance Manager | 6 | $210 | 4 | 2 |
+| Operations Manager | Operations Manager | 3.5 | $122.50 | 2 | 1 |
 
 ### What to check on the card
 
-- Headline: *"Your AI agents saved **X hours** this month"*
+- Headline: *"Your AI agents saved **X hours** this week"*
 - Gradient styling on the hours number (`ai-gradient-text`)
 - Sparkles icon in `ai-gradient` square (top-left of card)
 - **Est. value** box: dollar amount at `$35/hr staff rate`
-- **Agent runs** box: count with *"this month"*
-- Subline: *"Across N role-relevant agent(s)…"*
+- **Agent runs** box: successful runs in the last 7 days
+- Subline: run count across role-relevant agents
 - Card sits **above** Quick Stats, **below** Since You Were Away
 - Card uses `ai-card` top strip + subtle gradient background
 
@@ -96,10 +96,11 @@ When you ask *"how can I check this in the browser?"*, the agent should follow `
 ```
 [ ] /login → Quick Login → Executive Director → /dashboard
 [ ] ROI card between Since You Were Away and Quick Stats
-[ ] ED: 16 hrs | $560 | 7 runs | 5 agents
-[ ] DD: 7 hrs | $245 | 3 runs | 2 agents
-[ ] FM: 4.5 hrs | $157.50 | 2 runs | 2 agents
-[ ] OM: 2.5 hrs | $87.50 | 2 runs | 1 agent
+[ ] ED: 17.5 hrs | $612.50 | 9 runs | 5 agents
+[ ] DD: 6 hrs | $210 | 4 runs | 2 agents
+[ ] FM: 6 hrs | $210 | 4 runs | 2 agents
+[ ] OM: 3.5 hrs | $122.50 | 2 runs | 1 agent
+[ ] Headline says "this week" (not "this month")
 [ ] AI gradient styling visible
 [ ] Admin login does NOT show ROI card (expected)
 ```
@@ -268,6 +269,56 @@ After code changes land in `main`:
 | `meeting_id is required` | Old function still live — Publish latest `main` |
 | AI credits exhausted | Lovable billing / credits |
 | 401 | Re-login at `/login` |
+
+---
+
+## Core nonprofit demo pages (Brightside Foundation seed)
+
+**Source:** [`nonprofitDemoData.ts`](../../src/shared/data/nonprofitDemoData.ts) — single source of truth for dashboard, pipeline, grants, board reports, events post-event tab, data health, reconciliation, and voice notes.
+
+### Route map
+
+| Route | Expected on load |
+|-------|------------------|
+| `/dashboard` (ED Quick Login) | Org health **74**, weekly Time Saved > 0, ≥3 AI recommendations, AI activity widget |
+| `/donor-pipeline` | **9** donors across 5 columns; Carol Nguyen upgraded **+$1,300/yr** |
+| `/grants` | **4** grants: Kresge, RWJ, Gates, Local Community Foundation |
+| `/board-reports` | **Q2 2026**, badge *Draft — Pending ED Approval*, PDF export works |
+| `/events?tab=post-event` | Spring Gala **247** attendees, **47 not tagged in Salesforce** |
+| `/events?tab=manage` | Spring Gala ~**247** registrations (after seed file 13) |
+| `/data-health` | Score **74**, **3** duplicate pairs, **1** Stripe integration alert |
+| `/reconciliation` | **1** flagged txn **$2,340**, partial-match ledger |
+| `/voice-notes` | **5** debriefs with AI signal cards |
+
+### Step-by-step (smoke pass)
+
+1. `npm run dev` → **http://localhost:8080/login**
+2. Quick Login → **Executive Director** → confirm `/dashboard` org health ring shows **74**
+3. Sidebar → each route above; confirm no empty-state placeholders on first load
+4. `/board-reports` → **Approve & Export PDF** → file downloads
+5. `/events` → **Post-Event** tab → Spring Gala summary shows 247 / 47 untagged
+
+### Events Manage tab (live DB)
+
+Re-run seed after demo data changes:
+
+- **Lovable:** SQL Editor → paste `supabase/seed/13-nonprofit-events.sql`
+- **Local:** `npm run seed:nonprofit` (requires `DATABASE_URL` in `.env`)
+
+Spring Gala row: capacity **300**, fund raised **$142,000**, ticket sold totals **247**.
+
+### QA checklist
+
+```
+[ ] Dashboard ED: org health 74, Time Saved "this week", ≥3 AI alerts
+[ ] Donor Pipeline: 9 cards, Carol Nguyen in Upgraded column
+[ ] Grants: 4 funders match spec, utilization bars visible
+[ ] Board Reports: Q2 2026, Pending ED Approval badge
+[ ] Events post: 247 attendees, 47 not tagged in Salesforce
+[ ] Data Health: 74 score, 3 duplicates, Stripe alert card
+[ ] Reconciliation: $2,340 flagged txn, matched ledger rows
+[ ] Voice Notes: 5 notes with signal cards (capacity, timing, sensitivities)
+```
 
 ---
 

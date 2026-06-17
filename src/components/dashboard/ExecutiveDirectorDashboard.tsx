@@ -13,10 +13,9 @@ import SinceYouWereAway from "@/components/dashboard/SinceYouWereAway";
 import AgentROIHeroCard from "@/components/dashboard/AgentROIHeroCard";
 import QuickStatsRow from "@/components/dashboard/QuickStatsRow";
 import {
-  DEMO_DATA_HEALTH,
-  DEMO_GRANTS,
-  DEMO_BOARD_REPORT,
   DEMO_AI_RECOMMENDATIONS,
+  DEMO_ORG_HEALTH,
+  getSinceYouWereAwayDigest,
   type AIRecommendation,
 } from "@/shared/data/nonprofitDemoData";
 
@@ -62,6 +61,7 @@ export default function ExecutiveDirectorDashboard() {
   const visibleRecs = DEMO_AI_RECOMMENDATIONS.filter(
     (r) => !dismissedRecs.includes(r.id)
   );
+  const awayDigest = getSinceYouWereAwayDigest("executive_director");
 
   return (
     <div className="space-y-6">
@@ -74,26 +74,16 @@ export default function ExecutiveDirectorDashboard() {
 
       {/* Org Health Score */}
       <OrgHealthScore
-        score={74}
-        scoreColor="amber"
-        breakdown={[
-          { label: "Data Quality", value: "82%", percent: 82, color: "green" },
-          { label: "Grant Health", value: "61%", percent: 61, color: "amber" },
-          { label: "Reconciliation", value: "90%", percent: 90, color: "green" },
-          { label: "Agent Activity", value: "5/5 active", percent: 100, color: "green" },
-        ]}
-        insight="Grant health is below target — 2 reports due within 14 days. Review recommended."
+        score={DEMO_ORG_HEALTH.score}
+        scoreColor={DEMO_ORG_HEALTH.scoreColor}
+        breakdown={DEMO_ORG_HEALTH.breakdown}
+        insight={DEMO_ORG_HEALTH.insight}
       />
 
-      {/* Since You Were Away */}
       <SinceYouWereAway
-        lastLoginAgo="2 days ago"
-        summary="Your AI agents ran 14 times while you were away. The CRM Data Integrity Agent flagged 3 new potential duplicate records. The Grant Compliance Agent is tracking the Kresge Foundation report, due in 8 days with 61% fund utilization. One Stripe transaction from Apr 6 ($2,340) remains unmatched in Salesforce."
-        actions={[
-          { label: "Review 3 duplicates →", href: "/agents/crm-data-integrity" },
-          { label: "Open grant report →", href: "/agents/grant-compliance" },
-          { label: "Review transaction →", href: "/agents/reconciliation-fund-accounting" },
-        ]}
+        lastLoginAgo={awayDigest.lastLoginAgo}
+        summary={awayDigest.summary}
+        actions={awayDigest.actions}
       />
 
       <AgentROIHeroCard role="executive_director" />
@@ -103,7 +93,7 @@ export default function ExecutiveDirectorDashboard() {
         stats={[
           { label: "Active Donors", value: "1,847", change: "↑ 23 this month", positive: true },
           { label: "Grants Active", value: "4", change: "$497K total" },
-          { label: "Data Health", value: "82%", change: "↑ 3% vs last month", positive: true },
+          { label: "Data Health", value: `${DEMO_ORG_HEALTH.score}%`, change: "↑ 3% vs last month", positive: true },
           { label: "Tasks Pending", value: "7" },
         ]}
       />
@@ -158,7 +148,7 @@ export default function ExecutiveDirectorDashboard() {
         </CardContent>
       </Card>
 
-      <AIActivityWidget />
+      <AIActivityWidget role="executive_director" />
 
       <AITeamsDashboardCard />
     </div>
