@@ -119,6 +119,85 @@ export const agentTeams: Record<string, AgentTeamDef> = {
         whereToFind: { label: "Grants", path: "/grants" },
       },
       {
+        name: "Executive Daily Briefer",
+        slug: "executive-daily-briefer",
+        description:
+          "Morning briefing for the Executive Director — aggregates grants, board actions, donor risk, and operations into what needs attention today.",
+        icon: "Sun",
+        operational: {
+          lastFinding:
+            "Kresge report due in 8 days, 2 board actions overdue, 3 major donors at churn risk",
+          itemsToReview: 5,
+          timeSavedHrs: 2,
+        },
+        capabilities: [
+          "Aggregate grants, tasks, donors, and board actions into one briefing",
+          "Prioritize critical vs warning items for the ED",
+          "Surface metrics snapshot for morning standup",
+          "Recommend a single highest-priority action",
+        ],
+        howToUse: [
+          "Open Executive Daily Briefer on the AI Agents page",
+          "Generate Morning Briefing (sample or live data)",
+          "Review priority items and metrics",
+          "Take the recommended next step before 10am",
+        ],
+        whereToFind: { label: "Executive Daily Briefer", path: "/agents/executive-daily-briefer" },
+      },
+      {
+        name: "Donor Churn Risk Detector",
+        slug: "donor-churn-risk",
+        description:
+          "Flags at-risk donors from giving history — risk scores, revenue at risk, and personalized outreach recommendations.",
+        icon: "Heart",
+        operational: {
+          lastFinding:
+            "5 donors at elevated risk — Patricia Osei and William Davis are high priority major gifts",
+          itemsToReview: 5,
+          timeSavedHrs: 1.5,
+        },
+        capabilities: [
+          "Score donors by days since last gift and lifetime value",
+          "Classify high, medium, and low churn risk",
+          "Estimate revenue at risk across the portfolio",
+          "Recommend specific outreach per donor",
+        ],
+        howToUse: [
+          "Open Donor Churn Risk Detector on AI Agents",
+          "Run Churn Scan on sample or live donation data",
+          "Review at-risk table sorted by risk score",
+          "Open Donor Retention to re-engage flagged donors",
+        ],
+        whereToFind: { label: "Donor Churn Risk", path: "/agents/donor-churn-risk" },
+      },
+      {
+        name: "Strategic Insights Generator",
+        slug: "strategic-insights",
+        description:
+          "RAG-powered grant intelligence and donor insights — searches your org knowledge base and synthesizes cited findings with recommended actions.",
+        icon: "BookOpen",
+        operational: {
+          lastFinding:
+            "Kresge report urgent + Patricia Osei at churn risk — cross-link grant narrative with major-donor outreach",
+          itemsToReview: 4,
+          timeSavedHrs: 2.5,
+        },
+        capabilities: [
+          "Semantic search across knowledge base and embeddings",
+          "Grant deadline and utilization intelligence",
+          "Donor retention signals from giving history + KB",
+          "Cited insights with confidence scores",
+          "Cross-functional recommended action",
+        ],
+        howToUse: [
+          "Open Strategic Insights on the AI Agents page",
+          "Choose focus: Grants, Donors, or both",
+          "Generate Insights (sample KB or live RAG)",
+          "Review cited grant and donor findings",
+        ],
+        whereToFind: { label: "Strategic Insights", path: "/agents/strategic-insights" },
+      },
+      {
         name: "Event Intelligence Agent",
         slug: "event-intelligence",
         description: "Analyzes post-event attendance data and suggests engagement tags, volunteer interest flags, and follow-up tasks for attendees not yet connected to your donor pipeline.",
@@ -317,6 +396,9 @@ export const AGENT_ICON_MAP: Record<string, string> = {
   "crm-data-integrity": "Database",
   "reconciliation-fund-accounting": "DollarSign",
   "grant-compliance": "FileText",
+  "executive-daily-briefer": "Sun",
+  "donor-churn-risk": "Heart",
+  "strategic-insights": "BookOpen",
   "event-intelligence": "Calendar",
   "board-reporting": "BarChart3",
   "grant-budget-watcher": "AlertTriangle",

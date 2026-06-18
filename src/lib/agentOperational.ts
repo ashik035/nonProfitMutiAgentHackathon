@@ -4,6 +4,9 @@
 export const AGENT_UI_TO_DB_SLUG: Record<string, string> = {
   "meeting-intelligence": "meeting-summarizer",
   "action-item-tracker": "action-item-tracker",
+  "executive-daily-briefer": "executive-daily-briefer",
+  "donor-churn-risk": "donor-churn-risk",
+  "strategic-insights": "strategic-insights",
 };
 
 export function resolveDbAgentSlug(uiSlug: string): string {
