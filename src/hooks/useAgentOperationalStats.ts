@@ -54,6 +54,13 @@ function extractItemsToReview(metadata: unknown, output: unknown): number {
     const decisions = Array.isArray(out.decisions) ? out.decisions.length : 0;
     const overdue = Array.isArray(out.overdue) ? out.overdue.length : 0;
     const blocked = Array.isArray(out.blocked) ? out.blocked.length : 0;
+    const grantInsights = Array.isArray(out.grant_insights) ? out.grant_insights.length : 0;
+    const donorInsights = Array.isArray(out.donor_insights) ? out.donor_insights.length : 0;
+    if (grantInsights + donorInsights > 0) return grantInsights + donorInsights;
+    const atRisk = Array.isArray(out.at_risk_donors) ? out.at_risk_donors.length : 0;
+    if (atRisk > 0) return atRisk;
+    const priorityItems = Array.isArray(out.priority_items) ? out.priority_items.length : 0;
+    if (priorityItems > 0) return priorityItems;
     if (overdue + blocked > 0) return overdue + blocked;
     return actions + decisions;
   }

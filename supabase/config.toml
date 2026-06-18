@@ -343,6 +343,15 @@ verify_jwt = false
 [functions.action-item-tracker]
 verify_jwt = false
 
+[functions.executive-daily-briefer]
+verify_jwt = false
+
+[functions.donor-churn-risk]
+verify_jwt = false
+
+[functions.strategic-insights]
+verify_jwt = false
+
 # Copied from SJ Control Tower (verbatim) — references tables not in this project
 [functions.auto-status-transition]
 verify_jwt = true

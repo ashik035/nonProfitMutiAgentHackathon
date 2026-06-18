@@ -23,9 +23,18 @@ import { useNonprofitRolePermissions } from "@/hooks/useNonprofitRolePermissions
 import { useAgentOperationalStats } from "@/hooks/useAgentOperationalStats";
 import { useMeetingSummarizer } from "@/hooks/useMeetingSummarizer";
 import { useActionItemTracker } from "@/hooks/useActionItemTracker";
+import { useExecutiveDailyBriefer } from "@/hooks/useExecutiveDailyBriefer";
+import { useDonorChurnRisk } from "@/hooks/useDonorChurnRisk";
+import { useStrategicInsights } from "@/hooks/useStrategicInsights";
 import { BRIGHTSIDE_BOARD_MEETING_SAMPLE } from "@/shared/data/brightsideBoardMeetingSample";
 
-const LIVE_OPERATIONAL_SLUGS = new Set(["meeting-intelligence", "action-item-tracker"]);
+const LIVE_OPERATIONAL_SLUGS = new Set([
+  "meeting-intelligence",
+  "action-item-tracker",
+  "executive-daily-briefer",
+  "donor-churn-risk",
+  "strategic-insights",
+]);
 
 /* ── activity banner messages ── */
 
@@ -40,6 +49,9 @@ const BANNER_MESSAGES = [
 const CORE_LAST_RUN: Record<string, string> = {
   "meeting-intelligence": hoursAgo(0, 45),
   "action-item-tracker": hoursAgo(1, 12),
+  "executive-daily-briefer": hoursAgo(2, 5),
+  "donor-churn-risk": hoursAgo(3, 8),
+  "strategic-insights": hoursAgo(4, 2),
   "crm-data-integrity": hoursAgo(1, 3),
   "reconciliation-fund-accounting": hoursAgo(3, 5),
   "grant-compliance": hoursAgo(2, 4),
@@ -153,6 +165,9 @@ function AgentBrowseCard({
   const liveStats = useAgentOperationalStats(agent.slug);
   const summarizer = useMeetingSummarizer();
   const actionTracker = useActionItemTracker();
+  const dailyBriefer = useExecutiveDailyBriefer();
+  const churnRisk = useDonorChurnRisk();
+  const strategicInsights = useStrategicInsights();
 
   const [running, setRunning] = useState(false);
   const [lastRunOverride, setLastRunOverride] = useState<string | null>(null);
@@ -211,6 +226,57 @@ function AgentBrowseCard({
         });
       } catch (err) {
         toast.error(err instanceof Error ? err.message : "Tracker run failed");
+        navigate(`/agents/${agent.slug}`);
+      } finally {
+        setRunning(false);
+      }
+      return;
+    }
+    if (agent.slug === "executive-daily-briefer") {
+      if (running || dailyBriefer.isPending) return;
+      setRunning(true);
+      try {
+        await dailyBriefer.mutateAsync({ useSample: true });
+        setLastRunOverride("just now");
+        toast.success("Morning briefing ready", {
+          description: "Executive Daily Briefer run complete",
+        });
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Briefing failed");
+        navigate(`/agents/${agent.slug}`);
+      } finally {
+        setRunning(false);
+      }
+      return;
+    }
+    if (agent.slug === "donor-churn-risk") {
+      if (running || churnRisk.isPending) return;
+      setRunning(true);
+      try {
+        await churnRisk.mutateAsync({ useSample: true });
+        setLastRunOverride("just now");
+        toast.success("Churn scan complete", {
+          description: "Review at-risk donors and recommended outreach",
+        });
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Churn scan failed");
+        navigate(`/agents/${agent.slug}`);
+      } finally {
+        setRunning(false);
+      }
+      return;
+    }
+    if (agent.slug === "strategic-insights") {
+      if (running || strategicInsights.isPending) return;
+      setRunning(true);
+      try {
+        await strategicInsights.mutateAsync({ useSample: true, focus: "all" });
+        setLastRunOverride("just now");
+        toast.success("Strategic insights ready", {
+          description: "Grant + donor intelligence from knowledge base",
+        });
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Insights failed");
         navigate(`/agents/${agent.slug}`);
       } finally {
         setRunning(false);
@@ -310,7 +376,13 @@ function AgentBrowseCard({
                 ? "Summarize"
                 : agent.slug === "action-item-tracker"
                   ? "Track"
-                  : "View Findings"}
+                  : agent.slug === "executive-daily-briefer"
+                    ? "Brief"
+                    : agent.slug === "donor-churn-risk"
+                      ? "Scan"
+                      : agent.slug === "strategic-insights"
+                        ? "Insights"
+                        : "View Findings"}
             </span>
           </Button>
           <Button
@@ -318,9 +390,9 @@ function AgentBrowseCard({
             variant="outline"
             className="flex-1 min-w-0 h-8 px-2 text-xs gap-1"
             onClick={handleRunNow}
-            disabled={running || summarizer.isPending || actionTracker.isPending}
+            disabled={running || summarizer.isPending || actionTracker.isPending || dailyBriefer.isPending || churnRisk.isPending || strategicInsights.isPending}
           >
-            {running || summarizer.isPending || actionTracker.isPending ? (
+            {running || summarizer.isPending || actionTracker.isPending || dailyBriefer.isPending || churnRisk.isPending || strategicInsights.isPending ? (
               <Loader2 className="h-3 w-3 shrink-0 animate-spin" />
             ) : (
               <Play className="h-3 w-3 shrink-0" />

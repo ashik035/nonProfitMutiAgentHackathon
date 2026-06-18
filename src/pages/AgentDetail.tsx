@@ -22,6 +22,9 @@ import EventIntelligenceDetail from "@/components/ai/agents/EventIntelligenceDet
 import BoardReportingDetail from "@/components/ai/agents/BoardReportingDetail";
 import MeetingIntelligenceDetail from "@/components/ai/agents/MeetingIntelligenceDetail";
 import ActionItemTrackerDetail from "@/components/ai/agents/ActionItemTrackerDetail";
+import ExecutiveDailyBrieferDetail from "@/components/ai/agents/ExecutiveDailyBrieferDetail";
+import DonorChurnRiskDetail from "@/components/ai/agents/DonorChurnRiskDetail";
+import StrategicInsightsDetail from "@/components/ai/agents/StrategicInsightsDetail";
 
 function getIcon(name: string) {
   return (icons as Record<string, React.ComponentType<{ className?: string }>>)[name] ?? Bot;
@@ -149,6 +152,12 @@ export default function AgentDetail() {
         <MeetingIntelligenceDetail />
       ) : slug === "action-item-tracker" ? (
         <ActionItemTrackerDetail />
+      ) : slug === "executive-daily-briefer" ? (
+        <ExecutiveDailyBrieferDetail />
+      ) : slug === "donor-churn-risk" ? (
+        <DonorChurnRiskDetail />
+      ) : slug === "strategic-insights" ? (
+        <StrategicInsightsDetail />
       ) : slug === "mid-donor-upgrade" ? (
         <MidDonorUpgradeDetail />
       ) : slug === "donor-lapse-detection" ? (
