@@ -14,7 +14,8 @@ import {
   failAgentRun,
   logAgentActivity,
   resolveAgentId,
-  startAgentRun,
+  safeStartAgentRun,
+  ephemeralRunId,
 } from "../_shared/agent-run-lifecycle.ts";
 
 const AGENT_SLUG = "action-item-tracker";
@@ -428,6 +429,7 @@ serve(async (req) => {
 
   const startTime = Date.now();
   let runId: string | null = null;
+  let logRun = true;
 
   try {
     let body: { log_run?: boolean; use_sample?: boolean; ping?: boolean } = {};
@@ -441,13 +443,13 @@ serve(async (req) => {
       return jsonResponse({ ok: true, message: `${AGENT_SLUG} is ready` }, 200, corsHeaders);
     }
 
-    const logRun = body.log_run !== false;
+    logRun = body.log_run !== false;
     const useSample = body.use_sample === true;
 
     const agentId = logRun && authUserId ? await resolveAgentId(supabase, AGENT_SLUG) : null;
 
     if (logRun && authUserId && agentId) {
-      runId = await startAgentRun(supabase, {
+      runId = await safeStartAgentRun(supabase, {
         agentId,
         userId: authUserId,
         input: { use_sample: useSample },
@@ -497,10 +499,10 @@ serve(async (req) => {
       });
     }
 
-    if (logRun && runId) {
+    if (logRun) {
       return jsonResponse(
         {
-          run_id: runId,
+          run_id: runId ?? ephemeralRunId(AGENT_SLUG),
           result,
           time_saved_minutes: result.time_saved_minutes,
           recommended_action: result.recommended_action,
@@ -523,7 +525,24 @@ serve(async (req) => {
       });
     }
     console.error("[action-item-tracker] Error:", error);
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return jsonResponse({ error: "tracker_failed", message }, 500, corsHeaders);
+    const items = await gatherActionItems(supabase, true);
+    const classified = classifyItems(items);
+    const result = buildFallbackResult(classified, items);
+    if (logRun) {
+      return jsonResponse(
+        {
+          run_id: ephemeralRunId(AGENT_SLUG),
+          result,
+          time_saved_minutes: result.time_saved_minutes,
+          recommended_action: result.recommended_action,
+          model: MODEL,
+          provider: "rules-fallback",
+          latency_ms: Date.now() - startTime,
+        },
+        200,
+        corsHeaders
+      );
+    }
+    return jsonResponse(result, 200, corsHeaders);
   }
 });

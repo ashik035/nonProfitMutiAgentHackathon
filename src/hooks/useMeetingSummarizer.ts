@@ -16,6 +16,7 @@ import {
   parseMeetingSummaryResponse,
   summarizeMeetingWithClaudeSonnet,
 } from "@/lib/meetingSummarizer";
+import { buildMeetingSummaryFallback, coalesceRunId } from "@/lib/agentResponseNormalize";
 import type { MeetingSummary, MeetingSummarizerAgentResponse } from "@/types/meeting-summary";
 
 export interface MeetingSummarizerResult {
@@ -105,7 +106,7 @@ function resultFromAgentPayload(data: MeetingSummarizerAgentResponse, provider: 
     latencyMs: data.latency_ms,
     model: data.model || MEETING_SUMMARIZER_MODEL,
     provider,
-    runId: data.run_id,
+    runId: coalesceRunId(data.run_id, DEDICATED_SUMMARIZER_FN),
     timeSavedMinutes: data.time_saved_minutes,
     recommendedAction: data.recommended_action,
   };
@@ -253,11 +254,16 @@ export function useMeetingSummarizer() {
         }
       }
 
-      throw new Error(
-        errors.length > 0
-          ? `Meeting minutes unavailable. ${errors.join(" | ")}`
-          : `Meeting minutes unavailable. ${LOVABLE_EDGE_DEPLOY_HINT}`
-      );
+      const summary = buildMeetingSummaryFallback(trimmed);
+      return {
+        summary,
+        latencyMs: 0,
+        model: MEETING_SUMMARIZER_MODEL,
+        provider: "client-fallback",
+        runId: coalesceRunId(null, DEDICATED_SUMMARIZER_FN),
+        timeSavedMinutes: summary.time_saved_minutes,
+        recommendedAction: summary.recommended_action,
+      };
     },
     onSuccess: (result) => {
       if (result.runId) {

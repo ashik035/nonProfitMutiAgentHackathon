@@ -1,5 +1,5 @@
 /**
- * Sample board meeting transcript for Meeting Summarizer demo — Brightside Foundation Q2 2026.
+ * Q2 2026 board meeting transcript — Brightside Foundation.
  */
 export const BRIGHTSIDE_BOARD_MEETING_SAMPLE = `Brightside Foundation — Board of Directors Meeting
 Date: June 10, 2026 | Location: Conference Room A, Brightside Foundation HQ

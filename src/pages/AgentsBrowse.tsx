@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
-import { icons, Sparkles, Bot, Clock, Play, Loader2, Eye } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import { icons, Sparkles, Bot, Clock, Play, Loader2, Eye, Activity, Zap } from "lucide-react";
 import { toast } from "sonner";
 
 import { Card } from "@/components/ui/card";
@@ -15,7 +15,9 @@ import {
 import {
   allTeams,
   CATEGORY_COLORS,
+  TEAM_BADGE_LABELS,
   type AgentTeamAgent,
+  type AgentTeamDef,
 } from "@/components/ai/agentTeamConfig";
 import { cn } from "@/lib/utils";
 import { hoursAgo } from "@/shared/data/nonprofitDemoData";
@@ -35,6 +37,8 @@ const LIVE_OPERATIONAL_SLUGS = new Set([
   "donor-churn-risk",
   "strategic-insights",
 ]);
+
+type AgentFilter = "all" | "live" | "findings";
 
 /* ── activity banner messages ── */
 
@@ -139,9 +143,26 @@ function BrowseSkeleton() {
 }
 
 function getTeamBadgeLabel(teamId: string): string {
-  if (teamId === "nonprofit-ops") return "Core Ops";
-  if (teamId === "meetings") return "Meetings";
-  return teamId;
+  return TEAM_BADGE_LABELS[teamId] ?? teamId;
+}
+
+function agentReviewCount(agent: AgentTeamAgent): number {
+  return agent.operational?.itemsToReview ?? 0;
+}
+
+function sortAgentsByPriority(agents: AgentTeamAgent[]): AgentTeamAgent[] {
+  return [...agents].sort((a, b) => {
+    const aLive = LIVE_OPERATIONAL_SLUGS.has(a.slug) ? 1 : 0;
+    const bLive = LIVE_OPERATIONAL_SLUGS.has(b.slug) ? 1 : 0;
+    if (bLive !== aLive) return bLive - aLive;
+    return agentReviewCount(b) - agentReviewCount(a);
+  });
+}
+
+function matchesFilter(agent: AgentTeamAgent, filter: AgentFilter): boolean {
+  if (filter === "live") return LIVE_OPERATIONAL_SLUGS.has(agent.slug);
+  if (filter === "findings") return agentReviewCount(agent) > 0;
+  return true;
 }
 
 function AgentBrowseCard({
@@ -150,12 +171,14 @@ function AgentBrowseCard({
   teamBadgeLabel,
   gradientFrom,
   gradientTo,
+  isLive,
 }: {
   agent: AgentTeamAgent;
   teamId: string;
   teamBadgeLabel: string;
   gradientFrom: string;
   gradientTo: string;
+  isLive: boolean;
 }) {
   const navigate = useNavigate();
   const Icon = getIcon(agent.icon);
@@ -198,18 +221,19 @@ function AgentBrowseCard({
 
   const handleRunNow = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    const goToDetail = (path: string, agentRunResult?: unknown) => {
+      setLastRunOverride("just now");
+      navigate(path, { state: agentRunResult ? { agentRunResult } : { autoRun: true } });
+    };
+
     if (agent.slug === "meeting-intelligence") {
       if (running || summarizer.isPending) return;
       setRunning(true);
       try {
-        await summarizer.mutateAsync(BRIGHTSIDE_BOARD_MEETING_SAMPLE);
-        setLastRunOverride("just now");
-        toast.success("Meeting Summarizer run complete", {
-          description: "Board minutes generated from sample transcript",
-        });
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Summarizer run failed");
-        navigate(`/agents/${agent.slug}`);
+        const data = await summarizer.mutateAsync(BRIGHTSIDE_BOARD_MEETING_SAMPLE);
+        goToDetail(`/agents/${agent.slug}`, data);
+      } catch {
+        goToDetail(`/agents/${agent.slug}`);
       } finally {
         setRunning(false);
       }
@@ -219,14 +243,10 @@ function AgentBrowseCard({
       if (running || actionTracker.isPending) return;
       setRunning(true);
       try {
-        await actionTracker.mutateAsync({ useSample: true });
-        setLastRunOverride("just now");
-        toast.success("Action Item Tracker run complete", {
-          description: "Board actions scanned — review overdue and blocked items",
-        });
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Tracker run failed");
-        navigate(`/agents/${agent.slug}`);
+        const data = await actionTracker.mutateAsync();
+        goToDetail(`/agents/${agent.slug}`, data);
+      } catch {
+        goToDetail(`/agents/${agent.slug}`);
       } finally {
         setRunning(false);
       }
@@ -236,14 +256,10 @@ function AgentBrowseCard({
       if (running || dailyBriefer.isPending) return;
       setRunning(true);
       try {
-        await dailyBriefer.mutateAsync({ useSample: true });
-        setLastRunOverride("just now");
-        toast.success("Morning briefing ready", {
-          description: "Executive Daily Briefer run complete",
-        });
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Briefing failed");
-        navigate(`/agents/${agent.slug}`);
+        const data = await dailyBriefer.mutateAsync();
+        goToDetail(`/agents/${agent.slug}`, data);
+      } catch {
+        goToDetail(`/agents/${agent.slug}`);
       } finally {
         setRunning(false);
       }
@@ -253,14 +269,10 @@ function AgentBrowseCard({
       if (running || churnRisk.isPending) return;
       setRunning(true);
       try {
-        await churnRisk.mutateAsync({ useSample: true });
-        setLastRunOverride("just now");
-        toast.success("Churn scan complete", {
-          description: "Review at-risk donors and recommended outreach",
-        });
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Churn scan failed");
-        navigate(`/agents/${agent.slug}`);
+        const data = await churnRisk.mutateAsync();
+        goToDetail(`/agents/${agent.slug}`, data);
+      } catch {
+        goToDetail(`/agents/${agent.slug}`);
       } finally {
         setRunning(false);
       }
@@ -270,14 +282,10 @@ function AgentBrowseCard({
       if (running || strategicInsights.isPending) return;
       setRunning(true);
       try {
-        await strategicInsights.mutateAsync({ useSample: true, focus: "all" });
-        setLastRunOverride("just now");
-        toast.success("Strategic insights ready", {
-          description: "Grant + donor intelligence from knowledge base",
-        });
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Insights failed");
-        navigate(`/agents/${agent.slug}`);
+        const data = await strategicInsights.mutateAsync({ focus: "all" });
+        goToDetail(`/agents/${agent.slug}`, data);
+      } catch {
+        goToDetail(`/agents/${agent.slug}`);
       } finally {
         setRunning(false);
       }
@@ -295,7 +303,10 @@ function AgentBrowseCard({
   };
 
   return (
-    <Card className="overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all duration-300 hover:shadow-md flex flex-col h-full min-w-0">
+    <Card
+      className="overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all duration-300 hover:shadow-md flex flex-col h-full min-w-0 cursor-pointer"
+      onClick={() => navigate(`/agents/${agent.slug}`)}
+    >
       {/* Gradient header + overlapping icon */}
       <div
         className="h-24 shrink-0 relative z-0"
@@ -323,10 +334,17 @@ function AgentBrowseCard({
           <ActivePulse />
         </div>
 
-        <div className="flex items-center gap-2 mt-1.5">
-          <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-green-600 border-green-200 bg-green-50 dark:bg-green-950/20">
-            Active
-          </Badge>
+        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+          {isLive ? (
+            <Badge className="text-[10px] px-1.5 py-0 gap-0.5 bg-primary/10 text-primary border-primary/20">
+              <Zap className="h-2.5 w-2.5" />
+              Live
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-muted-foreground">
+              Monitoring
+            </Badge>
+          )}
           <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
             <Clock className="h-3 w-3" />
             Last run: {displayLastRun}
@@ -405,10 +423,111 @@ function AgentBrowseCard({
   );
 }
 
+function TeamSection({
+  team,
+  agents,
+  filter,
+}: {
+  team: AgentTeamDef;
+  agents: AgentTeamAgent[];
+  filter: AgentFilter;
+}) {
+  const visibleAgents = sortAgentsByPriority(
+    agents.filter((a) => matchesFilter(a, filter))
+  );
+  if (visibleAgents.length === 0) return null;
+
+  const cat = CATEGORY_COLORS[team.id] ?? CATEGORY_COLORS.general;
+
+  return (
+    <section className="rounded-xl border border-border bg-card/50 overflow-hidden">
+      <div
+        className="h-1"
+        style={{
+          background: `linear-gradient(90deg, hsl(${team.gradientFrom}), hsl(${team.gradientTo}))`,
+        }}
+      />
+      <div className="px-5 py-4 border-b border-border/60 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-foreground">{team.name}</h2>
+            <Badge variant="secondary" className="text-[10px]">
+              {visibleAgents.length} agent{visibleAgents.length === 1 ? "" : "s"}
+            </Badge>
+          </div>
+          <p className="text-sm text-muted-foreground mt-0.5">{team.tagline}</p>
+        </div>
+        <Badge className={cn("text-[10px] border-0", cat.badge)}>
+          {getTeamBadgeLabel(team.id)}
+        </Badge>
+      </div>
+      <div className="p-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+        {visibleAgents.map((agent) => (
+          <AgentBrowseCard
+            key={agent.slug}
+            agent={agent}
+            teamId={team.id}
+            teamBadgeLabel={getTeamBadgeLabel(team.id)}
+            gradientFrom={team.gradientFrom}
+            gradientTo={team.gradientTo}
+            isLive={LIVE_OPERATIONAL_SLUGS.has(agent.slug)}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function FilterTabs({
+  filter,
+  onChange,
+  liveCount,
+  findingsCount,
+}: {
+  filter: AgentFilter;
+  onChange: (f: AgentFilter) => void;
+  liveCount: number;
+  findingsCount: number;
+}) {
+  const tabs: { id: AgentFilter; label: string; count?: number }[] = [
+    { id: "all", label: "All agents" },
+    { id: "live", label: "Live", count: liveCount },
+    { id: "findings", label: "Needs review", count: findingsCount },
+  ];
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {tabs.map((tab) => (
+        <Button
+          key={tab.id}
+          size="sm"
+          variant={filter === tab.id ? "default" : "outline"}
+          className="h-8 text-xs"
+          onClick={() => onChange(tab.id)}
+        >
+          {tab.label}
+          {tab.count != null && tab.count > 0 && (
+            <Badge
+              variant="secondary"
+              className={cn(
+                "ml-1.5 h-4 px-1 text-[10px] min-w-[1.25rem] justify-center",
+                filter === tab.id && "bg-primary-foreground/20 text-primary-foreground"
+              )}
+            >
+              {tab.count}
+            </Badge>
+          )}
+        </Button>
+      ))}
+    </div>
+  );
+}
+
 /* ── main page ── */
 
 export default function AgentsBrowse() {
   const [isLoading, setIsLoading] = useState(true);
+  const [filter, setFilter] = useState<AgentFilter>("all");
   const { hasAgentPermission } = useNonprofitRolePermissions();
 
   useEffect(() => {
@@ -433,44 +552,77 @@ export default function AgentsBrowse() {
     [teamsWithAgents]
   );
 
+  const liveCount = useMemo(
+    () =>
+      teamsWithAgents.reduce(
+        (sum, { agents }) =>
+          sum + agents.filter((a) => LIVE_OPERATIONAL_SLUGS.has(a.slug)).length,
+        0
+      ),
+    [teamsWithAgents]
+  );
+
+  const findingsCount = useMemo(
+    () =>
+      teamsWithAgents.reduce(
+        (sum, { agents }) => sum + agents.filter((a) => agentReviewCount(a) > 0).length,
+        0
+      ),
+    [teamsWithAgents]
+  );
+
+  const filteredTeamCount = useMemo(() => {
+    return teamsWithAgents.filter(({ agents }) =>
+      agents.some((a) => matchesFilter(a, filter))
+    ).length;
+  }, [teamsWithAgents, filter]);
+
   if (isLoading) return <BrowseSkeleton />;
 
   return (
-    <div className="space-y-10">
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-          <Sparkles className="h-5 w-5 text-primary" />
+    <div className="space-y-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+            <Sparkles className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">AI Agents</h1>
+            <p className="text-sm text-muted-foreground">
+              {totalVisibleAgents} agents across {teamsWithAgents.length} teams · {liveCount} live
+            </p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">AI Agents</h1>
-          <p className="text-sm text-muted-foreground">
-            {totalVisibleAgents} agents actively monitoring your operations
-          </p>
-        </div>
+        <Button variant="outline" size="sm" className="gap-1.5 shrink-0" asChild>
+          <Link to="/agents/activity">
+            <Activity className="h-4 w-4" />
+            Activity log
+          </Link>
+        </Button>
       </div>
 
       <ActivityBanner />
 
-      {teamsWithAgents.map(({ team, agents }) => (
-        <section key={team.id} className="space-y-4">
-          <div>
-            <h2 className="text-lg font-semibold text-foreground">{team.name}</h2>
-            <p className="text-sm text-muted-foreground">{team.tagline}</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {agents.map((agent) => (
-              <AgentBrowseCard
-                key={agent.slug}
-                agent={agent}
-                teamId={team.id}
-                teamBadgeLabel={getTeamBadgeLabel(team.id)}
-                gradientFrom={team.gradientFrom}
-                gradientTo={team.gradientTo}
-              />
-            ))}
-          </div>
-        </section>
-      ))}
+      <FilterTabs
+        filter={filter}
+        onChange={setFilter}
+        liveCount={liveCount}
+        findingsCount={findingsCount}
+      />
+
+      {filteredTeamCount === 0 ? (
+        <div className="rounded-xl border border-dashed border-border px-6 py-12 text-center">
+          <p className="text-sm text-muted-foreground">
+            No agents match this filter. Try &ldquo;All agents&rdquo; or check your role permissions.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {teamsWithAgents.map(({ team, agents }) => (
+            <TeamSection key={team.id} team={team} agents={agents} filter={filter} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

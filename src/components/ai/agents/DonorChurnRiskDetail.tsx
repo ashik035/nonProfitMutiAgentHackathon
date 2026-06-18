@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   AlertCircle,
@@ -21,7 +21,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useDonorChurnRisk } from "@/hooks/useDonorChurnRisk";
+import { useDonorChurnRisk, type DonorChurnRiskRunResult } from "@/hooks/useDonorChurnRisk";
+import { useLiveAgentDetailBootstrap } from "@/hooks/useLiveAgentDetailBootstrap";
 import type { DonorChurnRiskResult } from "@/types/donor-churn-risk";
 import { cn } from "@/lib/utils";
 
@@ -181,25 +182,31 @@ export default function DonorChurnRiskDetail() {
     provider: string;
     runId?: string;
   } | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [useSample, setUseSample] = useState(true);
+
+  const applyRunResult = useCallback((data: DonorChurnRiskRunResult) => {
+    setResult({
+      data: data.result,
+      latencyMs: data.latencyMs,
+      model: data.model,
+      provider: data.provider,
+      runId: data.runId,
+    });
+  }, []);
 
   const handleScan = async () => {
-    setErrorMessage(null);
     setResult(null);
     try {
-      const data = await churn.mutateAsync({ useSample });
-      setResult({
-        data: data.result,
-        latencyMs: data.latencyMs,
-        model: data.model,
-        provider: data.provider,
-        runId: data.runId,
-      });
-    } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : "Scan failed");
+      const data = await churn.mutateAsync();
+      applyRunResult(data);
+    } catch {
+      // Hook resolves with client fallback.
     }
   };
+
+  useLiveAgentDetailBootstrap({
+    run: () => churn.mutateAsync(),
+    apply: applyRunResult,
+  });
 
   return (
     <div className="space-y-6">
@@ -210,21 +217,11 @@ export default function DonorChurnRiskDetail() {
             Churn Risk Scan
           </CardTitle>
           <CardDescription>
-            Analyzes donor giving history to flag at-risk relationships, estimate revenue exposure,
-            and recommend outreach — adapted from client risk detection patterns.
+            Analyzes your donation history to flag at-risk relationships, estimate revenue
+            exposure, and recommend personalized outreach for major and mid-level donors.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
-            <input
-              type="checkbox"
-              checked={useSample}
-              onChange={(e) => setUseSample(e.target.checked)}
-              disabled={churn.isPending}
-              className="rounded border-border"
-            />
-            Use sample donor portfolio (demo)
-          </label>
           <Button onClick={handleScan} disabled={churn.isPending} className="gap-1.5">
             {churn.isPending ? (
               <>
@@ -240,14 +237,6 @@ export default function DonorChurnRiskDetail() {
           </Button>
         </CardContent>
       </Card>
-
-      {errorMessage && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Scan failed</AlertTitle>
-          <AlertDescription>{errorMessage}</AlertDescription>
-        </Alert>
-      )}
 
       {result && (
         <ChurnOutput

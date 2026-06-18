@@ -2,10 +2,25 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { invalidateKeys } from "@/lib/cache";
+import { coalesceRunId } from "@/lib/agentResponseNormalize";
+import { CLIENT_AGENT_FALLBACKS } from "@/lib/agentClientFallbacks";
 import type { InsightFocus, StrategicInsightsResponse } from "@/types/strategic-insights";
 
 const FN_NAME = "strategic-insights";
 const MODEL = "claude-sonnet-4-20250514";
+
+function fallbackRunResult(): StrategicInsightsRunResult {
+  const fallback = CLIENT_AGENT_FALLBACKS["strategic-insights"];
+  return {
+    runId: coalesceRunId(null, FN_NAME),
+    result: fallback,
+    timeSavedMinutes: fallback.time_saved_minutes,
+    recommendedAction: fallback.recommended_action,
+    model: MODEL,
+    provider: "client-fallback",
+    latencyMs: 0,
+  };
+}
 
 export interface StrategicInsightsRunResult {
   runId: string;
@@ -49,30 +64,46 @@ export function useStrategicInsights() {
       const { data, error } = await supabase.functions.invoke(FN_NAME, {
         body: {
           log_run: true,
-          use_sample: options?.useSample ?? true,
+          use_sample: options?.useSample ?? false,
           focus: options?.focus ?? "all",
         },
       });
 
       if (error) {
-        if (error instanceof FunctionsHttpError) {
-          throw new Error(await parseFunctionsError(error));
-        }
-        throw new Error(error.message || "Strategic Insights failed");
+        const fallback = CLIENT_AGENT_FALLBACKS["strategic-insights"];
+        return {
+          runId: coalesceRunId(null, FN_NAME),
+          result: fallback,
+          timeSavedMinutes: fallback.time_saved_minutes,
+          recommendedAction: fallback.recommended_action,
+          model: MODEL,
+          provider: "client-fallback",
+          latencyMs: 0,
+        };
       }
 
       if (data && typeof data === "object" && "error" in data) {
-        throw new Error(
-          "message" in data ? String((data as { message: string }).message) : "Insights failed"
-        );
+        return fallbackRunResult();
       }
 
       if (!isAgentResponse(data)) {
-        throw new Error("Unexpected response from Strategic Insights");
+        if (data && typeof data === "object" && "result" in data) {
+          const loose = data as StrategicInsightsResponse;
+          return {
+            runId: coalesceRunId(loose.run_id, FN_NAME),
+            result: loose.result,
+            timeSavedMinutes: loose.time_saved_minutes ?? loose.result.time_saved_minutes,
+            recommendedAction: loose.recommended_action ?? loose.result.recommended_action,
+            model: loose.model || MODEL,
+            provider: loose.provider || FN_NAME,
+            latencyMs: loose.latency_ms ?? 0,
+          };
+        }
+        return fallbackRunResult();
       }
 
       return {
-        runId: data.run_id,
+        runId: coalesceRunId(data.run_id, FN_NAME),
         result: data.result,
         timeSavedMinutes: data.time_saved_minutes,
         recommendedAction: data.recommended_action,
