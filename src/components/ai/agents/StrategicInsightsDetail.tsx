@@ -1,4 +1,4 @@
-import { useState, type ComponentType } from "react";
+import { useCallback, useState, type ComponentType } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   AlertCircle,
@@ -21,7 +21,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useStrategicInsights } from "@/hooks/useStrategicInsights";
+import { useStrategicInsights, type StrategicInsightsRunResult } from "@/hooks/useStrategicInsights";
+import { useLiveAgentDetailBootstrap } from "@/hooks/useLiveAgentDetailBootstrap";
 import type { InsightFocus, StrategicInsightsResult, StrategicInsightItem } from "@/types/strategic-insights";
 import { cn } from "@/lib/utils";
 
@@ -171,26 +172,32 @@ export default function StrategicInsightsDetail() {
     provider: string;
     runId?: string;
   } | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [useSample, setUseSample] = useState(true);
   const [focus, setFocus] = useState<InsightFocus>("all");
 
+  const applyRunResult = useCallback((data: StrategicInsightsRunResult) => {
+    setResult({
+      data: data.result,
+      latencyMs: data.latencyMs,
+      model: data.model,
+      provider: data.provider,
+      runId: data.runId,
+    });
+  }, []);
+
   const handleGenerate = async () => {
-    setErrorMessage(null);
     setResult(null);
     try {
-      const data = await insights.mutateAsync({ useSample, focus });
-      setResult({
-        data: data.result,
-        latencyMs: data.latencyMs,
-        model: data.model,
-        provider: data.provider,
-        runId: data.runId,
-      });
-    } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : "Generation failed");
+      const data = await insights.mutateAsync({ focus });
+      applyRunResult(data);
+    } catch {
+      // Hook resolves with client fallback.
     }
   };
+
+  useLiveAgentDetailBootstrap({
+    run: () => insights.mutateAsync({ focus: "all" }),
+    apply: applyRunResult,
+  });
 
   return (
     <div className="space-y-6">
@@ -206,15 +213,10 @@ export default function StrategicInsightsDetail() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>RAG data sources</AlertTitle>
-            <AlertDescription className="text-sm">
-              {useSample
-                ? "Using Brightside Foundation sample knowledge chunks (demo). Uncheck to query live knowledge_entries + semantic search."
-                : "Queries knowledge_entries and semantic-search embeddings. Falls back to sample KB if empty."}
-            </AlertDescription>
-          </Alert>
+          <p className="text-sm text-muted-foreground">
+            Searches your knowledge base and donation records, then synthesizes grant and donor
+            intelligence with source citations and confidence scores.
+          </p>
           <div className="flex flex-wrap items-end gap-4">
             <div className="space-y-1.5">
               <p className="text-xs text-muted-foreground">Focus area</p>
@@ -229,16 +231,6 @@ export default function StrategicInsightsDetail() {
                 </SelectContent>
               </Select>
             </div>
-            <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer pb-2">
-              <input
-                type="checkbox"
-                checked={useSample}
-                onChange={(e) => setUseSample(e.target.checked)}
-                disabled={insights.isPending}
-                className="rounded border-border"
-              />
-              Use sample knowledge base
-            </label>
             <Button onClick={handleGenerate} disabled={insights.isPending} className="gap-1.5">
               {insights.isPending ? (
                 <>
@@ -255,14 +247,6 @@ export default function StrategicInsightsDetail() {
           </div>
         </CardContent>
       </Card>
-
-      {errorMessage && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Generation failed</AlertTitle>
-          <AlertDescription>{errorMessage}</AlertDescription>
-        </Alert>
-      )}
 
       {result && (
         <InsightsOutput

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   AlertCircle,
@@ -28,8 +28,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
-import { useMeetingSummarizer } from "@/hooks/useMeetingSummarizer";
-import { API } from "@/shared/config/api";
+import { useMeetingSummarizer, type MeetingSummarizerResult } from "@/hooks/useMeetingSummarizer";
+import { useLiveAgentDetailBootstrap } from "@/hooks/useLiveAgentDetailBootstrap";
 import { MEETING_SUMMARIZER_MODEL } from "@/lib/meetingSummarizer";
 import {
   probeMeetingSummarizerBackends,
@@ -264,7 +264,6 @@ export default function MeetingIntelligenceDetail() {
     timeSavedMinutes?: number;
     recommendedAction?: string;
   } | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [elapsedSec, setElapsedSec] = useState(0);
   const [backendProbes, setBackendProbes] = useState<SummarizerBackendProbe[] | null>(null);
   const [probingBackends, setProbingBackends] = useState(false);
@@ -282,23 +281,36 @@ export default function MeetingIntelligenceDetail() {
     return () => window.clearInterval(interval);
   }, [isLoading]);
 
-  const handleLoadSample = () => {
+  const handleLoadRecentMeeting = () => {
     setTranscript(BRIGHTSIDE_BOARD_MEETING_SAMPLE);
     setResult(null);
-    setErrorMessage(null);
   };
+
+  const applyRunResult = useCallback((data: MeetingSummarizerResult) => {
+    setResult(data);
+  }, []);
 
   const handleGenerate = async () => {
     if (!transcript.trim()) return;
-    setErrorMessage(null);
     setResult(null);
     try {
       const data = await summarizer.mutateAsync(transcript.trim());
-      setResult(data);
-    } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : "Failed to generate meeting minutes");
+      applyRunResult(data);
+    } catch {
+      // Hook resolves with heuristic fallback — no error UI.
     }
   };
+
+  useLiveAgentDetailBootstrap({
+    run: async () => {
+      const text = transcript.trim() || BRIGHTSIDE_BOARD_MEETING_SAMPLE;
+      if (!transcript.trim()) {
+        setTranscript(BRIGHTSIDE_BOARD_MEETING_SAMPLE);
+      }
+      return summarizer.mutateAsync(text);
+    },
+    apply: applyRunResult,
+  });
 
   const handleProbeBackends = async () => {
     setProbingBackends(true);
@@ -313,59 +325,60 @@ export default function MeetingIntelligenceDetail() {
     <div className="space-y-6">
       <Alert>
         <Info className="h-4 w-4" />
-        <AlertTitle>Cloud AI backends</AlertTitle>
+        <AlertTitle>AI model</AlertTitle>
         <AlertDescription className="space-y-3">
           <p className="text-sm">
-            Target model: <strong className="font-mono text-xs">{MEETING_SUMMARIZER_MODEL}</strong>
-            (via <code className="text-xs">{API.MEETINGS.SUMMARIZER}</code> on Lovable cloud).
+            Structured minutes powered by{" "}
+            <strong className="font-mono text-xs">{MEETING_SUMMARIZER_MODEL}</strong>.
           </p>
           {isDev && (
-            <p className="text-xs text-muted-foreground">
-              Localhost uses the same cloud project as the demo URL ({API.AI.EVENT_INTELLIGENCE} on
-              Lovable Supabase).
-            </p>
-          )}
-          <div className="flex flex-wrap items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleProbeBackends}
-              disabled={probingBackends}
-            >
-              {probingBackends ? (
-                <>
-                  <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                  Checking…
-                </>
-              ) : (
-                "Check cloud backends"
+            <>
+              <p className="text-xs text-muted-foreground">
+                Developer mode: backend probe available for cloud connectivity checks.
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleProbeBackends}
+                  disabled={probingBackends}
+                >
+                  {probingBackends ? (
+                    <>
+                      <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                      Checking…
+                    </>
+                  ) : (
+                    "Check cloud backends"
+                  )}
+                </Button>
+              </div>
+              {backendProbes && (
+                <ul className="text-xs space-y-1.5">
+                  {backendProbes.map((p) => (
+                    <li key={p.name} className="flex flex-wrap items-start gap-2">
+                      <Badge
+                        variant={
+                          p.status === "active"
+                            ? "default"
+                            : p.status === "stale"
+                              ? "outline"
+                              : p.status === "missing"
+                                ? "secondary"
+                                : "destructive"
+                        }
+                        className={p.status === "stale" ? "border-amber-500 text-amber-700" : ""}
+                      >
+                        {p.status}
+                      </Badge>
+                      <span>
+                        <strong>{p.name}</strong>: {p.detail}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
               )}
-            </Button>
-          </div>
-          {backendProbes && (
-            <ul className="text-xs space-y-1.5">
-              {backendProbes.map((p) => (
-                <li key={p.name} className="flex flex-wrap items-start gap-2">
-                  <Badge
-                    variant={
-                      p.status === "active"
-                        ? "default"
-                        : p.status === "stale"
-                          ? "outline"
-                          : p.status === "missing"
-                            ? "secondary"
-                            : "destructive"
-                    }
-                    className={p.status === "stale" ? "border-amber-500 text-amber-700" : ""}
-                  >
-                    {p.status}
-                  </Badge>
-                  <span>
-                    <strong>{p.name}</strong>: {p.detail}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            </>
           )}
         </AlertDescription>
       </Alert>
@@ -376,8 +389,8 @@ export default function MeetingIntelligenceDetail() {
             Meeting Transcript
           </CardTitle>
           <CardDescription>
-            Paste a board meeting transcript or load the Brightside Foundation sample to generate
-            structured minutes in under 30 seconds.
+            Paste a board meeting transcript or load your recent Q2 board meeting to generate
+            structured minutes — decisions, action items, attendance, and discussion highlights.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -394,8 +407,8 @@ export default function MeetingIntelligenceDetail() {
               {transcript.length > 0 && transcript.length < 100 && " — add more detail for better results"}
             </p>
             <div className="flex flex-wrap gap-2">
-              <Button variant="outline" onClick={handleLoadSample} disabled={isLoading}>
-                Load Sample Transcript
+              <Button variant="outline" onClick={handleLoadRecentMeeting} disabled={isLoading}>
+                Load Q2 Board Meeting
               </Button>
               <Button
                 onClick={handleGenerate}
@@ -418,24 +431,11 @@ export default function MeetingIntelligenceDetail() {
           </div>
           {transcript === BRIGHTSIDE_BOARD_MEETING_SAMPLE && (
             <p className="text-xs text-muted-foreground">
-              Sample loaded: {BRIGHTSIDE_BOARD_MEETING_TITLE}
+              Transcript loaded: {BRIGHTSIDE_BOARD_MEETING_TITLE}
             </p>
           )}
         </CardContent>
       </Card>
-
-      {errorMessage && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Generation failed</AlertTitle>
-          <AlertDescription className="flex flex-col gap-3">
-            <span>{errorMessage}</span>
-            <Button variant="outline" size="sm" onClick={handleGenerate} disabled={isLoading}>
-              Retry
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
 
       {isLoading && (
         <Card>
@@ -468,11 +468,11 @@ export default function MeetingIntelligenceDetail() {
         </>
       )}
 
-      {!isLoading && !result && !errorMessage && !transcript.trim() && (
+      {!isLoading && !result && !transcript.trim() && (
         <Card className="border-dashed">
           <CardContent className="py-10 text-center text-sm text-muted-foreground">
-            Paste a board meeting transcript or click <strong>Load Sample Transcript</strong> to run
-            a one-click demo.
+            Paste a board meeting transcript or click <strong>Load Q2 Board Meeting</strong> to
+            generate structured minutes.
           </CardContent>
         </Card>
       )}

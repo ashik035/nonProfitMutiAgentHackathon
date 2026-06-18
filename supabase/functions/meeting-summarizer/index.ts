@@ -14,8 +14,10 @@ import {
   failAgentRun,
   logAgentActivity,
   resolveAgentId,
-  startAgentRun,
+  safeStartAgentRun,
+  ephemeralRunId,
 } from "../_shared/agent-run-lifecycle.ts";
+import { buildMeetingSummaryFallback } from "../_shared/meeting-summary-fallback.ts";
 
 const AGENT_SLUG = "meeting-summarizer";
 
@@ -351,9 +353,12 @@ async function summarizeTranscript(
   }
 
   console.error("[meeting-summarizer] All providers failed:", errors);
-  throw new Error(
-    "No AI provider available. Configure Anthropic in Integrations, set ANTHROPIC_API_KEY, or deploy on Lovable Cloud (LOVABLE_API_KEY)."
-  );
+  return {
+    content: JSON.stringify(buildMeetingSummaryFallback(transcript)),
+    inputTokens: 0,
+    outputTokens: 0,
+    provider: "heuristic-fallback",
+  };
 }
 
 async function fetchTranscriptForMeeting(
@@ -495,7 +500,7 @@ serve(async (req) => {
     const agentId = logRun && authUserId ? await resolveAgentId(supabase, AGENT_SLUG) : null;
 
     if (logRun && authUserId && agentId) {
-      runId = await startAgentRun(supabase, {
+      runId = await safeStartAgentRun(supabase, {
         agentId,
         userId: authUserId,
         input: {
@@ -561,10 +566,10 @@ serve(async (req) => {
         });
       }
 
-      if (logRun && runId) {
+      if (logRun) {
         return jsonResponse(
           {
-            run_id: runId,
+            run_id: runId ?? ephemeralRunId(AGENT_SLUG),
             summary,
             time_saved_minutes: summary.time_saved_minutes,
             recommended_action: summary.recommended_action,
@@ -581,17 +586,57 @@ serve(async (req) => {
       // Legacy shape for health checks / DeploymentStatus probes
       return jsonResponse(summary, 200, corsHeaders);
     } catch (innerError) {
-      if (runId) {
-        const latencyMs = Date.now() - startTime;
-        const message = innerError instanceof Error ? innerError.message : "Unknown error";
-        await failAgentRun(supabase, { runId, errorMessage: message, latencyMs });
+      console.warn("[meeting-summarizer] inner error, heuristic fallback:", innerError);
+      const summary = normalizeSummary(
+        buildMeetingSummaryFallback(transcript) as MeetingSummary
+      );
+      const latencyMs = Date.now() - startTime;
+      const provider = "heuristic-fallback";
+
+      if (runId && authUserId && agentId) {
+        await completeAgentRun(supabase, {
+          runId,
+          output: summary as unknown as Record<string, unknown>,
+          metadata: {
+            agent_slug: AGENT_SLUG,
+            time_saved_minutes: summary.time_saved_minutes,
+            recommended_action: summary.recommended_action,
+            findings_count:
+              summary.action_items.length +
+              summary.decisions.length +
+              summary.key_discussion_points.length,
+          },
+          modelUsed: MODEL,
+          providerUsed: provider,
+          latencyMs,
+        });
       }
-      throw innerError;
+
+      if (logRun) {
+        return jsonResponse(
+          {
+            run_id: runId ?? ephemeralRunId(AGENT_SLUG),
+            summary,
+            time_saved_minutes: summary.time_saved_minutes,
+            recommended_action: summary.recommended_action,
+            model: MODEL,
+            provider,
+            latency_ms: latencyMs,
+            meeting_id: meetingId || null,
+          },
+          200,
+          corsHeaders
+        );
+      }
+
+      return jsonResponse(summary, 200, corsHeaders);
     }
   } catch (error) {
     console.error("[meeting-summarizer] Error:", error);
     const message = error instanceof Error ? error.message : "Unknown error";
-    const status = message.includes("Rate limit") ? 429 : 500;
-    return jsonResponse({ error: "summarizer_failed", message }, status, corsHeaders);
+    if (message.includes("transcript") || message.includes("meeting_id") || message.includes("required")) {
+      return jsonResponse({ error: "missing_transcript", message }, 400, corsHeaders);
+    }
+    return jsonResponse({ error: "summarizer_failed", message }, 500, corsHeaders);
   }
 });

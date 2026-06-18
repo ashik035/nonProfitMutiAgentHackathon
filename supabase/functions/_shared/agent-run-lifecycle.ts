@@ -19,17 +19,123 @@ export interface AgentActivityDetails {
   provider?: string;
 }
 
+interface AgentSeed {
+  name: string;
+  category: string;
+  model: string;
+  description: string;
+}
+
+/** Minimal rows for auto-provision when seed migrations were not applied yet */
+const AGENT_REGISTRY: Record<string, AgentSeed> = {
+  "meeting-summarizer": {
+    name: "Meeting Summarizer",
+    category: "meetings",
+    model: "claude-sonnet-4-20250514",
+    description: "Structured board minutes from meeting transcripts",
+  },
+  "action-item-tracker": {
+    name: "Action Item Tracker",
+    category: "meetings",
+    model: "gpt-4o",
+    description: "Board action scan with overdue and blocked flags",
+  },
+  "executive-daily-briefer": {
+    name: "Executive Daily Briefer",
+    category: "executive",
+    model: "gpt-4o",
+    description: "Executive Director morning briefing",
+  },
+  "donor-churn-risk": {
+    name: "Donor Churn Risk Detector",
+    category: "fundraising",
+    model: "claude-sonnet-4-20250514",
+    description: "Donor churn risk scoring and outreach recommendations",
+  },
+  "strategic-insights": {
+    name: "Strategic Insights Generator",
+    category: "executive",
+    model: "claude-sonnet-4-20250514",
+    description: "Grant and donor intelligence from knowledge base",
+  },
+};
+
 export async function resolveAgentId(
   supabase: SupabaseClient,
   slug: string
 ): Promise<string | null> {
   const { data } = await supabase
     .from("ai_agents")
-    .select("id")
+    .select("id, is_enabled")
     .eq("slug", slug)
-    .eq("is_enabled", true)
     .maybeSingle();
+
+  if (data?.id) {
+    if (data.is_enabled === false) {
+      await supabase.from("ai_agents").update({ is_enabled: true, is_active: true }).eq("id", data.id);
+    }
+    return data.id;
+  }
+
+  return resolveOrCreateAgentId(supabase, slug);
+}
+
+export async function resolveOrCreateAgentId(
+  supabase: SupabaseClient,
+  slug: string
+): Promise<string | null> {
+  const existing = await supabase.from("ai_agents").select("id").eq("slug", slug).maybeSingle();
+  if (existing.data?.id) return existing.data.id;
+
+  const seed = AGENT_REGISTRY[slug];
+  if (!seed) return null;
+
+  const { data, error } = await supabase
+    .from("ai_agents")
+    .insert({
+      name: seed.name,
+      slug,
+      category: seed.category,
+      description: seed.description,
+      model: seed.model,
+      is_enabled: true,
+      is_active: true,
+      memory_enabled: false,
+      metadata: {},
+    })
+    .select("id")
+    .single();
+
+  if (error) {
+    const retry = await supabase.from("ai_agents").select("id").eq("slug", slug).maybeSingle();
+    return retry.data?.id ?? null;
+  }
+
   return data?.id ?? null;
+}
+
+/** Start a run when possible; never throw — logging is best-effort */
+export async function safeStartAgentRun(
+  supabase: SupabaseClient,
+  params: {
+    agentId: string | null;
+    userId: string;
+    input: Record<string, unknown>;
+    context?: Record<string, unknown>;
+  }
+): Promise<string | null> {
+  if (!params.agentId) return null;
+  try {
+    return await startAgentRun(supabase, {
+      agentId: params.agentId,
+      userId: params.userId,
+      input: params.input,
+      context: params.context,
+    });
+  } catch (error) {
+    console.warn("[agent-run-lifecycle] safeStartAgentRun:", error);
+    return null;
+  }
 }
 
 export async function startAgentRun(
@@ -133,4 +239,9 @@ export async function logAgentActivity(
   if (error) {
     console.error("[agent-run-lifecycle] activity log failed:", error.message);
   }
+}
+
+/** Stable run id for responses when DB logging is unavailable */
+export function ephemeralRunId(slug: string): string {
+  return `local-${slug}-${crypto.randomUUID()}`;
 }

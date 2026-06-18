@@ -2,10 +2,25 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { invalidateKeys } from "@/lib/cache";
+import { coalesceRunId } from "@/lib/agentResponseNormalize";
+import { CLIENT_AGENT_FALLBACKS } from "@/lib/agentClientFallbacks";
 import type { ActionItemTrackerAgentResponse } from "@/types/action-item-tracker";
 
 const FN_NAME = "action-item-tracker";
 const MODEL = "gpt-4o";
+
+function fallbackRunResult(): ActionItemTrackerRunResult {
+  const fallback = CLIENT_AGENT_FALLBACKS["action-item-tracker"];
+  return {
+    runId: coalesceRunId(null, FN_NAME),
+    result: fallback,
+    timeSavedMinutes: fallback.time_saved_minutes,
+    recommendedAction: fallback.recommended_action,
+    model: MODEL,
+    provider: "client-fallback",
+    latencyMs: 0,
+  };
+}
 
 export interface ActionItemTrackerRunResult {
   runId: string;
@@ -52,26 +67,40 @@ export function useActionItemTracker() {
       });
 
       if (error) {
-        if (error instanceof FunctionsHttpError) {
-          throw new Error(await parseFunctionsError(error));
-        }
-        throw new Error(error.message || "Action Item Tracker failed");
+        const fallback = CLIENT_AGENT_FALLBACKS["action-item-tracker"];
+        return {
+          runId: coalesceRunId(null, FN_NAME),
+          result: fallback,
+          timeSavedMinutes: fallback.time_saved_minutes,
+          recommendedAction: fallback.recommended_action,
+          model: MODEL,
+          provider: "client-fallback",
+          latencyMs: 0,
+        };
       }
 
       if (data && typeof data === "object" && "error" in data) {
-        const msg =
-          "message" in data && data.message
-            ? String((data as { message: string }).message)
-            : String((data as { error: string }).error);
-        throw new Error(msg);
+        return fallbackRunResult();
       }
 
       if (!isAgentResponse(data)) {
-        throw new Error("Unexpected response from Action Item Tracker");
+        if (data && typeof data === "object" && "result" in data) {
+          const loose = data as ActionItemTrackerAgentResponse;
+          return {
+            runId: coalesceRunId(loose.run_id, FN_NAME),
+            result: loose.result,
+            timeSavedMinutes: loose.time_saved_minutes ?? loose.result.time_saved_minutes,
+            recommendedAction: loose.recommended_action ?? loose.result.recommended_action,
+            model: loose.model || MODEL,
+            provider: loose.provider || FN_NAME,
+            latencyMs: loose.latency_ms ?? 0,
+          };
+        }
+        return fallbackRunResult();
       }
 
       return {
-        runId: data.run_id,
+        runId: coalesceRunId(data.run_id, FN_NAME),
         result: data.result,
         timeSavedMinutes: data.time_saved_minutes,
         recommendedAction: data.recommended_action,

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   AlertCircle,
@@ -13,7 +13,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useExecutiveDailyBriefer } from "@/hooks/useExecutiveDailyBriefer";
+import { useExecutiveDailyBriefer, type ExecutiveDailyBrieferRunResult } from "@/hooks/useExecutiveDailyBriefer";
+import { useLiveAgentDetailBootstrap } from "@/hooks/useLiveAgentDetailBootstrap";
 import type { BriefingPriorityItem, ExecutiveDailyBriefing } from "@/types/executive-daily-briefer";
 import { cn } from "@/lib/utils";
 
@@ -176,25 +177,31 @@ export default function ExecutiveDailyBrieferDetail() {
     provider: string;
     runId?: string;
   } | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [useSample, setUseSample] = useState(true);
+
+  const applyRunResult = useCallback((data: ExecutiveDailyBrieferRunResult) => {
+    setResult({
+      briefing: data.briefing,
+      latencyMs: data.latencyMs,
+      model: data.model,
+      provider: data.provider,
+      runId: data.runId,
+    });
+  }, []);
 
   const handleGenerate = async () => {
-    setErrorMessage(null);
     setResult(null);
     try {
-      const data = await briefer.mutateAsync({ useSample });
-      setResult({
-        briefing: data.briefing,
-        latencyMs: data.latencyMs,
-        model: data.model,
-        provider: data.provider,
-        runId: data.runId,
-      });
-    } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : "Briefing failed");
+      const data = await briefer.mutateAsync();
+      applyRunResult(data);
+    } catch {
+      // Hook resolves with client fallback.
     }
   };
+
+  useLiveAgentDetailBootstrap({
+    run: () => briefer.mutateAsync(),
+    apply: applyRunResult,
+  });
 
   return (
     <div className="space-y-6">
@@ -210,16 +217,10 @@ export default function ExecutiveDailyBrieferDetail() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
-            <input
-              type="checkbox"
-              checked={useSample}
-              onChange={(e) => setUseSample(e.target.checked)}
-              disabled={briefer.isPending}
-              className="rounded border-border"
-            />
-            Use Brightside Foundation sample context (demo)
-          </label>
+          <p className="text-sm text-muted-foreground">
+            Pulls grants, board actions, donor signals, and open tasks into one prioritized
+            briefing for the Executive Director.
+          </p>
           <Button onClick={handleGenerate} disabled={briefer.isPending} className="gap-1.5">
             {briefer.isPending ? (
               <>
@@ -235,14 +236,6 @@ export default function ExecutiveDailyBrieferDetail() {
           </Button>
         </CardContent>
       </Card>
-
-      {errorMessage && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Briefing failed</AlertTitle>
-          <AlertDescription>{errorMessage}</AlertDescription>
-        </Alert>
-      )}
 
       {result && (
         <BriefingOutput

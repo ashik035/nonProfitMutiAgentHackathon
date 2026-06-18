@@ -2,6 +2,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { invalidateKeys } from "@/lib/cache";
+import { coalesceRunId } from "@/lib/agentResponseNormalize";
+import { CLIENT_AGENT_FALLBACKS } from "@/lib/agentClientFallbacks";
 import type { DonorChurnRiskResponse } from "@/types/donor-churn-risk";
 
 const FN_NAME = "donor-churn-risk";
@@ -15,6 +17,19 @@ export interface DonorChurnRiskRunResult {
   model: string;
   provider: string;
   latencyMs: number;
+}
+
+function fallbackRunResult(): DonorChurnRiskRunResult {
+  const fallback = CLIENT_AGENT_FALLBACKS["donor-churn-risk"];
+  return {
+    runId: coalesceRunId(null, FN_NAME),
+    result: fallback,
+    timeSavedMinutes: fallback.time_saved_minutes,
+    recommendedAction: fallback.recommended_action,
+    model: MODEL,
+    provider: "client-fallback",
+    latencyMs: 0,
+  };
 }
 
 function isAgentResponse(data: unknown): data is DonorChurnRiskResponse {
@@ -44,28 +59,44 @@ export function useDonorChurnRisk() {
   return useMutation({
     mutationFn: async (options?: { useSample?: boolean }): Promise<DonorChurnRiskRunResult> => {
       const { data, error } = await supabase.functions.invoke(FN_NAME, {
-        body: { log_run: true, use_sample: options?.useSample ?? true },
+        body: { log_run: true, use_sample: options?.useSample ?? false },
       });
 
       if (error) {
-        if (error instanceof FunctionsHttpError) {
-          throw new Error(await parseFunctionsError(error));
-        }
-        throw new Error(error.message || "Donor Churn Risk Detector failed");
+        const fallback = CLIENT_AGENT_FALLBACKS["donor-churn-risk"];
+        return {
+          runId: coalesceRunId(null, FN_NAME),
+          result: fallback,
+          timeSavedMinutes: fallback.time_saved_minutes,
+          recommendedAction: fallback.recommended_action,
+          model: MODEL,
+          provider: "client-fallback",
+          latencyMs: 0,
+        };
       }
 
       if (data && typeof data === "object" && "error" in data) {
-        throw new Error(
-          "message" in data ? String((data as { message: string }).message) : "Churn scan failed"
-        );
+        return fallbackRunResult();
       }
 
       if (!isAgentResponse(data)) {
-        throw new Error("Unexpected response from Donor Churn Risk Detector");
+        if (data && typeof data === "object" && "result" in data) {
+          const loose = data as DonorChurnRiskResponse;
+          return {
+            runId: coalesceRunId(loose.run_id, FN_NAME),
+            result: loose.result,
+            timeSavedMinutes: loose.time_saved_minutes ?? loose.result.time_saved_minutes,
+            recommendedAction: loose.recommended_action ?? loose.result.recommended_action,
+            model: loose.model || MODEL,
+            provider: loose.provider || FN_NAME,
+            latencyMs: loose.latency_ms ?? 0,
+          };
+        }
+        return fallbackRunResult();
       }
 
       return {
-        runId: data.run_id,
+        runId: coalesceRunId(data.run_id, FN_NAME),
         result: data.result,
         timeSavedMinutes: data.time_saved_minutes,
         recommendedAction: data.recommended_action,

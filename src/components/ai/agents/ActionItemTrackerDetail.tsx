@@ -1,4 +1,4 @@
-import { useState, type ComponentType } from "react";
+import { useCallback, useState, type ComponentType } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   AlertCircle,
@@ -23,7 +23,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useActionItemTracker } from "@/hooks/useActionItemTracker";
+import { useActionItemTracker, type ActionItemTrackerRunResult } from "@/hooks/useActionItemTracker";
+import { useLiveAgentDetailBootstrap } from "@/hooks/useLiveAgentDetailBootstrap";
 import type { ActionItemTrackerResult, BoardActionItem } from "@/types/action-item-tracker";
 
 function formatDue(item: BoardActionItem): string {
@@ -215,25 +216,31 @@ export default function ActionItemTrackerDetail() {
     provider: string;
     runId?: string;
   } | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [useSample, setUseSample] = useState(true);
+
+  const applyRunResult = useCallback((data: ActionItemTrackerRunResult) => {
+    setResult({
+      data: data.result,
+      latencyMs: data.latencyMs,
+      model: data.model,
+      provider: data.provider,
+      runId: data.runId,
+    });
+  }, []);
 
   const handleScan = async () => {
-    setErrorMessage(null);
     setResult(null);
     try {
-      const data = await tracker.mutateAsync({ useSample });
-      setResult({
-        data: data.result,
-        latencyMs: data.latencyMs,
-        model: data.model,
-        provider: data.provider,
-        runId: data.runId,
-      });
-    } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : "Scan failed");
+      const data = await tracker.mutateAsync();
+      applyRunResult(data);
+    } catch {
+      // Hook resolves with client fallback.
     }
   };
+
+  useLiveAgentDetailBootstrap({
+    run: () => tracker.mutateAsync(),
+    apply: applyRunResult,
+  });
 
   const isLoading = tracker.isPending;
 
@@ -251,27 +258,11 @@ export default function ActionItemTrackerDetail() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Data source</AlertTitle>
-            <AlertDescription className="text-sm">
-              {useSample
-                ? "Using Brightside Foundation sample board actions (demo). Uncheck to scan live tasks from your database."
-                : "Scanning live open tasks and meeting action-item takeaways. Falls back to sample data if none exist."}
-            </AlertDescription>
-          </Alert>
-          <div className="flex flex-wrap items-center gap-3">
-            <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
-              <input
-                type="checkbox"
-                checked={useSample}
-                onChange={(e) => setUseSample(e.target.checked)}
-                disabled={isLoading}
-                className="rounded border-border"
-              />
-              Use sample board actions
-            </label>
-            <Button onClick={handleScan} disabled={isLoading} className="gap-1.5">
+          <p className="text-sm text-muted-foreground">
+            Pulls from open tasks and meeting action items across your workspace. Overdue and
+            blocked items are ranked with a recommended next step for leadership.
+          </p>
+          <Button onClick={handleScan} disabled={isLoading} className="gap-1.5">
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -284,17 +275,8 @@ export default function ActionItemTrackerDetail() {
                 </>
               )}
             </Button>
-          </div>
         </CardContent>
       </Card>
-
-      {errorMessage && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Scan failed</AlertTitle>
-          <AlertDescription>{errorMessage}</AlertDescription>
-        </Alert>
-      )}
 
       {isLoading && (
         <Card>
